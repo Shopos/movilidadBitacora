@@ -1,0 +1,30 @@
+.navBarGrid{
+    flex: 1;
+    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1fr 3fr 1fr;
+    grid-template-rows: 1fr;
+    padding: 1%;
+    background-color: #F2F2F2;
+    align-items: center;
+}
+.imgIconBar{
+    grid-area: 1/1/2/2;
+}
+.imgIconBar img{
+    max-width: 50px;
+    max-height: 50px;
+    width: 125px;
+    height:125px;
+    border-radius: 100px;
+}
+.textDiv{
+    grid-area: 1/2/2/5;
+}
+.textDiv h2{
+    display: flex;
+    justify-items: start;
+}
+.iconSesion{
+    grid-area: 1/5/2/6;
+}

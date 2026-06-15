@@ -1,0 +1,35 @@
+.containerBotones{
+    display: flex;
+    height: 100vh;
+    flex-direction: column;
+    padding: 2%;
+    align-items: center;
+    margin: 1% 0 1% 0;
+    justify-items: center;
+    align-self: center;
+    justify-content: center;
+}
+.containerBotones button{
+    background-color: #3A3B61;
+    width: 50%;
+    color: white;
+    border: #3A3B61;
+    padding: 10px;
+    border-radius: 25px;
+    height: 10%; 
+    margin-top: 15px;
+    align-items: center;
+}
+.containerBotones h2{
+    color:white
+}
+.containerBotones button:hover{
+    cursor: pointer;
+}
+.spacer{
+    height: 88px;
+  border-top: 1px solid var(--border);
+  @media (max-width: 1024px) {
+    height: 48px;
+  }
+}

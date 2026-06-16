@@ -17,8 +17,10 @@
     "@mui/icons-material": "^9.1.1",
     "@mui/joy": "^5.0.0-beta.52",
     "@mui/material": "^9.1.1",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
+    "leaflet": "^1.9.4",
+    "react": "^19.0.0-rc.1",
+    "react-dom": "^19.0.0-rc.1",
+    "react-leaflet": "^5.0.0-rc.2",
     "react-router-dom": "^7.17.0"
   },
   "devDependencies": {
@@ -26,6 +28,7 @@
     "@eslint/js": "^10.0.1",
     "@rolldown/plugin-babel": "^0.2.3",
     "@types/babel__core": "^7.20.5",
+    "@types/leaflet": "^1.9.21",
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

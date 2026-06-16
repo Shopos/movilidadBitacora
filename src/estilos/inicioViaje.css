@@ -3,6 +3,33 @@
     grid-template-columns: 1fr 1fr;
     gap: 5px;
     padding: 10px;
+    overflow-x: hidden;
+}
+.itemInput{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+.itemInput option{
+    overflow: hidden;
+}
+.itemInput2{
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+}
+.itemInput2 textarea{
+    height: 100%;
+    max-height: 20vh;
+    field-sizing: content;
+    resize: none;
+    overflow-y: auto;
+}
+.itemInput input{
+    width: 50%;
+}
+.itemInput label{
+    width: 50%;
 }
 .full-width{
     display: flex;
@@ -13,15 +40,27 @@
 }
 .botonPaso{
     background-color: #3A3B61;
-    width: 50%;
+    width: 20%;
     color: white;
     border: #3A3B61;
     padding: 10px;
     border-radius: 25px;
     height: 10%; 
     margin-top: 15px;
-    align-items: center;
+    
 }
 .botonPaso:hover{
     cursor: pointer;
+}
+.leaflet-container{
+    height:500px;
+    width: 100%;
+}
+.botonesPaso{
+    display: flex;
+    width: 90%;
+    align-content: center;
+    justify-content: space-around;
+    justify-items: center;
+    margin-left: 10%;
 }

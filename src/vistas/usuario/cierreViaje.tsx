@@ -19,6 +19,16 @@ function cierreViaje(){
     
     const [openModal,setOpenModal] = useState<boolean>(false)
     const [modalFoto, setOpenModalFoto] = useState<boolean>(false)
+    const [checkCarga,setCheckCarga] = useState<number>(0)
+
+
+    const handleCheck=()=>{
+        if(checkCarga===0){
+            setCheckCarga(1)
+        }else{
+            setCheckCarga(0)
+        }
+    }
     return(
         <div>
             <NavBar type={0} texto=""/>
@@ -40,19 +50,29 @@ function cierreViaje(){
                 <div className="selectInput">
                     <div className="itemInputSelect">
                         <label>Carga combustible</label>
-                        <input type="checkbox"></input>
+                        <input name="carga" onChange={()=>handleCheck()} value={checkCarga} type="checkbox"></input>
                     </div>
-                    <label>Cantidad</label>
-                    <input type="number"></input>
+                    {checkCarga===1 ? 
+                    (<>
+                        <label>Cantidad</label>
+                        <input type="number"></input>
+                    </>):(
+                        <>
+
+                        </>
+                    )
+                    }
                 </div>
                 
-                <p>Comprobante</p>
-                <div className="displayModal">
-                    <label>Subir imagen desde dispositivo</label>
-                    <input type="file" ></input>
-                    modal movil / input Escritorio
-                    <button onClick={()=>setOpenModalFoto(true)}>Subir imagen desde cámara</button>    
-                </div>
+                {checkCarga===1 ? (
+                    <>
+                    <div className="displayModal">
+                        <p>Comprobante</p>
+                        <button onClick={()=>setOpenModalFoto(true)}>sube tu Comprobante aquí</button>   
+                    </div>
+                    </>
+                ):(<></>)}
+                
             </div>
             <div className="gridButton">
                 <button className="botonPasoFin" onClick={()=>volverProceso()}>Volver</button>
@@ -95,6 +115,10 @@ function cierreViaje(){
                 <Divider/>
                 <DialogContent>
                     <div>Acceso a cámara</div>
+                    <div>
+                        <p>Puedes subir una existente aquí</p>
+                        <input type="file" accept="image/*" name="comprobante"></input>
+                    </div>
                 </DialogContent>
                 <DialogActions>
                     <Button variant="solid" color="success" onClick={() => setOpenModalFoto(false)}>

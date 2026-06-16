@@ -49,12 +49,13 @@
 }
 .argumento{
     margin-top: 2%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 .argumento textarea{
-    width: 70%;
+    width: 80%;
     height: 50%;
     max-height: 150px;
     field-sizing: content;

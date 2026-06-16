@@ -2,6 +2,13 @@ import { useNavigate } from "react-router-dom"
 import NavBar from "../../componentes/navBar.tsx"
 
 import "../../estilos/viajeProceso.css"
+
+
+/*
+    Pasar datos desde viaje inicio 
+    recolectar gps?
+    pasar info a fin
+*/
 function viajeProceso(){
     //Ventana que muestra el estado del viaje, solo permite cerrar el viaje al pulsar el boton
     //Se deja debajo un recolector de coordenadas gps para determinar ruta

@@ -78,7 +78,7 @@ function viajesUsuario(){
                 </Table>
                 
 
-                <button onClick={()=>volverMenu()}>Volver</button>
+                <button className="botonPaso" onClick={()=>volverMenu()}>Volver</button>
 
                 <Modal open={openModalViaje} onClose={() => setOpenModalViaje(false)}>
                 <ModalDialog variant="outlined" role="alertdialog">

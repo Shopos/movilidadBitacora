@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom"
-import NavBar from "./componentes/navBar"
-import "./estilos/inicioViaje.css"
+import NavBar from "../../componentes/navBar.tsx"
+import "../../estilos/inicioViaje.css"
 import React, { useState } from "react";
 
 
@@ -12,7 +12,7 @@ type Vehiculo = {
 function inicioViaje(){
     const navigate = useNavigate()
     const continuarProceso =() => navigate("/viajeProceso")
-
+    const volverMenu = () => navigate("/menuUsuario")
 
     const [vehiculoSelected, setVehiculoSelected] = useState<Vehiculo|null>(null)
 
@@ -41,7 +41,7 @@ function inicioViaje(){
 
         //Se pide listado de patentes para seleccionar una
         <>
-            <NavBar />
+            <NavBar type={0} texto=""/>
             <div className="tituloPaso">
                 <h1>Iniciar un viaje</h1>
                 <h2>Ingresa los datos necesarios</h2>   
@@ -100,9 +100,10 @@ function inicioViaje(){
                 </div>
             </div>
 
-            
-            <button className="botonPaso" onClick={()=>continuarProceso()}>Continuar</button>    
-                
+            <div>
+                <button className="botonPaso" onClick={()=>volverMenu()}>Volver</button>
+                <button className="botonPaso" onClick={()=>continuarProceso()}>Continuar</button>    
+            </div>
         </>
     )
 }

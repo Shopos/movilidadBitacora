@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom"
-import NavBar from "./componentes/navBar"
-import './estilos/menuUsuario.css'
+import NavBar from "../../componentes/navBar.tsx"
+import '../../estilos/menuUsuario.css'
 
 function menuUsuario(){
     const navigate = useNavigate()
@@ -9,7 +9,7 @@ function menuUsuario(){
 
     return(
         <div>
-            <NavBar />
+            <NavBar type={0} texto=""/>
             <div className="containerBotones">
                 <button onClick={()=>comenzarViaje()}>
                     <h2>Iniciar un viaje</h2>

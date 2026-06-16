@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom"
-import NavBar from "./componentes/navBar.tsx"
+import NavBar from "../../componentes/navBar.tsx"
 
-import "./estilos/viajeProceso.css"
+import "../../estilos/viajeProceso.css"
 function viajeProceso(){
     //Ventana que muestra el estado del viaje, solo permite cerrar el viaje al pulsar el boton
     //Se deja debajo un recolector de coordenadas gps para determinar ruta
@@ -11,7 +11,7 @@ function viajeProceso(){
     
     return(
         <>
-            <NavBar />
+            <NavBar type={0} texto=""/>
 
             <div className="grupoIconMsg">
                 

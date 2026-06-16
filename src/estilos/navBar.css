@@ -27,4 +27,54 @@
 }
 .iconSesion{
     grid-area: 1/5/2/6;
+    background-color: transparent;
+    border: transparent;
+}
+.iconSesion :hover{
+    cursor: pointer;
+}
+
+.encabezado{
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    justify-content: center;
+    align-items: center;
+}
+.encabezado h1{
+    line-height:0.8;
+    margin-bottom: 1%;
+    color: #FFF;
+}
+.encabezado h2{
+    color: #F5F5F5;
+}
+.gridAdmin{
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr;
+    align-items: center;
+    background-color: #3B3E93;
+}
+.barraAux{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+    justify-items: center;
+    align-items: center;
+    background-color: #C8CAFA;
+    border-radius: 35px;
+    height: 50%;
+    margin-right: 4%;
+    padding: 2%;
+}
+.buttonBarra{
+    background-color:transparent;
+    border: transparent;
+    height: 100%;
+    font-size: 110%;
+    font-weight: normal;
+}
+.buttonBarra:hover{
+    cursor: pointer;
 }

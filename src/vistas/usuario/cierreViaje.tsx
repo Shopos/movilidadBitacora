@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
-import NavBar from "./componentes/navBar"
-import "./estilos/cierreViaje.css"
+import NavBar from "../../componentes/navBar.tsx"
+import "../../estilos/cierreViaje.css"
 
 import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button} from "@mui/joy"
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
@@ -21,7 +21,7 @@ function cierreViaje(){
     const [modalFoto, setOpenModalFoto] = useState<boolean>(false)
     return(
         <div>
-            <NavBar />
+            <NavBar type={0} texto=""/>
             <div className="formularioFin">
                 <div className="gridInput">
                     <div className="itemInput">

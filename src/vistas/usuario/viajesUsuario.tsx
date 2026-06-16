@@ -1,9 +1,10 @@
-import NavBar from "./componentes/navBar.tsx"
+import NavBar from "../../componentes/navBar.tsx"
 import Table from '@mui/joy/Table';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { useState } from "react"
 import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button} from "@mui/joy"
+import { useNavigate } from "react-router-dom";
 
 type Viaje={
     id:number,
@@ -23,7 +24,8 @@ function viajesUsuario(){
     ]
     const [viajeSelected,setViajeSelected] = useState<Viaje|null>(null)
     const [openModalViaje,setOpenModalViaje] = useState<boolean>(false)
-
+    const navigate = useNavigate()
+    const volverMenu = () => navigate("/menuUsuario")
     const handleModalViajeView=(viaje:Viaje):void=>{
         setViajeSelected(viaje)
         setOpenModalViaje(true)
@@ -32,17 +34,20 @@ function viajesUsuario(){
         console.log("se exporta")
         return
     }
+    
     return(
         <>  
-            <NavBar />
+            <NavBar type={0} texto=""/>
             <div>
-                <Table>
+                <Table hoverRow borderAxis="y" sx={
+                            {'& td':{textAlign:'left',paddingLeft:1.9}}
+                        }>
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th style={{width:"5%"}}>ID</th>
                             <th>Patente vehículo</th>
-                            <th>Hora inicio</th>
-                            <th>Hora llegada</th>
+                            <th style={{width:"10%"}}>Hora inicio</th>
+                            <th style={{width:"10%"}}>Hora llegada</th>
                             <th>Estado viaje</th>
                             <th>Acciones</th>
                         </tr>
@@ -71,7 +76,9 @@ function viajesUsuario(){
                         ))}
                     </tbody>
                 </Table>
+                
 
+                <button onClick={()=>volverMenu()}>Volver</button>
 
                 <Modal open={openModalViaje} onClose={() => setOpenModalViaje(false)}>
                 <ModalDialog variant="outlined" role="alertdialog">

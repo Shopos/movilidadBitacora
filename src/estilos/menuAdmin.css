@@ -1,0 +1,28 @@
+.cuerpoMenu{
+    display: flex;
+    flex-direction: column;
+}
+.barraFiltro{
+    margin-top: 5%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+.inputBusqueda{
+    display: flex;
+    width: 80%;
+    margin-right: 1%;
+}
+.inputBusqueda input{
+    width: 100%;
+}
+.tablaViajes{
+    width: 100%;
+    overflow: auto;
+}
+.tablaViajes button{
+    background-color: black;
+    color: white;
+    border-radius: 10px;
+}

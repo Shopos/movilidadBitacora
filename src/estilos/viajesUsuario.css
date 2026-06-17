@@ -1,0 +1,12 @@
+.buttonIconTable{
+   background-color: black;
+    color: white;
+    border-radius: 10px;
+    border: black;
+    padding: 2%;
+}
+.buttonIconTable:hover{
+    cursor: pointer;
+    background-color: #2C2C2C;
+}
+

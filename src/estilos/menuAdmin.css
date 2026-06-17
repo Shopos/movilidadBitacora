@@ -9,13 +9,38 @@
     align-items: center;
     justify-content: center;
 }
+.buttonExport{
+    font-weight: bold;
+    width: 15%;
+    background-color: #999CFF;
+    border: #999CFF;
+    border-radius: 20px;
+    padding: 1%;
+    color:black;
+}
+.buttonExport:hover{
+    cursor: pointer;
+}
+
 .inputBusqueda{
     display: flex;
     width: 80%;
     margin-right: 1%;
+    margin-left: 1%;
 }
 .inputBusqueda input{
     width: 100%;
+}
+.inputBusqueda button{
+    font-weight: bold;
+    width: 100%;
+    background-color: #999CFF;
+    border: #999CFF;
+    border-radius: 15px;
+    color:white;
+}
+.inputBusqueda button:hover{
+    cursor: pointer;
 }
 .tablaViajes{
     width: 100%;
@@ -25,4 +50,10 @@
     background-color: black;
     color: white;
     border-radius: 10px;
+    border: black;
+    padding: 2%;
+}
+.tablaViajes button:hover{
+    cursor: pointer;
+    background-color: #2C2C2C;
 }

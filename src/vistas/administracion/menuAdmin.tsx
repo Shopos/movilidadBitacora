@@ -6,7 +6,10 @@ import Table from '@mui/joy/Table';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import EditDocumentIcon from '@mui/icons-material/EditDocument';
-import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button} from "@mui/joy"
+import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button, Chip, Input} from "@mui/joy"
+import TodayOutlinedIcon from '@mui/icons-material/TodayOutlined';
+import DateRangeOutlinedIcon from '@mui/icons-material/DateRangeOutlined';
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 
 type Viaje = {
     id:number,
@@ -56,9 +59,37 @@ function menuAdmin(){
         <div className="cuerpoMenu">
             <div className="barraFiltro">
                 <div className="inputBusqueda">
-                    <input type="search" placeholder="Busca por patente, funcionario o estado del viaje"></input>
+                    <Input 
+                    startDecorator={<SearchOutlinedIcon/>}
+                    endDecorator={<button>buscar</button>}
+                    sx={{width:"100%"}}></Input>
                 </div>
-                <button>Exportar tabla</button>
+                <Chip
+                    variant="outlined"
+                    color="neutral"
+                    size="lg"
+                    startDecorator={<TodayOutlinedIcon />}
+                    onClick={()=>("Filtra por día")}
+                    sx={{
+                        padding:"0.5%",
+                        paddingLeft:"5px",
+                        marginRight:"2px"
+                    }}
+                >Último día</Chip>
+                <Chip
+                    variant="outlined"
+                    color="neutral"
+                    size="lg"
+                    startDecorator={<DateRangeOutlinedIcon />}
+                    onClick={()=>("Filtra por día")}
+                    sx={{
+                        padding:"0.5%",
+                        paddingLeft:"5px",
+                        marginRight:"2px"
+                    }}
+                >Última semana</Chip>
+
+                <button className="buttonExport">Exportar tabla</button>
             </div>
             <div className="tablaViajes">
                 <Table hoverRow borderAxis="y" sx={

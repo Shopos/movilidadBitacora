@@ -5,6 +5,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { useState } from "react"
 import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button} from "@mui/joy"
 import { useNavigate } from "react-router-dom";
+import "../../estilos/viajesUsuario.css"
 
 type Viaje={
     id:number,
@@ -64,10 +65,10 @@ function viajesUsuario(){
                             <td>{viaje.estado === true ? "En proceso" : "Terminado"}</td>
                             <td>
                                 <div style={{display:"flex",gap:"10px"}}>
-                                    <button onClick={()=>handleModalViajeView(viaje)}>
+                                    <button className="buttonIconTable" onClick={()=>handleModalViajeView(viaje)}>
                                         <VisibilityIcon />
                                     </button>
-                                    <button onClick={()=>exportarPDF()}>
+                                    <button className="buttonIconTable" onClick={()=>exportarPDF()}>
                                         <PictureAsPdfIcon />
                                     </button>
                                 </div>

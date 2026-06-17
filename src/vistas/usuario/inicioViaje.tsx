@@ -5,18 +5,25 @@ import React, { useEffect, useState } from "react";
 import { Modal, ModalDialog, DialogTitle, Divider, DialogContent, DialogActions, Button } from "@mui/joy"
 import type { Vehiculo,User } from "../../tipos/tiposSistema.ts";
 
+
 import 'leaflet/dist/leaflet.css';
+import L from "leaflet"
 import { MapContainer, Marker, TileLayer } from 'react-leaflet'
 
 /**Solo toma la segunda vez que se hace drag del pin */
 function inicioViaje() {
     const [vehiculoSelected, setVehiculoSelected] = useState<Vehiculo | null>(null)
     const [modalDestino, openModalDestino] = useState<boolean>(false)
+    const [modalCamara, openModalCamara] = useState<boolean>(false)
+    const [destinoChange,setDestinoChange] = useState<number>(0)
    const [dataGPS, setDataGPS] = useState({
         lat: -34.639739, lng: -71.365916
     })
     const [dataGPSDestino, setDataGPSDestino] = useState({
         lat: -34.639739, lng: -71.365916
+    })
+    const [coordCenter,setCoordCenter] = useState({
+        lat:0,lng:0
     })
     const [formInicio,setFormInicio] = useState({
         fecha:"",
@@ -51,6 +58,24 @@ function inicioViaje() {
         { patente: "xom123", modelo: "audi", KMS_actual: 197,estado:"Activo" },
     ]
 
+    const createCustomIcon = (color:string) => {
+        return L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="
+            background-color: ${color};
+            width: 24px;
+            height: 24px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            position: absolute;
+            left: -12px;
+            top: -12px;
+            border: 2px solid white;
+            "></div>`,
+            iconAnchor: [0, 12]
+        });
+    };
+
     const manejarDataVehiculo = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const patenteselected = event.target.value
 
@@ -70,7 +95,7 @@ function inicioViaje() {
         
     }
     useEffect(()=>{
-        /**Se consultan los datos del usuario (nombre) y el gps actual, de momento estatico a coords muni */
+        /**Se consultan los datos del usuario (nombre)*/
         setFormInicio((prevData)=>({
             ...prevData,
             funcionario:usuario.nombre,
@@ -85,10 +110,23 @@ function inicioViaje() {
             latFin:dataGPSDestino.lat,
             lngFin:dataGPSDestino.lng
         }
-        console.log(actualiza)
+        setNewMid()
         setFormInicio(actualiza)
+        setDestinoChange(destinoChange+1)
     },[dataGPSDestino]
     )
+    
+    const setNewMid = () =>{
+        let minLat = Math.min(formInicio.latInicio, formInicio.latFin)
+        let maxLat = Math.max(formInicio.latInicio, formInicio.latFin)
+        let minlng = Math.min(formInicio.lngInicio, formInicio.lngFin)
+        let maxlng = Math.max(formInicio.lngInicio, formInicio.lngFin)
+        let midLat = ((minLat+maxLat)/2)
+        let midLng = ((minlng+maxlng)/2)
+        setCoordCenter({lat:midLat,lng:midLng})
+        console.log(midLat,midLng)
+        console.log(coordCenter)
+    }
 
     const handleChange=(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)=>{
         const {name,value} = event.target
@@ -106,8 +144,6 @@ function inicioViaje() {
             // Actualizamos solo el estado del destino
             setDataGPSDestino({lat:gps.lat,lng:gps.lng});
         }
-        console.log("inicio",dataGPS)
-        console.log("destino",dataGPSDestino)
     };
     
 
@@ -174,8 +210,8 @@ function inicioViaje() {
 
             {/**Agregar input cámara*/}
             <div className="full-width">
-                <label>Ingresa captura</label>
-                <input type="file"></input>
+                {}
+                <button className="buttonFormularioInicio" onClick={()=>openModalCamara(true)}>Agregar imagen tablero</button>
             </div>
 
 
@@ -186,8 +222,38 @@ function inicioViaje() {
                     <textarea name="motivo" value={formInicio.motivo} onChange={handleChange} placeholder="Explique el objetivo del viaje"></textarea>
                 </div>
             </div>
-            <div className="full-width">
-                <button onClick={() => openModalDestino(true)}>Agregar destino del viaje</button>
+            <div className="full-width-map">
+                {destinoChange>1 ? 
+                (<>
+                        <div className="leaflet-container-preview">
+                            <MapContainer center={[coordCenter.lat,coordCenter.lng]} zoom={14}>
+                                <TileLayer
+                                    url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>'
+                                    subdomains="abcd"
+                                    maxZoom={18}
+                                />
+                                <Marker
+                                    position={[dataGPS.lat, dataGPS.lng]}
+                                    draggable={false} 
+                                    icon={createCustomIcon("#3b40cf")}
+                                />
+                                <Marker
+                                    position={[dataGPSDestino.lat, dataGPSDestino.lng]}
+                                    draggable={false} 
+                                    icon={createCustomIcon('#57A450')}
+                                >
+                                </Marker>
+                            </MapContainer>
+                            
+                            <button className="buttonFormularioInicio" onClick={() => openModalDestino(true)}>Cambiar destino</button>
+                        </div>
+                </>)
+                :
+                (<>
+                    <button className="buttonFormularioInicio" onClick={() => openModalDestino(true)}>Agregar destino del viaje</button>
+                </>)}
+                
             </div>
 
             <div className="botonesPaso">
@@ -199,7 +265,7 @@ function inicioViaje() {
 
 
             <Modal open={modalDestino} onClose={() => openModalDestino(false)}>
-                <ModalDialog variant="outlined" role="alertdialog">
+                <ModalDialog variant="soft" size="lg">
                     <DialogTitle>
                         Mueve el pin al lugar de destino aproximado
                     </DialogTitle>
@@ -216,6 +282,7 @@ function inicioViaje() {
                                 <Marker
                                     position={[dataGPS.lat, dataGPS.lng]}
                                     draggable={false} // Queda estatico con la posicion actual del usuario
+                                    icon={createCustomIcon("#3b40cf")}
                                 />
                                 <Marker
                                     position={[dataGPSDestino.lat, dataGPSDestino.lng]}
@@ -224,6 +291,8 @@ function inicioViaje() {
                                     eventHandlers={{
                                         dragend: manejarMovimientoDestino // Captura la nueva posición al soltarlo
                                     }}
+                                    riseOnHover={true}
+                                    icon={createCustomIcon('#57A450')}
                                 >
 
                                 </Marker>
@@ -237,6 +306,28 @@ function inicioViaje() {
                         <Button variant="plain" color="danger" onClick={() => openModalDestino(false)}>
                             Cancelar
                         </Button>
+                    </DialogActions>
+                </ModalDialog>
+            </Modal>
+
+            <Modal open={modalCamara} onClose={()=>openModalCamara(false)}>
+                <ModalDialog variant="plain">
+                    <DialogTitle>
+                        Agrega una captura del tablero del vehículo
+                    </DialogTitle>
+                    <Divider />
+                    <DialogContent>
+                            <div>seccion cámara</div>
+                            <label style={{color:"black"}}>Sube la captura si es necesario</label>
+                            <input type="file" accept="image/*"></input>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button variant="solid" color="success" onClick={() => openModalCamara(false)}>
+                                Agregar captura
+                            </Button>
+                            <Button variant="plain" color="danger" onClick={() => openModalCamara(false)}>
+                                Cancelar
+                            </Button>
                     </DialogActions>
                 </ModalDialog>
             </Modal>

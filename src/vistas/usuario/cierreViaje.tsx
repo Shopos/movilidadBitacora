@@ -53,10 +53,10 @@ function cierreViaje(){
                         <input name="carga" onChange={()=>handleCheck()} value={checkCarga} type="checkbox"></input>
                     </div>
                     {checkCarga===1 ? 
-                    (<>
+                    (<div className="itemInputSelect">
                         <label>Cantidad</label>
                         <input type="number"></input>
-                    </>):(
+                    </div>):(
                         <>
 
                         </>

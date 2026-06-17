@@ -3,6 +3,11 @@ import NavBar from "../../componentes/navBar.tsx"
 import "../../estilos/recursosAdmin.css"
 import { Table } from '@mui/joy'
 import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button} from "@mui/joy"
+import VisibilityIcon from '@mui/icons-material/Visibility'
+import EditIcon from '@mui/icons-material/Edit';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import BuildIcon from '@mui/icons-material/Build';
 
 type Usuario = {
     correo:string,
@@ -34,13 +39,20 @@ function recursosAdmin(){
     ]
     const [vistaActual,setVistaActual] = useState<boolean>(false)
     const [modalAdd,setOpenModalAdd] = useState<boolean>(false)
-
+    const [modalMantencion,setOpenModalMantencion] = useState<boolean>(false)
 
 
     const abriModalAdd =()=>{
         //se abre modal y luego antes del retorno se limpian los inputs
         setOpenModalAdd(true)
         return
+    }
+    const abrirModalMantencion=()=>{
+        setOpenModalMantencion(true)
+        return
+    }
+    const handlePatenteMantencion=(event:React.ChangeEvent<HTMLSelectElement>)=>{
+        /**Mantener patente en memoria para luego de tomar datos de mantencion indexar */
     }
     return(
         <>
@@ -49,7 +61,9 @@ function recursosAdmin(){
             <div>
                 <div className='buttonsFlexEnd'> 
                     <button>Exportar tabla actual</button>
+                    {vistaActual===true ? (<button onClick={()=>abrirModalMantencion()}>Agregar mantención</button>):(<></>)}
                     <button onClick={()=>abriModalAdd()}>Agregar nuevo {vistaActual===true ? "vehículo" : "usuario"}</button>
+                    
                 </div>
                 <div className='buttonsTablaH'>
                     <button className="bordeIzquierdoBoton" disabled={!vistaActual} onClick={()=>setVistaActual(false)}>Usuarios</button>
@@ -57,6 +71,7 @@ function recursosAdmin(){
                 </div>
                 {vistaActual === false ? 
                 (
+                    /* Tabla usuarios */
                     <div>
                         <Table hoverRow borderAxis="y" sx={
                             {'& td':{textAlign:'left',paddingLeft:1.9}}
@@ -79,8 +94,30 @@ function recursosAdmin(){
                                         <td>{usuario.cargo}</td>
                                         <td>{usuario.estado === false ? "Bloqueado":"Activo"}</td>
                                         <td>
-                                            <div style={{display:"flex",gap:"10px"}}>
-                                                Acciones
+                                            <div className='buttonsIconTable' style={{display:"flex",gap:"10px"}}>
+                                                <button>
+                                                    <VisibilityIcon/>
+                                                </button>
+                                                <button>
+                                                    <EditIcon />
+                                                </button>
+                                                {usuario.cargo === "Administrador" ? 
+                                                (
+                                                    <></>
+                                                ):(
+                                                    <>
+                                                        {usuario.estado === false ? 
+                                                        (
+                                                            <button>
+                                                                <LockOpenIcon />
+                                                            </button>
+                                                        ):(
+                                                            <button>
+                                                                <LockOutlinedIcon />
+                                                            </button>
+                                                        )}
+                                                    </>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -90,6 +127,7 @@ function recursosAdmin(){
                     </div>
                 ):
                 (
+                    /* Tabla vehiculos */
                     <div>
                         <Table hoverRow borderAxis="y" sx={
                             {'& td':{textAlign:'left',paddingLeft:1.9}}
@@ -112,8 +150,17 @@ function recursosAdmin(){
                                         <td>{vh.KMS_actual}</td>
                                         <td>{vh.estado}</td>
                                         <td>
-                                            <div style={{display:"flex",gap:"10px"}}>
-                                                Acciones
+                                            <div className="buttonsIconTable" style={{display:"flex",gap:"10px"}}>
+                                                <button>
+                                                    <VisibilityIcon/>
+                                                </button>
+                                                <button>
+                                                    <EditIcon />
+                                                </button>
+                                                {/*Mantenciones vehiculo */}
+                                                <button>
+                                                    <BuildIcon />
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -176,6 +223,30 @@ function recursosAdmin(){
                     Cancelar
                     </Button>
                 </DialogActions>
+            </ModalDialog>
+        </Modal>
+        <Modal open={modalMantencion} onClose={()=>setOpenModalMantencion(false)}>
+            <ModalDialog variant="outlined">
+                <DialogTitle>
+                    Agregar mantención a vehículo
+                </DialogTitle>
+                <Divider />
+                <DialogContent>
+                    <label>Patente del vehiculo</label>
+                    <select defaultValue={""} onChange={()=>handlePatenteMantencion}>
+                        {vehiculos.map((veh)=>(
+                            <option key={veh.patente} value={veh.patente}>{veh.patente}</option>
+                        ))}
+                    </select>
+                    <label>Último cambio de aceite</label>
+                    <input type='date' name='fechaAceite' ></input>
+                    <label>Taller</label>
+                    <input type='text' name='taller'></input>
+                    <label>Última mantención</label>
+                    <input type='date' name='fechaMantención'></input>
+                    <label>Motivo o detalle de la mantención</label>
+                    <textarea rows={5} style={{overflowY:"auto", resize:"none"}} name='motivoMantencion'></textarea>
+                </DialogContent>
             </ModalDialog>
         </Modal>
         </>

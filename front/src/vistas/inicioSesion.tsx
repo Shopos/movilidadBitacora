@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom"
-import "../estilos/incioSesion.css"
+import '../estilos/incioSesion.css'
 import { useState } from "react"
 
 type User={
@@ -24,6 +24,9 @@ function inicioSesion(){
     const manejoNavigate = () => navigate("/menuUsuario")
     const manejoNavigate2 = () => navigate("/menuAdmin")
 
+    /*Maneja los datos ingresados en los inputs de inicio de sesión
+    >los datos de inicio se almacenan en formData y se deben comprobar en DB    
+    */
     const handleRedirection = () =>{
         if(formData.mail === Admin.correo && formData.pass===Admin.contraseña){
             manejoNavigate2()
@@ -38,6 +41,10 @@ function inicioSesion(){
             [name]:value
         }))
     }
+
+    /*Vista inicial de la app
+        Muestra directamente el inicio de sesión de la app
+    */
     return(
         <>
         <header className="headerInicio">

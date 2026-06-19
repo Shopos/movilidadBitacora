@@ -1,4 +1,5 @@
 import NavBar from "../../componentes/navBar.tsx"
+import DataViewViaje from "../../componentes/dataViewViaje.tsx";
 import "../../estilos/menuAdmin.css"
 
 import { useState } from "react";
@@ -10,31 +11,75 @@ import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Bu
 import TodayOutlinedIcon from '@mui/icons-material/TodayOutlined';
 import DateRangeOutlinedIcon from '@mui/icons-material/DateRangeOutlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
-
-type Viaje = {
-    id:number,
-    patente:string,
-    fecha:string,
-    funcionario:string,
-    horaInicio:string,
-    KMSinicio:number,
-    horaLlegada:string,
-    KMSLlegada:number,
-    estado:boolean,
-}
+import type {Viaje} from "../../tipos/tipoSistema.ts"
 function menuAdmin(){
     const viajes:Viaje[]=[
-        {id:1,patente:"yzx123",fecha: "14/7/2026",funcionario:"sanchez miguel",horaInicio:"12:00",KMSinicio:100,horaLlegada:"13:30",KMSLlegada:110,estado:false},
-        {id:1,patente:"wxz122",fecha: "13/6/2026",funcionario:"linus loan",horaInicio:"12:00",KMSinicio:100,horaLlegada:"14:30",KMSLlegada:110,estado:true},
-        {id:1,patente:"asv124",fecha: "14/6/2026",funcionario:"tobar papu",horaInicio:"12:00",KMSinicio:100,horaLlegada:"15:30",KMSLlegada:110,estado:true},
-        {id:1,patente:"abc143",fecha: "12/3/2026",funcionario:"mejias miguel",horaInicio:"15:00",KMSinicio:100,horaLlegada:"16:30",KMSLlegada:110,estado:false},
-        {id:2,patente:"yzx123",fecha: "16/5/2026",funcionario:"sanchez miguel",horaInicio:"9:00",KMSinicio:100,horaLlegada:"13:30",KMSLlegada:110,estado:false},
-        {id:3,patente:"yzx123",fecha: "15/2/2026",funcionario:"mato juan",horaInicio:"8:00",KMSinicio:100,horaLlegada:"12:30",KMSLlegada:110,estado:false},
+        {id_viaje:1,
+            patente:"yzx123",
+            fecha: "14/7/2026",
+            nombre_funcionario:"sanchez miguel",
+            fecha_hora_inicio:"12:00",
+            kms_inicio:100,
+            fecha_hora_fin:"13:30",
+            kms_fin:110,
+            estado_viaje:false,
+            cantidad_combustible:10,
+            carga_combustible:true,
+            destino:"santa cruz",
+            lat_inicio: -34.639464, 
+            lng_inicio: -71.365910,
+            lat_fin:-34.627511,
+            lng_fin:-71.349689,
+            motivo:"Visita a parque",
+            obs_viaje:"-",
+            vehiculo:"Toyota"
+        },
+        {id_viaje:2,
+            patente:"yzx123",
+            fecha: "14/7/2026",
+            nombre_funcionario:"pedro pablo",
+            fecha_hora_inicio:"13:00",
+            kms_inicio:100,
+            fecha_hora_fin:"17:30",
+            kms_fin:110,
+            estado_viaje:true,
+            cantidad_combustible:10,
+            carga_combustible:false,
+            destino:"santa cruz",
+            lat_inicio: -34.639464, 
+            lng_inicio: -71.365910,
+            lat_fin:-34.661494,
+            lng_fin:-71.420961,
+            motivo:"Mirador la lajuela",
+            obs_viaje:"-",
+            vehiculo:"Toyota"
+        },
+        {id_viaje:3,
+            patente:"yzx123",
+            fecha: "14/7/2026",
+            nombre_funcionario:"sanchez miguel",
+            fecha_hora_inicio:"12:00",
+            kms_inicio:100,
+            fecha_hora_fin:"21:30",
+            kms_fin:110,
+            estado_viaje:false,
+            cantidad_combustible:10,
+            carga_combustible:true,
+            destino:"Santiago",
+            lat_inicio: -34.639464, 
+            lng_inicio: -71.365910,
+            lat_fin:-33.444210, 
+            lng_fin:-70.653608,
+            motivo:"Visita a Moneda",
+            obs_viaje:"-",
+            vehiculo:"Toyota"
+        }
     ]
     const [viajeSelected,setViajeSelected] = useState<Viaje|null>(null)
     const [viajeEdit,setViajeEditSelected] = useState<Viaje|null>(null)
     const [modalVista,setOpenModalVista] = useState<boolean>(false)
     const [modalEdicion,setOpenModalEdit] = useState<boolean>(false)
+
 
     const handleModalViajeView=(viaje:Viaje)=>{
         //Visualiza la informacion del viaje en un modal, si el viaje esta en proceso muestra la informacion del viaje hasta el momento
@@ -53,6 +98,14 @@ function menuAdmin(){
         setOpenModalEdit(true)
         return
     }
+
+    /*
+    Vista menu administracion
+    >Directamente abre la tabla de las bitacoras
+    >Muestra input barra para busqueda por patente o nombre usuario, mas 2 de busqueda rapida que muestra bitacoras del ultimo dia o la ultima semana
+    >boton para exportar la tabla actual en formato pdf
+        >Cada celda presenta botones de acciones para visualizar la bitacora de la celda, editar los datos (dejando registro de esto) y exportar dicha bitacora a PDF
+    */
     return(
         <>
         <NavBar type={1} texto="Bitácoras"/>
@@ -113,12 +166,12 @@ function menuAdmin(){
                         <tr>
                             <td>{viaje.patente}</td>
                             <td>{viaje.fecha}</td>
-                            <td>{viaje.funcionario}</td>
-                            <td>{viaje.horaInicio}</td>
+                            <td>{viaje.nombre_funcionario}</td>
+                            <td>{viaje.fecha_hora_inicio}</td>
                             
-                            <td>{viaje.horaLlegada}</td>
+                            <td>{viaje.fecha_hora_fin}</td>
                             
-                            <td>{viaje.estado === true ? "En proceso" : "Terminado"}</td>
+                            <td>{viaje.estado_viaje === true ? "En proceso" : "Terminado"}</td>
                             <td>
                                 <div style={{display:"flex",gap:"10px"}}>
                                     <button onClick={()=>handleModalViajeView(viaje)}>
@@ -127,7 +180,7 @@ function menuAdmin(){
                                     <button onClick={()=>exportarViajePDF(viaje)}>
                                         <PictureAsPdfIcon />
                                     </button>
-                                    {viaje.estado === false ? 
+                                    {viaje.estado_viaje === false ? 
                                        ( 
                                         <button onClick={()=>editarViajeModal(viaje)}>
                                             <EditDocumentIcon />
@@ -148,23 +201,13 @@ function menuAdmin(){
 
         {/*Modal vista viaje */}
         <Modal open={modalVista} onClose={() => setOpenModalVista(false)}>
-            <ModalDialog variant="outlined" role="alertdialog">
+            <ModalDialog variant="outlined" size="lg" sx={{width:"70%"}}>
                 <DialogTitle>
-                    Viaje {viajeSelected?.id}
+                    Viaje {viajeSelected?.id_viaje}
                 </DialogTitle>
                 <Divider />
                 <DialogContent>
-                    Data viaje
-                    INICIO: {viajeSelected?.horaInicio}
-                    LLEGADA: {viajeSelected?.horaLlegada}
-                    PATENTE VEHICULO: {viajeSelected?.patente}
-                    FUNCIONARIO: {viajeSelected?.funcionario}
-                    DESTINO: XX
-                    MOTIVO: XX
-                    ESTADO VIAJE: {viajeSelected?.estado == true ? "EN PROCESO" : "TERMINADO"}
-                    CARGA COMBUSTIBLE: XX
-                    CANTIDAD: XX
-                    OBSERVACIONES: XX
+                        <DataViewViaje viajeSelected={viajeSelected}></DataViewViaje>
                 </DialogContent>
                 <DialogActions>
                     <Button variant="solid" color="success" onClick={() => {
@@ -185,21 +228,12 @@ function menuAdmin(){
         <Modal open={modalEdicion} onClose={() => setOpenModalEdit(false)}>
             <ModalDialog variant="outlined" role="alertdialog">
                 <DialogTitle>
-                    Viaje {viajeEdit?.id}
+                    Viaje {viajeEdit?.id_viaje}
                 </DialogTitle>
                 <Divider />
                 <DialogContent>
-                    Datos viaje -- cambiar a inputs y logica reemplazo
-                    INICIO: {viajeEdit?.horaInicio}
-                    LLEGADA: {viajeEdit?.horaLlegada}
-                    PATENTE VEHICULO: {viajeEdit?.patente}
-                    FUNCIONARIO: {viajeEdit?.funcionario}
-                    DESTINO: XX
-                    MOTIVO: XX
-                    ESTADO VIAJE: {viajeEdit?.estado == true ? "EN PROCESO" : "TERMINADO"}
-                    CARGA COMBUSTIBLE: XX
-                    CANTIDAD: XX
-                    OBSERVACIONES: XX
+                    {/*Cambiar para aceptar edicion */}
+                   <DataViewViaje viajeSelected={viajeEdit}></DataViewViaje>
                 </DialogContent>
                 <DialogActions>
                     <Button variant="solid" color="success" onClick={() => {
@@ -215,6 +249,9 @@ function menuAdmin(){
                 </DialogActions>
             </ModalDialog>
         </Modal>
+
+                
+
         </>
     )
 }

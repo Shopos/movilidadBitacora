@@ -182,7 +182,3 @@
     border-right-color: var(--border);
   }
 }
-
-.leaflet-container{
-  height: 50%;
-}

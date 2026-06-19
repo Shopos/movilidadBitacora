@@ -6,22 +6,52 @@ import { useState } from "react"
 import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button} from "@mui/joy"
 import { useNavigate } from "react-router-dom";
 import "../../estilos/viajesUsuario.css"
-
-type Viaje={
-    id:number,
-    patente:string,
-    horaInicio:string,
-    horallegada:string,
-    estado:boolean
-}
+import type {Viaje} from "../../tipos/tipoSistema.ts"
+import DataViewViaje from "../../componentes/dataViewViaje.tsx"
 
 function viajesUsuario(){
 
     const Viajes:Viaje[]=[
-        {id:1,patente:"xtz123",horaInicio:"12:00",horallegada:"13:00",estado:false},
-        {id:2,patente:"xtz124",horaInicio:"12:00",horallegada:"13:00",estado:false},
-        {id:3,patente:"abc134",horaInicio:"12:00",horallegada:"13:00",estado:false},
-        {id:4,patente:"imu123",horaInicio:"12:00",horallegada:"13:00",estado:true},
+        {id_viaje:1,
+            patente:"yzx123",
+            fecha: "14/7/2026",
+            nombre_funcionario:"sanchez miguel",
+            fecha_hora_inicio:"12:00",
+            kms_inicio:100,
+            fecha_hora_fin:"13:30",
+            kms_fin:110,
+            estado_viaje:false,
+            cantidad_combustible:10,
+            carga_combustible:true,
+            destino:"santa cruz",
+            lat_inicio: -34.639464, 
+            lng_inicio: -71.365910,
+            lat_fin:-34.627511,
+            lng_fin:-71.349689,
+            motivo:"Visita a parque",
+            obs_viaje:"-",
+            vehiculo:"Toyota"
+        },
+        {id_viaje:2,
+            patente:"yzx123",
+            fecha: "14/7/2026",
+            nombre_funcionario:"sanchez miguel",
+            fecha_hora_inicio:"13:00",
+            kms_inicio:100,
+            fecha_hora_fin:"17:30",
+            kms_fin:110,
+            estado_viaje:true,
+            cantidad_combustible:10,
+            carga_combustible:false,
+            destino:"santa cruz",
+            lat_inicio: -34.639464, 
+            lng_inicio: -71.365910,
+            lat_fin:-34.661494,
+            lng_fin:-71.420961,
+            motivo:"Mirador la lajuela",
+            obs_viaje:"-",
+            vehiculo:"Toyota"
+        }
     ]
     const [viajeSelected,setViajeSelected] = useState<Viaje|null>(null)
     const [openModalViaje,setOpenModalViaje] = useState<boolean>(false)
@@ -36,6 +66,12 @@ function viajesUsuario(){
         return
     }
     
+    /*
+    Vista para los viajes del usuario
+        >Se listan los viajes y se muestran en tabla
+        >Usuario puede ver su viaje y detalles o exportar dicho viaje a formato pdf
+            >La edicion de dicho viaje sera vista y editada por Administracion para evitar problemas
+    */
     return(
         <>  
             <NavBar type={0} texto=""/>
@@ -58,11 +94,11 @@ function viajesUsuario(){
                         
                         {Viajes.map((viaje)=>(
                         <tr>
-                            <td>{viaje.id}</td>
+                            <td>{viaje.id_viaje}</td>
                             <td>{viaje.patente}</td>
-                            <td>{viaje.horaInicio}</td>
-                            <td>{viaje.horallegada}</td>
-                            <td>{viaje.estado === true ? "En proceso" : "Terminado"}</td>
+                            <td>{viaje.fecha_hora_inicio}</td>
+                            <td>{viaje.fecha_hora_fin}</td>
+                            <td>{viaje.estado_viaje === true ? "En proceso" : "Terminado"}</td>
                             <td>
                                 <div style={{display:"flex",gap:"10px"}}>
                                     <button className="buttonIconTable" onClick={()=>handleModalViajeView(viaje)}>
@@ -84,15 +120,11 @@ function viajesUsuario(){
                 <Modal open={openModalViaje} onClose={() => setOpenModalViaje(false)}>
                 <ModalDialog variant="outlined" role="alertdialog">
                 <DialogTitle>
-                    Viaje {viajeSelected?.id}
+                    Viaje {viajeSelected?.id_viaje}
                 </DialogTitle>
                 <Divider />
                 <DialogContent>
-                    Data viaje
-                    INICIO: {viajeSelected?.horaInicio}
-                    LLEGADA: {viajeSelected?.horallegada}
-                    PATENTE VEHICULO: {viajeSelected?.patente}
-                    ESTADO VIAJE: {viajeSelected?.estado == true ? "EN PROCESO" : "TERMINADO"}
+                   <DataViewViaje viajeSelected={viajeSelected} />
                 </DialogContent>
                 <DialogActions>
                     <Button variant="solid" color="success" onClick={() => setOpenModalViaje(false)}>

@@ -1,13 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react'
-import '../estilos/navBar.css'
+import "../estilos/navBar.css"
 import PersonIcon from '@mui/icons-material/Person';
 import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button} from "@mui/joy"
+import type { navBarProps } from '../tipos/tipoSistema';
 
-type navBarProps={
-    type:number;
-    texto:string;
-}
 
 
 function navBar({type,texto}:navBarProps){
@@ -16,11 +13,19 @@ function navBar({type,texto}:navBarProps){
     const irBitacoras = () =>navigate("/menuAdmin")
     const irRecursos =()=> navigate("/recursos")
 
+
+    /*Si usuario(cualquiera) selecciona el icono de usuario, comienza proceso cierre de sesión y se devuelve al home de la app (/) */
     const handleCierreSesion =()=>{
         setOpenModalCierre(false)
         navigate("/")
     }
 
+
+    /* 
+    Barra navegacion adaptable segun tipo de usuario, 
+        si tipo de usuario === 1 --> Administracion, entrega acceso rapido a recursos y bitacoras 
+        si tipo de usuario === 0 --> Usuario comun, deja sin acceso directo a ciertas funciones claves para centrar el funcionamiento a documentacion de viaje
+    */
     return(
         <>
         {type===1 ? 

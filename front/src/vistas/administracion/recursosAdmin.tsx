@@ -8,31 +8,20 @@ import EditIcon from '@mui/icons-material/Edit';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import BuildIcon from '@mui/icons-material/Build';
+import type { Vehiculo,User } from '../../tipos/tipoSistema.ts'
 
-type Usuario = {
-    correo:string,
-    nombre:string,
-    cargo:string,
-    estado:boolean,
-}
-type Vehiculo = {
-    patente:string,
-    modelo:string,
-    estado:"Activo"|"Reparacion"|"Dado de baja"|"Disponible",
-    KMS_actual:number
-}
 function recursosAdmin(){
-    const usuarios:Usuario[] = [
-        {correo:"abc@gmail.com",nombre:"abc def",cargo:"Funcionario",estado:false},
-        {correo:"admin@gmail.com",nombre:"abc def",cargo:"Administrador",estado:true},
-        {correo:"nombre.apellido@munisantacruz.cl",nombre:"nombre apellido",cargo:"Funcionario",estado:true},
-        {correo:"def@gmail.com",nombre:"def acv",cargo:"Funcionario",estado:true},
-        {correo:"ghi@gmail.com",nombre:"dhi fgj",cargo:"Funcionario",estado:false},
+    const usuarios:User[] = [
+        {email:"abc@gmail.com",nombre:"abc def",cargo:"Funcionario",estado:false},
+        {email:"admin@gmail.com",nombre:"abc def",cargo:"Administrador",estado:true},
+        {email:"nombre.apellido@munisantacruz.cl",nombre:"nombre apellido",cargo:"Funcionario",estado:true},
+        {email:"def@gmail.com",nombre:"def acv",cargo:"Funcionario",estado:true},
+        {email:"ghi@gmail.com",nombre:"dhi fgj",cargo:"Funcionario",estado:false},
     ]
     const vehiculos:Vehiculo[] = [
         {patente:"xyz123", modelo:"toyota", KMS_actual:192,estado:"Activo"},
         {patente:"abc123", modelo:"suzuki", KMS_actual:193,estado:"Disponible"},
-        {patente:"dfe123", modelo:"toyota", KMS_actual:194,estado:"Reparacion"},
+        {patente:"dfe123", modelo:"toyota", KMS_actual:194,estado:"En reparación"},
         {patente:"plm123", modelo:"suzuki", KMS_actual:195,estado:"Dado de baja"},
         {patente:"pit123", modelo:"toyota", KMS_actual:196,estado:"Disponible"},
         {patente:"xom123", modelo:"audi", KMS_actual:197,estado:"Activo"},
@@ -40,7 +29,10 @@ function recursosAdmin(){
     const [vistaActual,setVistaActual] = useState<boolean>(false)
     const [modalAdd,setOpenModalAdd] = useState<boolean>(false)
     const [modalMantencion,setOpenModalMantencion] = useState<boolean>(false)
-
+    const [modalViewRecurso,openModalViewRecurso] = useState<boolean>(false)
+    const [recursoShow,setRecursoShow] = useState<Vehiculo|User|null>(null)
+    const [recursoEdit,setRecursoEdit] = useState<Vehiculo|User|null>(null)
+    const [modalEdit,openModalEdit] = useState<boolean>(false)
 
     const abriModalAdd =()=>{
         //se abre modal y luego antes del retorno se limpian los inputs
@@ -48,12 +40,26 @@ function recursosAdmin(){
         return
     }
     const abrirModalMantencion=()=>{
+        console.log("mantencion")
         setOpenModalMantencion(true)
         return
     }
+    const abrirModalView=(recurso:Vehiculo|User)=>{
+        setRecursoShow(recurso)
+        openModalViewRecurso(true)
+    }
     const handlePatenteMantencion=(event:React.ChangeEvent<HTMLSelectElement>)=>{
         /**Mantener patente en memoria para luego de tomar datos de mantencion indexar */
+    }  
+    const abriModalEdit=(recurso:Vehiculo|User)=>{
+        setRecursoEdit(recurso)
+        openModalEdit(true)
     }
+
+    /*
+        Vista de recursos del departamento
+        
+    */
     return(
         <>
             <NavBar type={1} texto={"Recursos"} />
@@ -61,7 +67,6 @@ function recursosAdmin(){
             <div>
                 <div className='buttonsFlexEnd'> 
                     <button>Exportar tabla actual</button>
-                    {vistaActual===true ? (<button onClick={()=>abrirModalMantencion()}>Agregar mantención</button>):(<></>)}
                     <button onClick={()=>abriModalAdd()}>Agregar nuevo {vistaActual===true ? "vehículo" : "usuario"}</button>
                     
                 </div>
@@ -89,16 +94,16 @@ function recursosAdmin(){
                             <tbody> 
                                 {usuarios.map((usuario)=>(
                                     <tr>
-                                        <td style={{overflow:"clip"}}>{usuario.correo}</td>
+                                        <td style={{overflow:"clip"}}>{usuario.email}</td>
                                         <td>{usuario.nombre}</td>
                                         <td>{usuario.cargo}</td>
                                         <td>{usuario.estado === false ? "Bloqueado":"Activo"}</td>
                                         <td>
                                             <div className='buttonsIconTable' style={{display:"flex",gap:"10px"}}>
-                                                <button>
+                                                <button onClick={()=>abrirModalView(usuario)}>
                                                     <VisibilityIcon/>
                                                 </button>
-                                                <button>
+                                                <button onClick={()=>abriModalEdit(usuario)}>
                                                     <EditIcon />
                                                 </button>
                                                 {usuario.cargo === "Administrador" ? 
@@ -151,14 +156,13 @@ function recursosAdmin(){
                                         <td>{vh.estado}</td>
                                         <td>
                                             <div className="buttonsIconTable" style={{display:"flex",gap:"10px"}}>
-                                                <button>
+                                                <button onClick={()=>abrirModalView(vh)}>
                                                     <VisibilityIcon/>
                                                 </button>
-                                                <button>
+                                                <button onClick={()=>abriModalEdit(vh)}>
                                                     <EditIcon />
                                                 </button>
-                                                {/*Mantenciones vehiculo */}
-                                                <button>
+                                                <button onClick={()=>abrirModalMantencion()}>
                                                     <BuildIcon />
                                                 </button>
                                             </div>
@@ -170,7 +174,9 @@ function recursosAdmin(){
                     </div>
                 )}
             </div>
-            <Modal open={modalAdd} onClose={() => setOpenModalAdd(false)}>
+
+        {/**Modal agrega recurso */}
+        <Modal open={modalAdd} onClose={() => setOpenModalAdd(false)}>
             <ModalDialog variant="outlined" role="alertdialog">
                 <DialogTitle>
                     Agregar nuevo {vistaActual === true ? "vehículo" : "usuario"}
@@ -225,6 +231,7 @@ function recursosAdmin(){
                 </DialogActions>
             </ModalDialog>
         </Modal>
+        {/**Modal agrega mantencion vehiculo */}
         <Modal open={modalMantencion} onClose={()=>setOpenModalMantencion(false)}>
             <ModalDialog variant="outlined">
                 <DialogTitle>
@@ -247,9 +254,105 @@ function recursosAdmin(){
                     <label>Motivo o detalle de la mantención</label>
                     <textarea rows={5} style={{overflowY:"auto", resize:"none"}} name='motivoMantencion'></textarea>
                 </DialogContent>
+                <DialogActions>
+                    <Button variant="solid" color="success" onClick={() => setOpenModalMantencion(false)}>
+                    Agregar
+                    </Button>
+                    <Button variant="plain" color="danger" onClick={() => setOpenModalMantencion(false)}>
+                    Cancelar
+                    </Button>
+                </DialogActions>
+            </ModalDialog>
+        </Modal>
+        {/**Abrir modal vista recurso */}
+        <Modal open={modalViewRecurso} onClose={()=>openModalViewRecurso(false)}>
+            <ModalDialog variant="outlined">
+                <DialogTitle>
+                    Vista de {recursoShow && 'email' in recursoShow ? (
+                        `Vista de usuario: ${recursoShow.nombre}`
+                    ): recursoShow && 'patente' in recursoShow ? (
+                        `Vista de vehículo: ${recursoShow.patente}`
+                    ):("vista de recurso")} 
+                </DialogTitle>
+                <Divider />
+                <DialogContent>
+                    {recursoShow && 'email' in recursoShow ? (
+                        <>
+                            <p><strong>Nombre: </strong>{recursoShow.nombre}</p>
+                            <p><strong>Cargo: </strong>{recursoShow.cargo}</p>
+                            <p><strong>Estado: </strong>{recursoShow.estado===false ? "Bloqueado":"Activo"}</p>
+                        </>
+                     ):
+                     recursoShow && 'patente' in recursoShow ? 
+                     (<>
+                        <p><strong>Patente: </strong>{recursoShow.patente}</p>
+                        <p><strong>Modelo: </strong>{recursoShow.modelo}</p>
+                        <p><strong>Kilometraje: </strong>{recursoShow.KMS_actual}</p>
+
+                        {/*Apartado mantenciones del vehiculo --> asociadas a X patente*/}
+                    </>):"datos no encontrados"}
+                </DialogContent>
+            </ModalDialog>
+        </Modal>
+        
+        {/**Abrir modal edicion recurso */}
+        <Modal open={modalEdit} onClose={() => openModalEdit(false)}>
+            <ModalDialog variant="outlined" role="alertdialog">
+                <DialogTitle>
+                    Editar {vistaActual === true ? "vehículo" : "usuario"}
+                </DialogTitle>
+                <Divider />
+                <DialogContent>
+                    {recursoEdit && 'patente' in recursoEdit  ? 
+                    (<>
+                        <label>Patente</label>
+                        <input value={recursoEdit.patente} type='text'></input>
+                        <label>Modelo</label>
+                        <input value={recursoEdit.modelo} type='text'></input>
+                        <label>kilometraje actual</label>
+                        <input value={recursoEdit.KMS_actual}  type='number'></input>
+                        <label>Estado</label>
+                        <select defaultValue={recursoEdit.estado}>
+                            <option>Activo</option>
+                            <option>Reparacion</option>
+                            <option>Dado de baja</option>
+                            <option>Disponible</option>
+                        </select>
+                    </>)
+                    : recursoEdit && 'email' in recursoEdit ?
+                    (<>
+                        <label>Correo</label>
+                        <input value={recursoEdit.email} type='email' placeholder='nombre.apellido@mail.com'></input>
+                        <label>Nombre</label>
+                        <input value={recursoEdit.nombre} type='text'></input>
+                        <label>Cargo</label>
+                        <select defaultValue={recursoEdit.cargo} disabled>
+                            <option>Funcionario</option>
+                            <option>Administrativo</option>
+                        </select>
+                        <label>Estado</label>
+                        <select defaultValue={recursoEdit.estado===true ? "Activo" : "Bloqueado"}>
+                            <option>Activo</option>
+                            <option>Bloqueado</option>
+                        </select>
+                    </>):<>Error</>}
+                </DialogContent>
+                <DialogActions>
+                    <Button variant="solid" color="success" onClick={() => {
+                        
+                        openModalEdit(false)}}>
+                    Agregar
+                    </Button>
+                    <Button variant="plain" color="danger" onClick={() => {
+                        
+                        openModalEdit(false)}}>
+                    Cancelar
+                    </Button>
+                </DialogActions>
             </ModalDialog>
         </Modal>
         </>
+        
     )
 }
 export default recursosAdmin

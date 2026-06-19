@@ -75,7 +75,7 @@
 }
 .leaflet-container{
     height:500px;
-    width: 100%;
+    width: 500px;
 }
 
 .botonesPaso{
@@ -93,4 +93,5 @@
     border: #696AE3;
     border-radius: 20px;
     padding: 1%;
+    margin-left: 2%;
 }

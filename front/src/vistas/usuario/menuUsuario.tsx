@@ -7,6 +7,11 @@ function menuUsuario(){
     const comenzarViaje=()=>navigate("/inicioViaje")
     const verViajes =()=> navigate("/viajesUsuario");
 
+
+    /*Vista del menu del usuario
+        >Iniciar viaje para comenzar proceso de documentacion bitacora
+        >Ver mis viajes para navegar a vista de viajes del usuario
+    */
     return(
         <div>
             <NavBar type={0} texto=""/>

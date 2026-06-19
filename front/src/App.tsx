@@ -9,13 +9,15 @@ import ViajesUsuario from "./vistas/usuario/viajesUsuario.tsx"
 import Recursos from "./vistas/administracion/recursosAdmin.tsx"
 
 function App(){
+
+  /*Rutas de la app*/
   return(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<InicioSesion />}></Route>
         {/**Rutas usuario */}
         <Route path="/inicioViaje" element={<InicioViaje />} />
-        <Route path="/viajeProceso" element={<ViajeProceso />} />
+        <Route path="/viajeProceso" element={<ViajeProceso />}  />
         <Route path="/cierreViaje" element={<CierreViaje />}/>
         <Route path="/viajesUsuario" element={<ViajesUsuario />}></Route>
         <Route path="/menuUsuario" element={<MenuUsuario />}></Route>

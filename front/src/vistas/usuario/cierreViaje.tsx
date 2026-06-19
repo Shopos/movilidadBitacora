@@ -12,7 +12,6 @@ function cierreViaje(){
     //inputs de recoleccion y cierre final con dialogo de confirmacion
     //es posible cancelar y volver al estado de viajeProceso si es necesario
     //al finalizar cambia los estados del viaje y vehiculo asociados
-    //vuelve a menu inicial    
     const navigate = useNavigate()
     const volverProceso = () =>navigate("/viajeProceso")
     const cerrarYvolver = () =>navigate("/menuUsuario")
@@ -29,6 +28,15 @@ function cierreViaje(){
             setCheckCarga(0)
         }
     }
+
+    /*
+    Vista fin cierre bitacora
+        >inputs que recolectan la informacion de cierre
+        >Check por si se realiza carga de combustible -> 
+            >1 --> Señala que si se realizo y se pide informacion
+            >0 --> Quedan vacios
+        >Se pide confirmacion para cerrar el proceso-->se guardan los datos finales y viaje queda en estado false indicando que el viaje ya no esta activo
+    */
     return(
         <div>
             <NavBar type={0} texto=""/>

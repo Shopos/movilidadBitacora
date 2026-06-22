@@ -6,6 +6,7 @@ import "../../estilos/cierreViaje.css"
 import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button} from "@mui/joy"
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import { isMobile } from "react-device-detect"
 
 
 function cierreViaje(){
@@ -72,7 +73,7 @@ function cierreViaje(){
                     }
                 </div>
                 
-                {checkCarga===1 ? (
+                {checkCarga===1 && isMobile ? (
                     <>
                     <div className="displayModal">
                         <p>Comprobante</p>

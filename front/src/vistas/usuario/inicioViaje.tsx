@@ -5,11 +5,11 @@ import React, { useEffect, useState } from "react";
 import { Modal, ModalDialog, DialogTitle, Divider, DialogContent, DialogActions, Button } from "@mui/joy"
 import type { Vehiculo,User } from "../../tipos/tipoSistema.ts";
 import Routing from "../../componentes/routing.tsx" /*Componente para marcar la ruta entre inicio y destino en mapa*/
-
+import getVehiculos from "../../utils/auxiliar.ts";
 import 'leaflet/dist/leaflet.css';
 import L from "leaflet"
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
-
+import { isMobile } from "react-device-detect"
 
 type GPS={
     lat:number,
@@ -57,15 +57,8 @@ function inicioViaje() {
         nombre:"Pepe pape",
         estado: false
     }
-    const Vehiculos: Vehiculo[] = [
-        { patente: "xyz123", modelo: "toyota", KMS_actual: 192,estado:"Disponible" },
-        { patente: "abc123", modelo: "suzuki", KMS_actual: 193,estado:"Disponible"},
-        { patente: "dfe123", modelo: "toyota", KMS_actual: 194,estado:"En reparación" },
-        { patente: "plm123", modelo: "suzuki", KMS_actual: 195,estado:"Activo" },
-        { patente: "pit123", modelo: "toyota", KMS_actual: 196,estado:"Dado de baja"},
-        { patente: "xom123", modelo: "audi", KMS_actual: 197,estado:"Activo" },
-    ]
-
+    const [vehiculos,setVehiculos] = useState<[Vehiculo]>()
+    
     /*Funcion para dar colores especificos a los Marker de leaflet y poder diferenciar punto de inicio y destino */
     const createCustomIcon = (color:string) => {
         return L.divIcon({
@@ -90,7 +83,7 @@ function inicioViaje() {
     const manejarDataVehiculo = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const patenteselected = event.target.value
 
-        const vehiculoEncontrado = Vehiculos.find(
+        const vehiculoEncontrado = vehiculos!.find(
             (vehiculo) => vehiculo.patente === patenteselected
         )
         if(vehiculoEncontrado){
@@ -100,7 +93,7 @@ function inicioViaje() {
             ...prevData,
             patente:patenteselected,
             modelo: vehiculoEncontrado ? vehiculoEncontrado.modelo:"",
-            kmsInicio: vehiculoEncontrado ? vehiculoEncontrado.KMS_actual.toString():""
+            kmsInicio: vehiculoEncontrado ? vehiculoEncontrado.kms_actual.toString():""
         }))
 
         
@@ -112,11 +105,19 @@ function inicioViaje() {
             ...prevData,
             funcionario:usuario.nombre,
         }))
+
         navigator.geolocation.getCurrentPosition(position => {
             setDestinoChange(destinoChange)
             setDataGPS({lat:position.coords.latitude,lng:position.coords.longitude})
             setDataGPSDestino({lat:position.coords.latitude,lng:position.coords.longitude})
         });
+        const getData = async () =>{
+            const data = await getVehiculos()
+            if(data){
+                setVehiculos(data)
+            }
+        }
+        getData()
     },[])
     
     /*Funcion para centrar el preview del mapa dependiendo de los puntos seleccionados */
@@ -203,7 +204,7 @@ function inicioViaje() {
                     <select name="Patentes" defaultValue={""} onChange={manejarDataVehiculo}>
                         <option value={""} disabled>Selecciona una de las patentes disponibles</option>
                         {/**Solo se muestran las patentes de vehiculos disponibles */}
-                        {Vehiculos.filter(vehiculo => vehiculo.estado === "Disponible").map((vehiculo) => (
+                        {vehiculos && vehiculos!.filter(vehiculo => vehiculo.estado === "DISPONIBLE").map((vehiculo) => (
                             <option key={vehiculo.patente} value={vehiculo.patente}>
                                 {vehiculo.patente}
                             </option>
@@ -218,7 +219,7 @@ function inicioViaje() {
 
                 <div className="itemInput">
                     <label>Kilometraje actual</label>
-                    <input disabled type="number" name="kmsInicio" value={vehiculoSelected?.KMS_actual}></input>
+                    <input disabled type="number" name="kmsInicio" value={vehiculoSelected?.kms_actual}></input>
                 </div>
 
                 <div className="itemInput">
@@ -228,14 +229,15 @@ function inicioViaje() {
 
                 <div className="itemInput">
                     <label>Funcionario</label>
-                    <input disabled name={formInicio.funcionario} value={formInicio.funcionario} type="text"></input>
+                    <input disabled name={usuario.nombre} value={usuario.nombre} type="text"></input>
                 </div>
             </div>
 
-
+            
+            {isMobile ? (
             <div className="full-width">
                 <button className="buttonFormularioInicio" onClick={()=>openModalCamara(true)}>Agregar imagen tablero</button>
-            </div>
+            </div>):(<></>)}
 
 
 
@@ -273,6 +275,8 @@ function inicioViaje() {
                             </MapContainer>
                             
                             <button className="buttonFormularioInicio" onClick={() => openModalDestino(true)}>Cambiar destino</button>
+                            
+                            <span>Destino</span><input type="text"></input>
                         </div>
                 </>)
                 :

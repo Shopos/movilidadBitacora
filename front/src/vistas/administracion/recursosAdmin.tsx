@@ -9,7 +9,15 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import BuildIcon from '@mui/icons-material/Build';
 import type { Vehiculo,User } from '../../tipos/tipoSistema.ts'
+import getVehiculos from "../../utils/auxiliar.ts"
 
+
+const vehiculoVacio:Vehiculo = {
+    patente:"",
+    modelo:"",
+    kms_actual:0,
+    estado:"DADO DE BAJA"
+}
 function recursosAdmin(){
     const usuarios:User[] = [
         {email:"abc@gmail.com",nombre:"abc def",cargo:"Funcionario",estado:false},
@@ -26,27 +34,31 @@ function recursosAdmin(){
     const [recursoShow,setRecursoShow] = useState<Vehiculo|User|null>(null)
     const [recursoEdit,setRecursoEdit] = useState<Vehiculo|User|null>(null)
     const [modalEdit,openModalEdit] = useState<boolean>(false)
+    
+    const [refresh,setRefresh] = useState(false)
 
+    const [cargando, setCargando] = useState(false)
 
+    const [formV,setFormV] = useState<Vehiculo>(vehiculoVacio)
+    const [formAddV,setFormAddV] = useState<Vehiculo>(vehiculoVacio)
 
     
 
     useEffect(()=>{
-        const getVehiculos = async () =>{
-        try{
-            const response = await fetch('http://localhost:3306/vehiculos')
-            const data = await response.json()
-            console.log("datos vehiculos")
-            console.log(data)
-        }catch(e){
-            console.error("error encontrando vehiculos: ",e)
+        const getListaVehiculos = async () =>{
+            try{
+                const response = await getVehiculos()
+                if(response){
+                    setVehiculos(response)
+                }
+            }catch(e){
+                console.error("error encontrando vehiculos: ",e)
 
-        }finally{
-            setVehiculos([])
-        }  
+            }
         }
-    getVehiculos()
-    },[])
+        getListaVehiculos()
+    },[modalEdit,refresh])
+
     const abriModalAdd =()=>{
         //se abre modal y luego antes del retorno se limpian los inputs
         setOpenModalAdd(true)
@@ -64,9 +76,77 @@ function recursosAdmin(){
     const handlePatenteMantencion=(event:React.ChangeEvent<HTMLSelectElement>)=>{
         /**Mantener patente en memoria para luego de tomar datos de mantencion indexar */
     }  
+
     const abriModalEdit=(recurso:Vehiculo|User)=>{
         setRecursoEdit(recurso)
+        if(recurso && 'patente'in recurso){
+            setFormV(recurso)
+        }else{
+            /**para usuario */
+        }
         openModalEdit(true)
+    }
+
+
+    const handleEditVehiculo=async()=>{
+        if (recursoEdit && 'patente' in recursoEdit){
+            const patente = recursoEdit.patente
+            const url = `http://localhost:4000/vehiculos/${patente}`
+            const payload = formV
+        
+        try{
+            const res = await fetch(url,{
+                method: 'PUT',
+                headers:{
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            if(!res.ok){
+                setFormV(vehiculoVacio)
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+        const data = await res.json();
+        console.log('Success:', data);
+        setFormV(vehiculoVacio)
+        } catch (error) {
+            console.error('Error:', error); 
+            console.log({msg:"Error al editar vehiculo"})
+        }  
+        }
+    }
+
+    const handleAgregar=async()=>{
+        if(!formAddV || cargando) return
+
+        const url = `http://localhost:4000/vehiculos`
+        setCargando(true)
+        const payload = formAddV
+        console.log(formAddV)
+        try{
+            const res = await fetch(url,{
+                method: 'POST',
+                headers:{
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            if(!res.ok){
+                setFormAddV(vehiculoVacio)
+                const errorData = await res.json().catch(()=>{
+                })
+                console.log("back",errorData)
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+            const data = await res.json();
+            console.log('Success:', data);
+            setFormAddV(vehiculoVacio)
+            setRefresh(!refresh)
+        }catch(e){
+            console.error('Error:', e); 
+            console.log({msg:"Error al agregar vehiculo"})
+            setFormAddV(vehiculoVacio)
+        }
     }
 
     /*
@@ -165,7 +245,7 @@ function recursosAdmin(){
                                     <tr>
                                         <td>{vh.patente}</td>
                                         <td>{vh.modelo}</td>
-                                        <td>{vh.KMS_actual}</td>
+                                        <td>{vh.kms_actual}</td>
                                         <td>{vh.estado}</td>
                                         <td>
                                             <div className="buttonsIconTable" style={{display:"flex",gap:"10px"}}>
@@ -198,19 +278,21 @@ function recursosAdmin(){
                 <DialogContent>
                     {vistaActual === true ? 
                     (<>
+                    <form>
                         <label>Patente</label>
-                        <input type='text'></input>
+                        <input type='text' value={formAddV.patente} onChange={(e)=>setFormAddV({...formAddV,patente:(e.target.value)})}></input>
                         <label>Modelo</label>
-                        <input type='text'></input>
+                        <input type='text' value={formAddV.modelo} onChange={(e)=>setFormAddV({...formAddV, modelo:(e.target.value)})}></input>
                         <label>kilometraje actual</label>
-                        <input type='number'></input>
+                        <input type='number' value={formAddV.kms_actual} onChange={(e)=>setFormAddV({...formAddV, kms_actual:Number(e.target.value)})}></input>
                         <label>Estado</label>
-                        <select>
-                            <option>Activo</option>
-                            <option>Reparacion</option>
-                            <option>Dado de baja</option>
-                            <option>Disponible</option>
+                        <select value={formAddV.estado} onChange={(e)=> setFormAddV({...formAddV,estado:e.target.value as "DISPONIBLE" | "EN REPARACION" | "EN RUTA" | "DADO DE BAJA"})}>
+                            <option>DISPONIBLE</option>
+                            <option>EN REPARACION</option>
+                            <option>DADO DE BAJA</option>
+                            <option>EN RUTA</option>
                         </select>
+                    </form>
                     </>)
                     :
                     (<>
@@ -232,7 +314,7 @@ function recursosAdmin(){
                 </DialogContent>
                 <DialogActions>
                     <Button variant="solid" color="success" onClick={() => {
-                        
+                        handleAgregar()
                         setOpenModalAdd(false)}}>
                     Agregar
                     </Button>
@@ -300,7 +382,7 @@ function recursosAdmin(){
                      (<>
                         <p><strong>Patente: </strong>{recursoShow.patente}</p>
                         <p><strong>Modelo: </strong>{recursoShow.modelo}</p>
-                        <p><strong>Kilometraje: </strong>{recursoShow.KMS_actual}</p>
+                        <p><strong>Kilometraje: </strong>{recursoShow.kms_actual}</p>
 
                         {/*Apartado mantenciones del vehiculo --> asociadas a X patente*/}
                     </>):"datos no encontrados"}
@@ -318,19 +400,21 @@ function recursosAdmin(){
                 <DialogContent>
                     {recursoEdit && 'patente' in recursoEdit  ? 
                     (<>
+                    <form>
                         <label>Patente</label>
-                        <input value={recursoEdit.patente} type='text'></input>
+                        <input value={recursoEdit.patente} type='text' disabled ></input>
                         <label>Modelo</label>
-                        <input value={recursoEdit.modelo} type='text'></input>
+                        <input value={recursoEdit.modelo} type='text' disabled></input>
                         <label>kilometraje actual</label>
-                        <input value={recursoEdit.KMS_actual}  type='number'></input>
+                        <input value={formV.kms_actual }  type='number' onChange={(e)=>setFormV({...formV,kms_actual:Number(e.target.value)})}></input>
                         <label>Estado</label>
-                        <select defaultValue={recursoEdit.estado}>
-                            <option>Activo</option>
-                            <option>Reparacion</option>
-                            <option>Dado de baja</option>
-                            <option>Disponible</option>
+                        <select defaultValue={formV.estado} onChange={(e)=>setFormV({...formV, estado: e.target.value as "DISPONIBLE" | "EN REPARACION" | "EN RUTA" | "DADO DE BAJA"})}>
+                            <option>DISPONIBLE</option>
+                            <option>EN RUTA</option>
+                            <option>EN REPARACION</option>
+                            <option>DADO DE BAJA</option>
                         </select>
+                    </form>
                     </>)
                     : recursoEdit && 'email' in recursoEdit ?
                     (<>
@@ -352,7 +436,7 @@ function recursosAdmin(){
                 </DialogContent>
                 <DialogActions>
                     <Button variant="solid" color="success" onClick={() => {
-                        
+                        handleEditVehiculo()
                         openModalEdit(false)}}>
                     Agregar
                     </Button>

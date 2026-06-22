@@ -1,8 +1,8 @@
 export type Vehiculo={
     patente:string,
     modelo:string,
-    KMS_actual:number,
-    estado:"Disponible"|"En reparación"|"Activo"|"Dado de baja"
+    kms_actual:number,
+    estado:"DISPONIBLE"|"EN REPARACION"|"EN RUTA"|"DADO DE BAJA"
 }
 export type User={
     cargo:"Funcionario"|"Administrador"

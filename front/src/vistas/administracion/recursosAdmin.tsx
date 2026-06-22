@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
 import NavBar from "../../componentes/navBar.tsx"
 import "../../estilos/recursosAdmin.css"
 import { Table } from '@mui/joy'
@@ -18,14 +18,7 @@ function recursosAdmin(){
         {email:"def@gmail.com",nombre:"def acv",cargo:"Funcionario",estado:true},
         {email:"ghi@gmail.com",nombre:"dhi fgj",cargo:"Funcionario",estado:false},
     ]
-    const vehiculos:Vehiculo[] = [
-        {patente:"xyz123", modelo:"toyota", KMS_actual:192,estado:"Activo"},
-        {patente:"abc123", modelo:"suzuki", KMS_actual:193,estado:"Disponible"},
-        {patente:"dfe123", modelo:"toyota", KMS_actual:194,estado:"En reparación"},
-        {patente:"plm123", modelo:"suzuki", KMS_actual:195,estado:"Dado de baja"},
-        {patente:"pit123", modelo:"toyota", KMS_actual:196,estado:"Disponible"},
-        {patente:"xom123", modelo:"audi", KMS_actual:197,estado:"Activo"},
-    ]
+    const [vehiculos,setVehiculos]= useState<[]>()
     const [vistaActual,setVistaActual] = useState<boolean>(false)
     const [modalAdd,setOpenModalAdd] = useState<boolean>(false)
     const [modalMantencion,setOpenModalMantencion] = useState<boolean>(false)
@@ -34,6 +27,26 @@ function recursosAdmin(){
     const [recursoEdit,setRecursoEdit] = useState<Vehiculo|User|null>(null)
     const [modalEdit,openModalEdit] = useState<boolean>(false)
 
+
+
+    
+
+    useEffect(()=>{
+        const getVehiculos = async () =>{
+        try{
+            const response = await fetch('http://localhost:3306/vehiculos')
+            const data = await response.json()
+            console.log("datos vehiculos")
+            console.log(data)
+        }catch(e){
+            console.error("error encontrando vehiculos: ",e)
+
+        }finally{
+            setVehiculos([])
+        }  
+        }
+    getVehiculos()
+    },[])
     const abriModalAdd =()=>{
         //se abre modal y luego antes del retorno se limpian los inputs
         setOpenModalAdd(true)
@@ -148,7 +161,7 @@ function recursosAdmin(){
                             </thead>
 
                             <tbody> 
-                                {vehiculos.map((vh)=>(
+                                {vehiculos && vehiculos!.map((vh:Vehiculo)=>(
                                     <tr>
                                         <td>{vh.patente}</td>
                                         <td>{vh.modelo}</td>
@@ -241,7 +254,7 @@ function recursosAdmin(){
                 <DialogContent>
                     <label>Patente del vehiculo</label>
                     <select defaultValue={""} onChange={()=>handlePatenteMantencion}>
-                        {vehiculos.map((veh)=>(
+                        {vehiculos?.length && vehiculos!.map((veh:Vehiculo)=>(
                             <option key={veh.patente} value={veh.patente}>{veh.patente}</option>
                         ))}
                     </select>

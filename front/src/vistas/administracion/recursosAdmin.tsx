@@ -6,10 +6,8 @@ import { Table } from '@mui/joy'
 import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button} from "@mui/joy"
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import EditIcon from '@mui/icons-material/Edit';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import LockOpenIcon from '@mui/icons-material/LockOpen';
 import type { Vehiculo, User, Mantencion } from '../../tipos/tipoSistema.ts'
-import getVehiculos, { addMantencionVehiculo } from "../../utils/auxiliar.ts"
+import getVehiculos, { addMantencionVehiculo, agregarVehiculo, editarVehiculo, agregarUsuario, getUsuarios,editarUsuario } from "../../utils/auxiliar.ts"
 
 
 const vehiculoVacio:Vehiculo = {
@@ -35,7 +33,7 @@ const usuarioVacio:User = {
     tipo_licencia:""
 }
 function recursosAdmin(){
-    const usuarios:User[] = []
+    const [usuarios,setUsuarios] = useState<[]>()
     const [vehiculos,setVehiculos]= useState<[]>()
     const [vistaActual,setVistaActual] = useState<boolean>(false)
     const [modalAdd,setOpenModalAdd] = useState<boolean>(false)
@@ -50,6 +48,7 @@ function recursosAdmin(){
     const [cargando, setCargando] = useState(false)
 
     const [formV,setFormV] = useState<Vehiculo>(vehiculoVacio)
+    const [formU,setFormU] = useState<User>(usuarioVacio)
     const [formAddV,setFormAddV] = useState<Vehiculo>(vehiculoVacio)
     const [formMantencion,setFormMantencion] = useState<Mantencion>(mantencionVacia)
     const [formAddU,setFormAddU] = useState<User>(usuarioVacio)
@@ -63,21 +62,30 @@ function recursosAdmin(){
                 }
             }catch(e){
                 console.error("error encontrando vehiculos: ",e)
-
             }
         }
         getListaVehiculos()
-    },[modalEdit,refresh])
+    },[refresh,modalAdd,modalEdit])
+
+    useEffect(()=>{
+        const getListaUsuarios = async () =>{
+            try{
+                const response = await getUsuarios()
+                if(response){
+                    setUsuarios(response)
+                }
+            }catch(e){
+                console.error("error encontrando usuarios",e)
+            }
+        }
+        getListaUsuarios()
+    },[refresh])
 
     const abriModalAdd =()=>{
-        //se abre modal y luego antes del retorno se limpian los inputs
         setOpenModalAdd(true)
-        return
     }
     const abrirModalMantencion=()=>{
-        console.log("mantencion")
         setOpenModalMantencion(true)
-        return
     }
     const abrirModalView=(recurso:Vehiculo|User)=>{
         setRecursoShow(recurso)
@@ -89,80 +97,59 @@ function recursosAdmin(){
         if(recurso && 'patente'in recurso){
             setFormV(recurso)
         }else{
-            /**para usuario */
+           setFormU(recurso)
         }
         openModalEdit(true)
     }
 
 
-    const handleEditVehiculo=async()=>{
+    const handleEditVehiculo = async()=>{
+        if(!recursoEdit && cargando) return
         if (recursoEdit && 'patente' in recursoEdit){
+            setCargando(true)
             const patente = recursoEdit.patente
-            const url = `http://localhost:4000/vehiculos/${patente}`
             const payload = formV
-        
-        try{
-            const res = await fetch(url,{
-                method: 'PUT',
-                headers:{
-                    'Content-type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            })
-            if(!res.ok){
-                setFormV(vehiculoVacio)
-                throw new Error(`HTTP error! Status: ${res.status}`);
-            }
-        const data = await res.json();
-        console.log('Success:', data);
-        setFormV(vehiculoVacio)
-        } catch (error) {
-            console.error('Error:', error); 
-            console.log({msg:"Error al editar vehiculo"})
-        }  
-        }
-    }
-
-    const handleAgregar=async()=>{
-        if(!formAddV || cargando) return
-
-        const url = `http://localhost:4000/vehiculos`
-        setCargando(true)
-        const payload = formAddV
-        console.log(formAddV)
-        try{
-            const res = await fetch(url,{
-                method: 'POST',
-                headers:{
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            })
-            if(!res.ok){
-                setFormAddV(vehiculoVacio)
-                const errorData = await res.json().catch(()=>{
-                })
-                console.log("back",errorData)
-                throw new Error(`HTTP error! Status: ${res.status}`);
-            }
-            const data = await res.json();
-            console.log('Success:', data);
-            setFormAddV(vehiculoVacio)
+            await editarVehiculo(patente,payload)
+            setFormV(vehiculoVacio)
+            setCargando(false)
             setRefresh(!refresh)
-        }catch(e){
-            console.error('Error:', e); 
-            console.log({msg:"Error al agregar vehiculo"})
-            setFormAddV(vehiculoVacio)
+        }
+        if(recursoEdit && 'correo' in recursoEdit){
+            setCargando(true)
+            const correo = recursoEdit.correo
+            const payload = formU
+            await editarUsuario(correo,payload)
+            setFormU(usuarioVacio)
+            setCargando(false)
+            setRefresh(!refresh)
         }
     }
 
-    const handleAgregarMantencion=async()=>{
-        if(!formMantencion || cargando) return
-
+    const handleAgregar = async()=>{
+        if(!formAddV || cargando) return
         setCargando(true)
-        addMantencionVehiculo(formMantencion)
+        await agregarVehiculo(formAddV)
+        setFormAddV(vehiculoVacio)
+        setCargando(false)
+        setRefresh(!refresh)
+    }
+
+    const handleAgregarUsuario = async()=>{
+        if(!formAddU || cargando)return
+        setCargando(true)
+        await agregarUsuario(formAddU)
+        setFormAddU(usuarioVacio)
+        setCargando(false)
+        setRefresh(!refresh)
+    }
+
+    const handleAgregarMantencion = async()=>{
+        if(!formMantencion || cargando) return
+        setCargando(true)
+        await addMantencionVehiculo(formMantencion)
         setFormMantencion(mantencionVacia)
-        setCargando(!refresh)
+        setCargando(false)
+        setRefresh(!refresh)
     }
     /*
         Vista de recursos del departamento
@@ -201,12 +188,12 @@ function recursosAdmin(){
                             </thead>
 
                             <tbody> 
-                                {usuarios.map((usuario)=>(
+                                {usuarios && usuarios!.map((usuario:User)=>(
                                     <tr>
                                         <td style={{overflow:"clip"}}>{usuario.correo}</td>
                                         <td>{usuario.nombre}</td>
                                         <td>{usuario.cargo}</td>
-                                        <td>{usuario.estado === false ? "Bloqueado":"Activo"}</td>
+                                        <td>{Number(usuario.estado) === 0 ? "Bloqueado":"Activo"}</td>
                                         <td>
                                             <div className='buttonsIconTable' style={{display:"flex",gap:"10px"}}>
                                                 <button onClick={()=>abrirModalView(usuario)}>
@@ -215,23 +202,7 @@ function recursosAdmin(){
                                                 <button onClick={()=>abriModalEdit(usuario)}>
                                                     <EditIcon />
                                                 </button>
-                                                {usuario.cargo === "Administrador" ? 
-                                                (
-                                                    <></>
-                                                ):(
-                                                    <>
-                                                        {usuario.estado === false ? 
-                                                        (
-                                                            <button>
-                                                                <LockOpenIcon />
-                                                            </button>
-                                                        ):(
-                                                            <button>
-                                                                <LockOutlinedIcon />
-                                                            </button>
-                                                        )}
-                                                    </>
-                                                )}
+                                        
                                             </div>
                                         </td>
                                     </tr>
@@ -283,7 +254,9 @@ function recursosAdmin(){
 
         {/**Modal agrega recurso */}
         <Modal open={modalAdd} onClose={() => setOpenModalAdd(false)}>
-            <ModalDialog variant="outlined" role="alertdialog">
+            <ModalDialog variant="outlined" sx={{
+                width: { xs: '90%', sm: '500px', md: '700px' } 
+            }}>
                 <DialogTitle>
                     Agregar nuevo {vistaActual === true ? "vehículo" : "usuario"}
                 </DialogTitle>
@@ -313,25 +286,40 @@ function recursosAdmin(){
                         <label>Correo</label>
                         <input type='email' placeholder='nombre.apellido@mail.com' value={formAddU.correo} onChange={(e)=>setFormAddU({...formAddU,correo:(e.target.value)})}></input>
                         <label>Contraseña</label>
-                        <input type='password' placeholder='********'></input>
+                        <input type='password' placeholder='********' value={formAddU.pass} onChange={(e)=>setFormAddU({...formAddU,pass:(e.target.value)})}></input>
                         <label>Nombre</label>
-                        <input type='text'></input>
+                        <input type='text' value={formAddU.nombre} onChange={(e)=>setFormAddU({...formAddU,nombre:(e.target.value)})}></input>
                         <label>Cargo</label>
-                        <select>
+                        <select defaultValue={""} onChange={(e)=>setFormAddU({...formAddU,cargo:(e.target.value)})}>
+                            <option disabled value={""}>Elige el cargo del usuario a agregar</option>
                             <option>Funcionario</option>
                             <option>Administrativo</option>
                         </select>
+                        <label>Tipo de licencia</label>
+                        <select defaultValue={""} onChange={(e)=>setFormAddU({...formAddU,tipo_licencia:(e.target.value)})}>
+                            <option value={""}>Selecciona el tipo de licencia del usuario</option>
+                            <option>A1</option>
+                            <option>A2</option>
+                            <option>A3</option>
+                            <option>A4</option>
+                            <option>A5</option>
+                            <option>B</option>
+                            <option>C</option>
+                            <option>D</option>
+                            <option>E</option>
+                            <option>F</option>
+                        </select>
                         <label>Estado</label>
-                        <select>
-                            <option>Activo</option>
-                            <option>Bloqueado</option>
+                        <select value={Number(formAddU.estado)} onChange={(e)=>setFormAddU({...formAddU,estado: (Number(e.target.value)===1) ? true : false})}>
+                            <option value={1}>Activo</option>
+                            <option value={0}>Bloqueado</option>
                         </select>
                     </form>
                     </>)}
                 </DialogContent>
                 <DialogActions>
                     <Button variant="solid" color="success" onClick={() => {
-                        handleAgregar()
+                        vistaActual===true ? handleAgregar() : handleAgregarUsuario()
                         setOpenModalAdd(false)}}>
                     Agregar
                     </Button>
@@ -343,10 +331,12 @@ function recursosAdmin(){
                 </DialogActions>
             </ModalDialog>
         </Modal>
+
+
         {/**Modal agrega mantencion vehiculo */}
         <Modal open={modalMantencion} onClose={()=>setOpenModalMantencion(false)}>
             <ModalDialog variant="outlined" sx={{
-                width:"50hw"
+                width: { xs: '90%', sm: '500px', md: '700px' } 
             }}>
                 <DialogTitle>
                     Agregar mantención a vehículo
@@ -381,13 +371,15 @@ function recursosAdmin(){
                 </DialogActions>
             </ModalDialog>
         </Modal>
+
+
         {/**Abrir modal vista recurso */}
         <Modal open={modalViewRecurso} onClose={()=>openModalViewRecurso(false)}>
             <ModalDialog variant="outlined" sx={{
                 width: { xs: '90%', sm: '500px', md: '700px' } 
             }}>
                 <DialogTitle>
-                    Vista de {recursoShow && 'correo' in recursoShow ? (
+                    {recursoShow && 'correo' in recursoShow ? (
                         `Vista de usuario: ${recursoShow.nombre}`
                     ): recursoShow && 'patente' in recursoShow ? (
                         `Vista de vehículo: ${recursoShow.patente}`
@@ -398,8 +390,9 @@ function recursosAdmin(){
                     {recursoShow && 'correo' in recursoShow ? (
                         <>
                             <p><strong>Nombre: </strong>{recursoShow.nombre}</p>
+                            <p><strong>Licencia: </strong>{recursoShow.tipo_licencia}</p>
                             <p><strong>Cargo: </strong>{recursoShow.cargo}</p>
-                            <p><strong>Estado: </strong>{recursoShow.estado===false ? "Bloqueado":"Activo"}</p>
+                            <p><strong>Estado: </strong>{Number(recursoShow.estado)=== 0 ? "Bloqueado":"Activo"}</p>
                         </>
                      ):
                      recursoShow && 'patente' in recursoShow ? 
@@ -440,22 +433,37 @@ function recursosAdmin(){
                         </select>
                     </form>
                     </>)
-                    : recursoEdit && 'email' in recursoEdit ?
+                    : recursoEdit && 'correo' in recursoEdit ?
                     (<>
+                    <form style={{display:"flex",flexDirection:"column"}}>
                         <label>Correo</label>
-                        <input value={recursoEdit.correo} type='email' placeholder='nombre.apellido@mail.com'></input>
+                        <input value={recursoEdit.correo} type='email' placeholder='nombre.apellido@mail.com' disabled></input>
                         <label>Nombre</label>
-                        <input value={recursoEdit.nombre} type='text'></input>
+                        <input value={recursoEdit.nombre} type='text' disabled></input>
                         <label>Cargo</label>
-                        <select defaultValue={recursoEdit.cargo} disabled>
+                        <select defaultValue={recursoEdit.cargo}  disabled>
                             <option>Funcionario</option>
                             <option>Administrativo</option>
                         </select>
+                        <select defaultValue={""} value={formU.tipo_licencia} onChange={(e)=>setFormU({...formU,tipo_licencia:(e.target.value)})}>
+                            <option value={""}>Selecciona el tipo de licencia del usuario</option>
+                            <option>A1</option>
+                            <option>A2</option>
+                            <option>A3</option>
+                            <option>A4</option>
+                            <option>A5</option>
+                            <option>B</option>
+                            <option>C</option>
+                            <option>D</option>
+                            <option>E</option>
+                            <option>F</option>
+                        </select>
                         <label>Estado</label>
-                        <select defaultValue={recursoEdit.estado===true ? "Activo" : "Bloqueado"}>
+                        <select value={formU.estado ? "Activo" : "Bloqueado"} defaultValue={Number(recursoEdit.estado)===1 ? "Activo" : "Bloqueado"} onChange={(e)=>setFormU({...formU,estado:( e.target.value === "Activo" ? true:false)})}>
                             <option>Activo</option>
                             <option>Bloqueado</option>
                         </select>
+                    </form>
                     </>):<>Error</>}
                 </DialogContent>
                 <DialogActions>

@@ -19,7 +19,10 @@ export interface UsuarioInput {
     cargo:string,
     estado:boolean
 }
-
+export interface UsuarioEdit{
+    estado:string,
+    tipo_licencia:string
+}
 export async function getAllUsuarios(): Promise<Usuario[]>{
     const [rows] = await connection.query<Usuario[]>(
         "SELECT * FROM usuarios"
@@ -34,26 +37,28 @@ export async function getUsuarioCorreo(correo:string|string[]): Promise<Usuario[
     return rows
 }
 
-const hashPass = (pass:string) =>{
-    bcrypt.genSalt(10,function(err,salt){
-        if(err){
-            return
-        }
-        bcrypt.hash(pass,salt,function(err,hash){
-            if(err){
-                return
-            }
-            return hash
-        })
-    })
+async function hashPass(pass:string) :Promise<string>{
+    const saltRounds= 11
+    const hash = await bcrypt.hash(pass,saltRounds)
+    return hash
 }
 
 export async function addUsuario(data:UsuarioInput):Promise<Number>{
-    const passEncrypt  = hashPass(data.pass)
+    const passEncrypt  = await hashPass(data.pass)
+    console.log(passEncrypt)
     const [res] = await connection.query(
         "INSERT INTO usuarios (correo,pass,tipo_licencia,nombre,cargo,estado) VALUES (?,?,?,?,?,?)",
         [data.correo,passEncrypt,data.tipo_licencia,data.nombre,data.cargo,data.estado]
     )
     //@ts-ignore
     return res.insertId
+}
+
+export async function editUsuario(correo:string|string[],data:UsuarioEdit):Promise<boolean>{
+    const [resultado] = await connection.query(
+        "UPDATE usuarios SET estado=?, tipo_licencia=? WHERE correo = ?",
+        [data.estado,data.tipo_licencia,correo]
+    )
+    //@ts-ignore
+    return(resultado.affectedRows>0)
 }

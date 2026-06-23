@@ -3,7 +3,7 @@ import NavBar from "../../componentes/navBar.tsx"
 import "../../estilos/inicioViaje.css"
 import React, { useEffect, useState } from "react";
 import { Modal, ModalDialog, DialogTitle, Divider, DialogContent, DialogActions, Button } from "@mui/joy"
-import type { Vehiculo,User } from "../../tipos/tipoSistema.ts";
+import type { Vehiculo, User } from "../../tipos/tipoSistema.ts";
 import Routing from "../../componentes/routing.tsx" /*Componente para marcar la ruta entre inicio y destino en mapa*/
 import getVehiculos from "../../utils/auxiliar.ts";
 import 'leaflet/dist/leaflet.css';
@@ -11,12 +11,12 @@ import L from "leaflet"
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
 import { isMobile } from "react-device-detect"
 
-type GPS={
-    lat:number,
-    lng:number
+type GPS = {
+    lat: number,
+    lng: number
 }
 
-interface prop{
+interface prop {
     points: GPS[]
 }
 /**Solo toma la segunda vez que se hace drag del pin */
@@ -24,43 +24,46 @@ function inicioViaje() {
     const [vehiculoSelected, setVehiculoSelected] = useState<Vehiculo | null>(null)
     const [modalDestino, openModalDestino] = useState<boolean>(false)
     const [modalCamara, openModalCamara] = useState<boolean>(false)
-    const [destinoChange,setDestinoChange] = useState<number>(0)
-   const [dataGPS, setDataGPS] = useState<GPS>({
+    const [destinoChange, setDestinoChange] = useState<number>(0)
+    const [cargando,setCargando] = useState<boolean>(false)
+    const [dataGPS, setDataGPS] = useState<GPS>({
         lat: -34.639739, lng: -71.365916
     })
     const [dataGPSDestino, setDataGPSDestino] = useState<GPS>({
         lat: -34.639739, lng: -71.365916
     })
-    const points:GPS[] = [dataGPS,dataGPSDestino]
+    const points: GPS[] = [dataGPS, dataGPSDestino]
 
-    const [formInicio,setFormInicio] = useState({
-        fecha:"",
-        patente:"",
-        horaInicio:"",
-        motivo:"",
-        modelo:"",
-        kmsInicio:"",
-        horaLlegada:"",
-        kmsFinViaje:"",
-        funcionario:"",
-        combustible:false,
-        cantidad:0,
-        observaciones:"",
-        latInicio:0,
-        lngInicio:0,
-        latFin:0,
-        lngFin:0
+    const [formInicio, setFormInicio] = useState({
+        fecha: "",
+        patente: "",
+        horaInicio: "",
+        motivo: "",
+        modelo: "",
+        kmsInicio: "",
+        horaLlegada: "",
+        kmsFinViaje: "",
+        funcionario: "",
+        combustible: false,
+        cantidad: 0,
+        observaciones: "",
+        latInicio: 0,
+        lngInicio: 0,
+        latFin: 0,
+        lngFin: 0
     })
-    const usuario:User = {
-        cargo:"Funcionario",
-        email:"usr@usr.cl",
-        nombre:"Pepe pape",
-        estado: false
+    const usuario: User = {
+        cargo: "Funcionario",
+        correo: "usr@usr.cl",
+        nombre: "Pepe pape",
+        estado: false,
+        tipo_licencia: "A1",
+        pass: ""
     }
-    const [vehiculos,setVehiculos] = useState<[Vehiculo]>()
-    
+    const [vehiculos, setVehiculos] = useState<[Vehiculo]>()
+
     /*Funcion para dar colores especificos a los Marker de leaflet y poder diferenciar punto de inicio y destino */
-    const createCustomIcon = (color:string) => {
+    const createCustomIcon = (color: string) => {
         return L.divIcon({
             className: 'custom-div-icon',
             html: `<div style="
@@ -86,76 +89,78 @@ function inicioViaje() {
         const vehiculoEncontrado = vehiculos!.find(
             (vehiculo) => vehiculo.patente === patenteselected
         )
-        if(vehiculoEncontrado){
+        if (vehiculoEncontrado) {
             setVehiculoSelected(vehiculoEncontrado || null)
         }
-        setFormInicio((prevData)=>({
+        setFormInicio((prevData) => ({
             ...prevData,
-            patente:patenteselected,
-            modelo: vehiculoEncontrado ? vehiculoEncontrado.modelo:"",
-            kmsInicio: vehiculoEncontrado ? vehiculoEncontrado.kms_actual.toString():""
+            patente: patenteselected,
+            modelo: vehiculoEncontrado ? vehiculoEncontrado.modelo : "",
+            kmsInicio: vehiculoEncontrado ? vehiculoEncontrado.kms_actual.toString() : ""
         }))
 
-        
+
     }
 
     /*Efecto para conseguir el nombre del usuario registrado y su posicion actual dependiendo del GPS, solo si ha sido aceptado en app */
-    useEffect(()=>{
-        setFormInicio((prevData)=>({
-            ...prevData,
-            funcionario:usuario.nombre,
-        }))
+    useEffect(() => {
+        
 
         navigator.geolocation.getCurrentPosition(position => {
             setDestinoChange(destinoChange)
-            setDataGPS({lat:position.coords.latitude,lng:position.coords.longitude})
-            setDataGPSDestino({lat:position.coords.latitude,lng:position.coords.longitude})
+            setDataGPS({ lat: position.coords.latitude, lng: position.coords.longitude })
+            setDataGPSDestino({ lat: position.coords.latitude, lng: position.coords.longitude })
         });
-        const getData = async () =>{
+        const getData = async () => {
             const data = await getVehiculos()
-            if(data){
+            if (data) {
                 setVehiculos(data)
             }
+            setFormInicio((prevData) => ({
+            ...prevData,
+            funcionario: usuario.nombre,
+            }))
+            setCargando(true)
         }
         getData()
-    },[])
-    
+    }, [])
+
     /*Funcion para centrar el preview del mapa dependiendo de los puntos seleccionados */
-    function FitBounds ({ points }: prop){
+    function FitBounds({ points }: prop) {
         const map = useMap()
 
-        useEffect(()=>{
-            const bound = points.map(p=> [p.lat,p.lng]as[number,number])
-            if(points.length > 0 ){
-                map.fitBounds(bound,{
-                    padding:[50,50],
-                    maxZoom:15,
+        useEffect(() => {
+            const bound = points.map(p => [p.lat, p.lng] as [number, number])
+            if (points.length > 0) {
+                map.fitBounds(bound, {
+                    padding: [50, 50],
+                    maxZoom: 15,
                 })
             }
-        },[map,points])
+        }, [map, points])
         return null
     }
 
     /*Efecto para guardar los puntos del destino luego de terminar el drag del marcador de destino*/
-    useEffect(()=>
-    {
-        const actualiza = {...formInicio,
-            latInicio:dataGPS.lat,
-            lngInicio:dataGPS.lng,
-            latFin:dataGPSDestino.lat,
-            lngFin:dataGPSDestino.lng
+    useEffect(() => {
+        const actualiza = {
+            ...formInicio,
+            latInicio: dataGPS.lat,
+            lngInicio: dataGPS.lng,
+            latFin: dataGPSDestino.lat,
+            lngFin: dataGPSDestino.lng
         }
         setFormInicio(actualiza)
-        setDestinoChange(destinoChange+1)
-    },[dataGPSDestino]
+        setDestinoChange(destinoChange + 1)
+    }, [dataGPSDestino]
     )
-    
+
     /*Funcion para manejar los cambios de los inputs disponibles */
-    const handleChange=(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)=>{
-        const {name,value} = event.target
-        setFormInicio((prevData)=>({
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = event.target
+        setFormInicio((prevData) => ({
             ...prevData,
-            [name]:value
+            [name]: value
         }))
     }
 
@@ -166,16 +171,16 @@ function inicioViaje() {
             const gps = marker.getLatLng();
             console.log(gps)
             // Actualizamos solo el estado del destino
-            setDataGPSDestino({lat:gps.lat,lng:gps.lng});
+            setDataGPSDestino({ lat: gps.lat, lng: gps.lng });
         }
     };
-    
+
 
     const navigate = useNavigate()
 
     /*Almacena los datos ingresados dentro de formInicio en db y deja el estado del viaje en "true" (viaje activo -> true/viaje terminado ->false) --> vehiculo a "ACTIVO" */
     const continuarProceso = () => {
-        navigate("/viajeProceso",{})
+        navigate("/viajeProceso", {})
     }
     const volverMenu = () => navigate("/menuUsuario")
 
@@ -188,6 +193,9 @@ function inicioViaje() {
         */
         <>
             <NavBar type={0} texto="" />
+            {cargando ? 
+            ( 
+                <div>
             <div className="tituloPaso">
                 <h1>Iniciar un viaje</h1>
                 <h2>Ingresa los datos necesarios</h2>
@@ -209,7 +217,7 @@ function inicioViaje() {
                                 {vehiculo.patente}
                             </option>
                         ))}
-                    </select> 
+                    </select>
                 </div>
 
                 <div className="itemInput">
@@ -233,11 +241,11 @@ function inicioViaje() {
                 </div>
             </div>
 
-            
+
             {isMobile ? (
-            <div className="full-width">
-                <button className="buttonFormularioInicio" onClick={()=>openModalCamara(true)}>Agregar imagen tablero</button>
-            </div>):(<></>)}
+                <div className="full-width">
+                    <button className="buttonFormularioInicio" onClick={() => openModalCamara(true)}>Agregar imagen tablero</button>
+                </div>) : (<></>)}
 
 
 
@@ -248,10 +256,10 @@ function inicioViaje() {
                 </div>
             </div>
             <div className="full-width-map">
-                {destinoChange>1 ? 
-                (<>
+                {destinoChange > 1 ?
+                    (<>
                         <div className="leaflet-container-preview">
-                            <MapContainer center={[dataGPSDestino.lat,dataGPSDestino.lng]} zoom={18}>
+                            <MapContainer center={[dataGPSDestino.lat, dataGPSDestino.lng]} zoom={18}>
                                 <TileLayer
                                     url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>'
@@ -261,37 +269,38 @@ function inicioViaje() {
                                 />
                                 <Marker
                                     position={[dataGPS.lat, dataGPS.lng]}
-                                    draggable={false} 
+                                    draggable={false}
                                     icon={createCustomIcon("#3b40cf")}
                                 />
                                 <Marker
                                     position={[dataGPSDestino.lat, dataGPSDestino.lng]}
-                                    draggable={false} 
+                                    draggable={false}
                                     icon={createCustomIcon('#57A450')}
                                 >
                                 </Marker>
                                 <FitBounds points={points}></FitBounds>
                                 <Routing point1={dataGPS} point2={dataGPSDestino} />
                             </MapContainer>
-                            
+
                             <button className="buttonFormularioInicio" onClick={() => openModalDestino(true)}>Cambiar destino</button>
-                            
+
                             <span>Destino</span><input type="text"></input>
                         </div>
-                </>)
-                :
-                (<>
-                    <button className="buttonFormularioInicio" onClick={() => openModalDestino(true)}>Agregar destino del viaje</button>
-                </>)}
-                
+                    </>)
+                    :
+                    (<>
+                        <button className="buttonFormularioInicio" onClick={() => openModalDestino(true)}>Agregar destino del viaje</button>
+                    </>)}
+
             </div>
 
             <div className="botonesPaso">
                 <button className="botonPaso" onClick={() => volverMenu()}>Volver</button>
                 <button className="botonPaso" onClick={() => continuarProceso()}>Continuar</button>
             </div>
-            
-            
+            </div>
+            ):(<>Cargando...</>)}
+
 
             {/*Modal para la seleccion de destino del viaje */}
             <Modal open={modalDestino} onClose={() => openModalDestino(false)}>
@@ -302,7 +311,7 @@ function inicioViaje() {
                     <Divider />
                     <DialogContent>
                         <div className="leaflet-container">
-                            <MapContainer center={[dataGPS.lat,dataGPS.lng]} zoom={15} scrollWheelZoom={false}>
+                            <MapContainer center={[dataGPS.lat, dataGPS.lng]} zoom={15} scrollWheelZoom={false}>
                                 <TileLayer
                                     url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>'
@@ -326,7 +335,7 @@ function inicioViaje() {
                                 >
 
                                 </Marker>
-                                
+
                                 <FitBounds points={points}></FitBounds>
                                 <Routing point1={dataGPS} point2={dataGPSDestino} />
                             </MapContainer>
@@ -343,25 +352,25 @@ function inicioViaje() {
                 </ModalDialog>
             </Modal>
 
-            {/*Modal para ingreso de documentacion tablero vehiculo ya sea imagen previa o con camara */}                       
-            <Modal open={modalCamara} onClose={()=>openModalCamara(false)}>
+            {/*Modal para ingreso de documentacion tablero vehiculo ya sea imagen previa o con camara */}
+            <Modal open={modalCamara} onClose={() => openModalCamara(false)}>
                 <ModalDialog variant="plain">
                     <DialogTitle>
                         Agrega una captura del tablero del vehículo
                     </DialogTitle>
                     <Divider />
                     <DialogContent>
-                            <div>seccion cámara</div>
-                            <label style={{color:"black"}}>Sube la captura si es necesario</label>
-                            <input type="file" accept="image/*"></input>
+                        <div>seccion cámara</div>
+                        <label style={{ color: "black" }}>Sube la captura si es necesario</label>
+                        <input type="file" accept="image/*"></input>
                     </DialogContent>
                     <DialogActions>
                         <Button variant="solid" color="success" onClick={() => openModalCamara(false)}>
-                                Agregar captura
-                            </Button>
-                            <Button variant="plain" color="danger" onClick={() => openModalCamara(false)}>
-                                Cancelar
-                            </Button>
+                            Agregar captura
+                        </Button>
+                        <Button variant="plain" color="danger" onClick={() => openModalCamara(false)}>
+                            Cancelar
+                        </Button>
                     </DialogActions>
                 </ModalDialog>
             </Modal>

@@ -5,9 +5,11 @@ export type Vehiculo={
     estado:"DISPONIBLE"|"EN REPARACION"|"EN RUTA"|"DADO DE BAJA"
 }
 export type User={
-    cargo:"Funcionario"|"Administrador"
+    correo:string,
+    pass:string,
+    tipo_licencia:string,
     nombre:string,
-    email:string,
+    cargo:string,
     estado:boolean
 }
 export type navBarProps={
@@ -35,4 +37,17 @@ export type Viaje = {
     cantidad_combustible:number,
     nombre_funcionario:string,
     estado_viaje:boolean
+}
+
+export type mantencionProp={
+    patenteBuscada:string
+}
+
+export type Mantencion = {
+    id_mantencion:number,
+    ultimo_cambio_aceite:string,
+    taller:string,
+    ultima_mantencion:string,
+    detalle_mantencion:string,
+    patente:string
 }

@@ -1,0 +1,14 @@
+.mantencionItem{
+    display: flex;
+    flex-direction: column;
+    border-top: 1px;
+    padding: 1%;
+    border-style: groove;
+    border-color: darkgrey;
+}
+.listaMantenciones{
+    display: flex;
+    flex-direction: column;
+    max-height: 40vh;
+    overflow-y: auto;
+}

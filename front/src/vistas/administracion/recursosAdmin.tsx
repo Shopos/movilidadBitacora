@@ -1,5 +1,6 @@
 import { useState,useEffect } from 'react'
 import NavBar from "../../componentes/navBar.tsx"
+import Mantenciones from "../../componentes/mantencionesVehiculo.tsx"
 import "../../estilos/recursosAdmin.css"
 import { Table } from '@mui/joy'
 import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button} from "@mui/joy"
@@ -7,9 +8,8 @@ import VisibilityIcon from '@mui/icons-material/Visibility'
 import EditIcon from '@mui/icons-material/Edit';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
-import BuildIcon from '@mui/icons-material/Build';
-import type { Vehiculo,User } from '../../tipos/tipoSistema.ts'
-import getVehiculos from "../../utils/auxiliar.ts"
+import type { Vehiculo, User, Mantencion } from '../../tipos/tipoSistema.ts'
+import getVehiculos, { addMantencionVehiculo } from "../../utils/auxiliar.ts"
 
 
 const vehiculoVacio:Vehiculo = {
@@ -18,14 +18,24 @@ const vehiculoVacio:Vehiculo = {
     kms_actual:0,
     estado:"DADO DE BAJA"
 }
+const mantencionVacia:Mantencion = {
+    id_mantencion:0,
+    detalle_mantencion:"",
+    patente:"",
+    taller:"",
+    ultima_mantencion:"",
+    ultimo_cambio_aceite:""
+}
+const usuarioVacio:User = {
+    cargo:"Funcionario",
+    correo:"",
+    estado:false,
+    nombre:"",
+    pass:"",
+    tipo_licencia:""
+}
 function recursosAdmin(){
-    const usuarios:User[] = [
-        {email:"abc@gmail.com",nombre:"abc def",cargo:"Funcionario",estado:false},
-        {email:"admin@gmail.com",nombre:"abc def",cargo:"Administrador",estado:true},
-        {email:"nombre.apellido@munisantacruz.cl",nombre:"nombre apellido",cargo:"Funcionario",estado:true},
-        {email:"def@gmail.com",nombre:"def acv",cargo:"Funcionario",estado:true},
-        {email:"ghi@gmail.com",nombre:"dhi fgj",cargo:"Funcionario",estado:false},
-    ]
+    const usuarios:User[] = []
     const [vehiculos,setVehiculos]= useState<[]>()
     const [vistaActual,setVistaActual] = useState<boolean>(false)
     const [modalAdd,setOpenModalAdd] = useState<boolean>(false)
@@ -41,8 +51,8 @@ function recursosAdmin(){
 
     const [formV,setFormV] = useState<Vehiculo>(vehiculoVacio)
     const [formAddV,setFormAddV] = useState<Vehiculo>(vehiculoVacio)
-
-    
+    const [formMantencion,setFormMantencion] = useState<Mantencion>(mantencionVacia)
+    const [formAddU,setFormAddU] = useState<User>(usuarioVacio)
 
     useEffect(()=>{
         const getListaVehiculos = async () =>{
@@ -73,9 +83,6 @@ function recursosAdmin(){
         setRecursoShow(recurso)
         openModalViewRecurso(true)
     }
-    const handlePatenteMantencion=(event:React.ChangeEvent<HTMLSelectElement>)=>{
-        /**Mantener patente en memoria para luego de tomar datos de mantencion indexar */
-    }  
 
     const abriModalEdit=(recurso:Vehiculo|User)=>{
         setRecursoEdit(recurso)
@@ -149,6 +156,14 @@ function recursosAdmin(){
         }
     }
 
+    const handleAgregarMantencion=async()=>{
+        if(!formMantencion || cargando) return
+
+        setCargando(true)
+        addMantencionVehiculo(formMantencion)
+        setFormMantencion(mantencionVacia)
+        setCargando(!refresh)
+    }
     /*
         Vista de recursos del departamento
         
@@ -161,6 +176,7 @@ function recursosAdmin(){
                 <div className='buttonsFlexEnd'> 
                     <button>Exportar tabla actual</button>
                     <button onClick={()=>abriModalAdd()}>Agregar nuevo {vistaActual===true ? "vehículo" : "usuario"}</button>
+                    {vistaActual ? (<button onClick={()=>abrirModalMantencion()} > Agregar mantención</button>):(<></>)}
                     
                 </div>
                 <div className='buttonsTablaH'>
@@ -187,7 +203,7 @@ function recursosAdmin(){
                             <tbody> 
                                 {usuarios.map((usuario)=>(
                                     <tr>
-                                        <td style={{overflow:"clip"}}>{usuario.email}</td>
+                                        <td style={{overflow:"clip"}}>{usuario.correo}</td>
                                         <td>{usuario.nombre}</td>
                                         <td>{usuario.cargo}</td>
                                         <td>{usuario.estado === false ? "Bloqueado":"Activo"}</td>
@@ -255,9 +271,6 @@ function recursosAdmin(){
                                                 <button onClick={()=>abriModalEdit(vh)}>
                                                     <EditIcon />
                                                 </button>
-                                                <button onClick={()=>abrirModalMantencion()}>
-                                                    <BuildIcon />
-                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -278,7 +291,7 @@ function recursosAdmin(){
                 <DialogContent>
                     {vistaActual === true ? 
                     (<>
-                    <form>
+                    <form style={{display:"flex",flexDirection:"column"}}>
                         <label>Patente</label>
                         <input type='text' value={formAddV.patente} onChange={(e)=>setFormAddV({...formAddV,patente:(e.target.value)})}></input>
                         <label>Modelo</label>
@@ -296,8 +309,11 @@ function recursosAdmin(){
                     </>)
                     :
                     (<>
+                    <form style={{display:"flex", flexDirection:"column"}}>
                         <label>Correo</label>
-                        <input type='email' placeholder='nombre.apellido@mail.com'></input>
+                        <input type='email' placeholder='nombre.apellido@mail.com' value={formAddU.correo} onChange={(e)=>setFormAddU({...formAddU,correo:(e.target.value)})}></input>
+                        <label>Contraseña</label>
+                        <input type='password' placeholder='********'></input>
                         <label>Nombre</label>
                         <input type='text'></input>
                         <label>Cargo</label>
@@ -310,6 +326,7 @@ function recursosAdmin(){
                             <option>Activo</option>
                             <option>Bloqueado</option>
                         </select>
+                    </form>
                     </>)}
                 </DialogContent>
                 <DialogActions>
@@ -328,29 +345,34 @@ function recursosAdmin(){
         </Modal>
         {/**Modal agrega mantencion vehiculo */}
         <Modal open={modalMantencion} onClose={()=>setOpenModalMantencion(false)}>
-            <ModalDialog variant="outlined">
+            <ModalDialog variant="outlined" sx={{
+                width:"50hw"
+            }}>
                 <DialogTitle>
                     Agregar mantención a vehículo
                 </DialogTitle>
                 <Divider />
                 <DialogContent>
                     <label>Patente del vehiculo</label>
-                    <select defaultValue={""} onChange={()=>handlePatenteMantencion}>
+                    <select defaultValue={""} onChange={(e)=>setFormMantencion({...formMantencion,patente:e.target.value})}>
+                        <option value={""} disabled>Selecciona la patente a agregar mantención</option>
                         {vehiculos?.length && vehiculos!.map((veh:Vehiculo)=>(
                             <option key={veh.patente} value={veh.patente}>{veh.patente}</option>
                         ))}
                     </select>
                     <label>Último cambio de aceite</label>
-                    <input type='date' name='fechaAceite' ></input>
+                    <input type='date' name='fechaAceite' value={formMantencion.ultimo_cambio_aceite} onChange={(e)=>setFormMantencion({...formMantencion,ultimo_cambio_aceite:e.target.value})}></input>
                     <label>Taller</label>
-                    <input type='text' name='taller'></input>
+                    <input type='text' name='taller' value={formMantencion.taller} onChange={(e)=>setFormMantencion({...formMantencion,taller:e.target.value})}></input>
                     <label>Última mantención</label>
-                    <input type='date' name='fechaMantención'></input>
+                    <input type='date' name='fechaMantención' value={formMantencion.ultima_mantencion} onChange={(e)=>setFormMantencion({...formMantencion,ultima_mantencion:e.target.value})}></input>
                     <label>Motivo o detalle de la mantención</label>
-                    <textarea rows={5} style={{overflowY:"auto", resize:"none"}} name='motivoMantencion'></textarea>
+                    <textarea rows={5} style={{overflowY:"auto", resize:"none"}} name='motivoMantencion' value={formMantencion.detalle_mantencion} onChange={(e)=>setFormMantencion({...formMantencion,detalle_mantencion:e.target.value})}></textarea>
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="solid" color="success" onClick={() => setOpenModalMantencion(false)}>
+                    <Button variant="solid" color="success" onClick={() => {
+                        handleAgregarMantencion(),
+                        setOpenModalMantencion(false)}}>
                     Agregar
                     </Button>
                     <Button variant="plain" color="danger" onClick={() => setOpenModalMantencion(false)}>
@@ -361,9 +383,11 @@ function recursosAdmin(){
         </Modal>
         {/**Abrir modal vista recurso */}
         <Modal open={modalViewRecurso} onClose={()=>openModalViewRecurso(false)}>
-            <ModalDialog variant="outlined">
+            <ModalDialog variant="outlined" sx={{
+                width: { xs: '90%', sm: '500px', md: '700px' } 
+            }}>
                 <DialogTitle>
-                    Vista de {recursoShow && 'email' in recursoShow ? (
+                    Vista de {recursoShow && 'correo' in recursoShow ? (
                         `Vista de usuario: ${recursoShow.nombre}`
                     ): recursoShow && 'patente' in recursoShow ? (
                         `Vista de vehículo: ${recursoShow.patente}`
@@ -371,7 +395,7 @@ function recursosAdmin(){
                 </DialogTitle>
                 <Divider />
                 <DialogContent>
-                    {recursoShow && 'email' in recursoShow ? (
+                    {recursoShow && 'correo' in recursoShow ? (
                         <>
                             <p><strong>Nombre: </strong>{recursoShow.nombre}</p>
                             <p><strong>Cargo: </strong>{recursoShow.cargo}</p>
@@ -383,8 +407,8 @@ function recursosAdmin(){
                         <p><strong>Patente: </strong>{recursoShow.patente}</p>
                         <p><strong>Modelo: </strong>{recursoShow.modelo}</p>
                         <p><strong>Kilometraje: </strong>{recursoShow.kms_actual}</p>
+                        <Mantenciones patenteBuscada={recursoShow.patente}/>
 
-                        {/*Apartado mantenciones del vehiculo --> asociadas a X patente*/}
                     </>):"datos no encontrados"}
                 </DialogContent>
             </ModalDialog>
@@ -400,7 +424,7 @@ function recursosAdmin(){
                 <DialogContent>
                     {recursoEdit && 'patente' in recursoEdit  ? 
                     (<>
-                    <form>
+                    <form style={{display:"flex", flexDirection:"column"}}>
                         <label>Patente</label>
                         <input value={recursoEdit.patente} type='text' disabled ></input>
                         <label>Modelo</label>
@@ -419,7 +443,7 @@ function recursosAdmin(){
                     : recursoEdit && 'email' in recursoEdit ?
                     (<>
                         <label>Correo</label>
-                        <input value={recursoEdit.email} type='email' placeholder='nombre.apellido@mail.com'></input>
+                        <input value={recursoEdit.correo} type='email' placeholder='nombre.apellido@mail.com'></input>
                         <label>Nombre</label>
                         <input value={recursoEdit.nombre} type='text'></input>
                         <label>Cargo</label>

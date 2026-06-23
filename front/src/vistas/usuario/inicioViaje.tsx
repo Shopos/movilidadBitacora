@@ -209,7 +209,7 @@ function inicioViaje() {
                                 {vehiculo.patente}
                             </option>
                         ))}
-                    </select>
+                    </select> 
                 </div>
 
                 <div className="itemInput">

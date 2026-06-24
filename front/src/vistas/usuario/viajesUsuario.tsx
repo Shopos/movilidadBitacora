@@ -1,23 +1,24 @@
 import NavBar from "../../componentes/navBar.tsx"
 import Table from '@mui/joy/Table';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { useState } from "react"
 import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button} from "@mui/joy"
 import { useNavigate } from "react-router-dom";
 import "../../estilos/viajesUsuario.css"
 import type {Viaje} from "../../tipos/tipoSistema.ts"
 import DataViewViaje from "../../componentes/dataViewViaje.tsx"
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 function viajesUsuario(){
 
     const Viajes:Viaje[]=[
-        {id_viaje:1,
+        {
+            id_viaje:1,
             patente:"yzx123",
-            fecha: "14/7/2026",
             nombre_funcionario:"sanchez miguel",
             fecha_hora_inicio:"12:00",
-            kms_inicio:100,
+            kms_inicial:100,
             fecha_hora_fin:"13:30",
             kms_fin:110,
             estado_viaje:false,
@@ -30,29 +31,15 @@ function viajesUsuario(){
             lng_fin:-71.349689,
             motivo:"Visita a parque",
             obs_viaje:"-",
-            vehiculo:"Toyota"
-        },
-        {id_viaje:2,
-            patente:"yzx123",
-            fecha: "14/7/2026",
-            nombre_funcionario:"sanchez miguel",
-            fecha_hora_inicio:"13:00",
-            kms_inicio:100,
-            fecha_hora_fin:"17:30",
-            kms_fin:110,
-            estado_viaje:true,
-            cantidad_combustible:10,
-            carga_combustible:false,
-            destino:"santa cruz",
-            lat_inicio: -34.639464, 
-            lng_inicio: -71.365910,
-            lat_fin:-34.661494,
-            lng_fin:-71.420961,
-            motivo:"Mirador la lajuela",
-            obs_viaje:"-",
-            vehiculo:"Toyota"
+            vehiculo:"Toyota",
+            id_usuario:3,
+            lat_fin_real:0,
+            lng_fin_real:0,
+            modificado_por:"",
+            ultima_modificacion:""
         }
     ]
+    let name = Viajes.at(0)?.nombre_funcionario
     const [viajeSelected,setViajeSelected] = useState<Viaje|null>(null)
     const [openModalViaje,setOpenModalViaje] = useState<boolean>(false)
     const navigate = useNavigate()
@@ -62,7 +49,35 @@ function viajesUsuario(){
         setOpenModalViaje(true)
     }
     const exportarPDF=()=>{
-        console.log("se exporta")
+        if(Viajes){
+            const doc = new jsPDF('l','pt','a4')
+            doc.setFontSize(12)
+            const columns = ['ID','Vehiculo','Patente','kM inicio','kM fin','Hora inicio','Destino','Hora llegada','Estado del viaje']
+            const rows = Viajes.map((vje) => [
+                vje.id_viaje,
+                vje.vehiculo,
+                vje.patente,
+                vje.kms_inicial,
+                (vje.kms_fin ? vje.kms_fin : 0),
+                (vje.fecha_hora_inicio.slice(0,10)+" "+vje.fecha_hora_inicio.slice(11,19)),
+                vje.destino,
+                (vje.fecha_hora_fin.slice(0,10)+ " "+ vje.fecha_hora_fin.slice(11,19)),
+                (vje.estado_viaje ? "Activo":"Terminado")
+            ])
+            doc.text(`Reporte de viajes de ${name} - Departamento de Movilización`,20,20)
+
+            autoTable(doc,{
+                startY:40,
+                head:[columns],
+                body: rows,
+                theme: 'plain',
+                styles: {fontSize:10,cellPadding:5},
+                headStyles:{fillColor:[41,120,120],textColor:255}
+            })
+            doc.save(`Reporte viajes ${name}.pdf`)
+        }else{
+            return
+        }
         return
     }
     
@@ -104,9 +119,6 @@ function viajesUsuario(){
                                     <button className="buttonIconTable" onClick={()=>handleModalViajeView(viaje)}>
                                         <VisibilityIcon />
                                     </button>
-                                    <button className="buttonIconTable" onClick={()=>exportarPDF()}>
-                                        <PictureAsPdfIcon />
-                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -116,6 +128,7 @@ function viajesUsuario(){
                 
 
                 <button className="botonPaso" onClick={()=>volverMenu()}>Volver</button>
+                <button className="botonPaso" onClick={()=>exportarPDF()}>Exportar Tabla a PDF</button>
 
                 <Modal open={openModalViaje} onClose={() => setOpenModalViaje(false)}>
                 <ModalDialog variant="outlined" role="alertdialog">
@@ -124,7 +137,7 @@ function viajesUsuario(){
                 </DialogTitle>
                 <Divider />
                 <DialogContent>
-                   <DataViewViaje viajeSelected={viajeSelected} />
+                    {viajeSelected ? (<DataViewViaje viajeSelected={viajeSelected} modo={0}/>) : "ERROR"}
                 </DialogContent>
                 <DialogActions>
                     <Button variant="solid" color="success" onClick={() => setOpenModalViaje(false)}>

@@ -18,7 +18,7 @@ export interface prop{
 function dataViewViaje({viajeSelected,modo}:prop ) {
 
     const [modalMapa,openModalMapa] = useState<boolean>(false)
-    let kms_inicio = viajeSelected.kms_inicial
+    let kms_inicio = viajeSelected.kms_inicial 
     let kms_fin = viajeSelected.kms_fin
     let fechaInicio = viajeSelected.fecha_hora_inicio
     let fechaFin = viajeSelected.fecha_hora_fin

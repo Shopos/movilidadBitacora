@@ -3,15 +3,6 @@ import { useEffect, useState } from 'react'
 import { getMantencionesVehiculo } from "../utils/auxiliar"
 import "../estilos/mantencionesVehiculo.css"
 
-const mantencionVacia: Mantencion = {
-    id_mantencion: 0,
-    detalle_mantencion: "",
-    patente: "",
-    taller: "",
-    ultima_mantencion: "",
-    ultimo_cambio_aceite: ""
-}
-
 const getListaMantencionesVehiculo = async (patente: string) => {
     try {
         const respuesta: Mantencion[] = await getMantencionesVehiculo(patente)

@@ -29,6 +29,32 @@ export async function getUsuarios(){
   }
 }
 
+export async function getViajes(){
+  try{
+    const response = await fetch('http://localhost:4000/viajes')
+    if(!response.ok){
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return await response.json()
+  }catch(e){
+    console.error(" Error encontrando viajes:  ", e)
+    return null
+  }
+}
+
+export async function getNameFuncionario(id:number){
+  try{
+    const response = await fetch(`http://localhost:4000/usuarios/id/${id}`)
+    if(!response.ok){
+      throw new Error(`HTTP error! Status: ${response.status}`)
+    }
+    return await response.json()
+  }catch (e) {
+    console.error('Error encontrando nombre del usuario:', e);
+    return null;
+  }
+}
+
 export async function getMantencionesVehiculo(patente: string) {
 
   try {

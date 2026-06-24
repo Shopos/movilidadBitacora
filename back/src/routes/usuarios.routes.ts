@@ -1,12 +1,14 @@
 import { Router } from "express";
-import { getUsuarioCorreo, getUsuarios, agregarUsuario, editarUsuario} from "../controllers/usuarios.controller"
+import { getUsuarioCorreo, getUsuarios, agregarUsuario, editarUsuario, getUsuarioId} from "../controllers/usuarios.controller"
 
 
 const router = Router()
 
 router.get('/',getUsuarios)
 
-router.get('/:correo',getUsuarioCorreo)
+router.get('/correos/:correo',getUsuarioCorreo)
+
+router.get('/id/:id', getUsuarioId)
 
 router.post('/',agregarUsuario)
 

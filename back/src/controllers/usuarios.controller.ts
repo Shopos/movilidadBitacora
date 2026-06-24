@@ -25,6 +25,20 @@ export async function getUsuarioCorreo(req:Request,res:Response){
     }
 }
 
+export async function getUsuarioId(req:Request,res:Response){
+    try{
+        const id = Number(req.params.id)
+        const usuario = await usuarioModel.getUsuarioId(id)
+        if(!usuario){
+            return res.status(404).json({error: " Usuario no encontrado para este id"})
+        }
+        res.json(usuario)
+    }catch(e){
+        console.error(e)
+        res.status(500).json({error: " error encontrando usuario por id "})
+    }
+}
+
 export async function agregarUsuario(req:Request,res:Response) {
     try{
         const {correo,pass,tipo_licencia,nombre,cargo,estado} = req.body

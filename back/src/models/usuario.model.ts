@@ -37,6 +37,13 @@ export async function getUsuarioCorreo(correo:string|string[]): Promise<Usuario[
     return rows
 }
 
+export async function getUsuarioId(id:number): Promise<Usuario[]>{
+    const [rows] = await connection.query<Usuario[]>(
+        "SELECT * FROM usuarios WHERE id_usuario = ?",[id]
+    )
+    return rows
+}
+
 async function hashPass(pass:string) :Promise<string>{
     const saltRounds= 11
     const hash = await bcrypt.hash(pass,saltRounds)

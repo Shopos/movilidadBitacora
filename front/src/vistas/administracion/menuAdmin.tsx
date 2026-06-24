@@ -2,7 +2,7 @@ import NavBar from "../../componentes/navBar.tsx"
 import DataViewViaje from "../../componentes/dataViewViaje.tsx";
 import "../../estilos/menuAdmin.css"
 
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import Table from '@mui/joy/Table';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -11,74 +11,34 @@ import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Bu
 import TodayOutlinedIcon from '@mui/icons-material/TodayOutlined';
 import DateRangeOutlinedIcon from '@mui/icons-material/DateRangeOutlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
+import { jsPDF } from "jspdf"
+import autoTable from "jspdf-autotable";
+
 import type {Viaje} from "../../tipos/tipoSistema.ts"
+import { getViajes } from "../../utils/auxiliar.ts";
+
 function menuAdmin(){
-    const viajes:Viaje[]=[
-        {id_viaje:1,
-            patente:"yzx123",
-            fecha: "14/7/2026",
-            nombre_funcionario:"sanchez miguel",
-            fecha_hora_inicio:"12:00",
-            kms_inicio:100,
-            fecha_hora_fin:"13:30",
-            kms_fin:110,
-            estado_viaje:false,
-            cantidad_combustible:10,
-            carga_combustible:true,
-            destino:"santa cruz",
-            lat_inicio: -34.639464, 
-            lng_inicio: -71.365910,
-            lat_fin:-34.627511,
-            lng_fin:-71.349689,
-            motivo:"Visita a parque",
-            obs_viaje:"-",
-            vehiculo:"Toyota"
-        },
-        {id_viaje:2,
-            patente:"yzx123",
-            fecha: "14/7/2026",
-            nombre_funcionario:"pedro pablo",
-            fecha_hora_inicio:"13:00",
-            kms_inicio:100,
-            fecha_hora_fin:"17:30",
-            kms_fin:110,
-            estado_viaje:true,
-            cantidad_combustible:10,
-            carga_combustible:false,
-            destino:"santa cruz",
-            lat_inicio: -34.639464, 
-            lng_inicio: -71.365910,
-            lat_fin:-34.661494,
-            lng_fin:-71.420961,
-            motivo:"Mirador la lajuela",
-            obs_viaje:"-",
-            vehiculo:"Toyota"
-        },
-        {id_viaje:3,
-            patente:"yzx123",
-            fecha: "14/7/2026",
-            nombre_funcionario:"sanchez miguel",
-            fecha_hora_inicio:"12:00",
-            kms_inicio:100,
-            fecha_hora_fin:"21:30",
-            kms_fin:110,
-            estado_viaje:false,
-            cantidad_combustible:10,
-            carga_combustible:true,
-            destino:"Santiago",
-            lat_inicio: -34.639464, 
-            lng_inicio: -71.365910,
-            lat_fin:-33.444210, 
-            lng_fin:-70.653608,
-            motivo:"Visita a Moneda",
-            obs_viaje:"-",
-            vehiculo:"Toyota"
-        }
-    ]
+    const [viajes,setViajes] = useState<[Viaje]>()
     const [viajeSelected,setViajeSelected] = useState<Viaje|null>(null)
     const [viajeEdit,setViajeEditSelected] = useState<Viaje|null>(null)
     const [modalVista,setOpenModalVista] = useState<boolean>(false)
     const [modalEdicion,setOpenModalEdit] = useState<boolean>(false)
+    const [cargando,setCargando] = useState<boolean>(false)
+
+    useEffect(()=>{
+        const getListaViajes = async()=>{
+            try{
+                const response = await getViajes()
+                if(response){
+                    setViajes(response)
+                }
+            }catch(e){
+                console.error(" Error listando viajes ",e)
+            }
+        }
+        getListaViajes()
+        setCargando(true)
+    },[])
 
 
     const handleModalViajeView=(viaje:Viaje)=>{
@@ -87,9 +47,39 @@ function menuAdmin(){
         setOpenModalVista(true)
         return
     }
-    const exportarViajePDF =(viaje:Viaje)=>{
-        //Exporta el viaje con sus datos en formato pdf
-        console.log("se exporta viaje seleccionado", viaje)
+
+
+    const exportarViajesPDF =()=>{
+        const doc = new jsPDF('l','pt','a4')
+
+        const columns = ['ID','Vehiculo','Patente','Funcionario','kM inicio','kM fin','Hora inicio','Destino','Hora llegada','Estado del viaje']
+
+        if(viajes){
+        const rows = viajes.map((viaje)=>[
+            viaje.id_viaje,
+            viaje.vehiculo,
+            viaje.patente,
+            viaje.nombre_funcionario,
+            viaje.kms_inicial,
+            (viaje.kms_fin ? viaje.kms_fin : 0),
+            (viaje.fecha_hora_inicio.slice(0,10)+" "+viaje.fecha_hora_inicio.slice(11,19)),
+            viaje.destino,
+            (viaje.fecha_hora_fin ? (viaje.fecha_hora_fin.slice(0,10)+" "+viaje.fecha_hora_fin.slice(11,19)) : "-"),
+            (viaje.estado_viaje ? "Activo":"Terminado")
+        ])
+        doc.setFontSize(12)
+        doc.text("Reporte de viajes departamento de movilización",20,20)
+
+        autoTable(doc,{
+            startY:40,
+            head:[columns],
+            body: rows,
+            theme: 'plain',
+            styles: {fontSize:10,cellPadding:5},
+            headStyles:{fillColor:[41,120,120],textColor:255}
+        })
+        doc.save("Reporte.pdf")
+    }
         return
     }
     const editarViajeModal = (viaje:Viaje) =>{
@@ -142,11 +132,12 @@ function menuAdmin(){
                     }}
                 >Última semana</Chip>
 
-                <button className="buttonExport">Exportar tabla</button>
+                <button className="buttonExport" onClick={()=>exportarViajesPDF()}>Exportar tabla</button>
             </div>
-            <div className="tablaViajes">
+            {cargando ? (<><div className="tablaViajes">
                 <Table hoverRow borderAxis="y" sx={
                             {'& td':{textAlign:'left',paddingLeft:1.9}}
+                            
                         }>
                     <thead>
                         <tr>
@@ -162,14 +153,14 @@ function menuAdmin(){
 
                     <tbody>
                         
-                        {viajes.map((viaje)=>(
+                        {viajes && viajes.map((viaje:Viaje)=>(
                         <tr>
                             <td>{viaje.patente}</td>
-                            <td>{viaje.fecha}</td>
+                            <td>{(viaje.fecha_hora_inicio.slice(0,10))}</td>
                             <td>{viaje.nombre_funcionario}</td>
-                            <td>{viaje.fecha_hora_inicio}</td>
+                            <td>{(viaje.fecha_hora_inicio.slice(11,19))}</td>
                             
-                            <td>{viaje.fecha_hora_fin}</td>
+                            <td>{viaje.fecha_hora_fin ? (viaje.fecha_hora_fin.slice(11,19)):("-")}</td>
                             
                             <td>{viaje.estado_viaje === true ? "En proceso" : "Terminado"}</td>
                             <td>
@@ -177,10 +168,10 @@ function menuAdmin(){
                                     <button onClick={()=>handleModalViajeView(viaje)}>
                                         <VisibilityIcon />
                                     </button>
-                                    <button onClick={()=>exportarViajePDF(viaje)}>
+                                    <button >
                                         <PictureAsPdfIcon />
                                     </button>
-                                    {viaje.estado_viaje === false ? 
+                                    {Number(viaje.estado_viaje) === 0 ? 
                                        ( 
                                         <button onClick={()=>editarViajeModal(viaje)}>
                                             <EditDocumentIcon />
@@ -196,18 +187,20 @@ function menuAdmin(){
                         ))}
                     </tbody>
                 </Table>
-            </div>
+            </div>  </>):(<>Cargando</>) }
+            
         </div>
+       
 
         {/*Modal vista viaje */}
         <Modal open={modalVista} onClose={() => setOpenModalVista(false)}>
-            <ModalDialog variant="outlined" size="lg" sx={{width:"70%"}}>
+            <ModalDialog variant="outlined"  sx={{width: { xs: '90%', sm: '500px', md: '700px' }}}>
                 <DialogTitle>
                     Viaje {viajeSelected?.id_viaje}
                 </DialogTitle>
                 <Divider />
                 <DialogContent>
-                        <DataViewViaje viajeSelected={viajeSelected}></DataViewViaje>
+                        <DataViewViaje viajeSelected={viajeSelected!} modo={0}></DataViewViaje>
                 </DialogContent>
                 <DialogActions>
                     <Button variant="solid" color="success" onClick={() => {
@@ -226,14 +219,14 @@ function menuAdmin(){
         {/*Modal edición viaje */}
 
         <Modal open={modalEdicion} onClose={() => setOpenModalEdit(false)}>
-            <ModalDialog variant="outlined" role="alertdialog">
+            <ModalDialog variant="outlined"  sx={{width: { xs: '90%', sm: '500px', md: '700px' }}}>
                 <DialogTitle>
                     Viaje {viajeEdit?.id_viaje}
                 </DialogTitle>
                 <Divider />
                 <DialogContent>
                     {/*Cambiar para aceptar edicion */}
-                   <DataViewViaje viajeSelected={viajeEdit}></DataViewViaje>
+                   <DataViewViaje viajeSelected={viajeEdit!} modo={1}></DataViewViaje>
                 </DialogContent>
                 <DialogActions>
                     <Button variant="solid" color="success" onClick={() => {

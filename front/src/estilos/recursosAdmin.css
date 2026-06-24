@@ -4,8 +4,8 @@
     margin-top: 1%;
 }
 .buttonsTablaH button{
-    background-color: #2C2C2C;
-    border: #2C2C2C;
+    background-color: #434343;
+    border: #434343;
     color:white;
     width: 50%;
     padding: 1.5%;
@@ -18,8 +18,8 @@
     border-top-right-radius: 15px;
 }
 .buttonsTablaH button:disabled{
-    background-color: #434343;
-    border: #434343;
+    background-color: #2C2C2C;
+    border: #2C2C2C;
 }
 .buttonsFlexEnd{
     display: flex;

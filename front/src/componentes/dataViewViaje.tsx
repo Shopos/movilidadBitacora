@@ -1,6 +1,9 @@
 import { useState } from 'react'
 
-import { Modal, ModalDialog, DialogTitle,Divider,DialogContent} from "@mui/joy"
+import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,Button} from "@mui/joy"
+import MapSharpIcon from '@mui/icons-material/MapSharp';
+import LocalGasStationSharpIcon from '@mui/icons-material/LocalGasStationSharp';
+import SpeedSharpIcon from '@mui/icons-material/SpeedSharp';
 
 import type {Viaje} from "../tipos/tipoSistema"
 import MapaPreview from "../componentes/mapa"
@@ -66,16 +69,14 @@ function dataViewViaje({viajeSelected,modo}:prop ) {
                     <span>Estado del viaje: </span>{viajeSelected?.estado_viaje == true ? "En proceso" : "Terminado"}
                 </div>
             </div>
-            <div className="rowTwoCol">
-                <div>Comprobante tablero</div>
+            <div style={{display:"flex",flexDirection:"row", gap:"0.5%", marginTop:"1%"}}>
+                <Button startDecorator={<SpeedSharpIcon/>}>Comprobante tablero</Button>
                 {viajeSelected.carga_combustible ? 
-                (<div>Comprobante carga</div>):(<></>)
+                (<Button startDecorator={<LocalGasStationSharpIcon />}>Comprobante carga</Button>):(<></>)
                 }
-                <div style={{ width: "100%" }} onClick={() => openModalMapa(true)}>
-                    {viajeSelected?.lat_inicio!== null && viajeSelected?.lng_inicio!== null && viajeSelected?.lat_fin!== null && viajeSelected?.lng_fin!== null &&(
-                        <MapaPreview puntoI={{ lat: viajeSelected!.lat_inicio, lng: viajeSelected!.lng_inicio }} puntoD={{ lat: viajeSelected!.lat_fin, lng: viajeSelected!.lng_fin }} interaction={false} />
-                    )}
-                </div>
+                <Button startDecorator={<MapSharpIcon />} onClick={() => openModalMapa(true)}>
+                    Mapa de la ruta seguida
+                </Button>
             </div>
 
 
@@ -122,16 +123,14 @@ function dataViewViaje({viajeSelected,modo}:prop ) {
                     <span>Estado del viaje: </span>{viajeSelected?.estado_viaje == true ? "En proceso" : "Terminado"}
                 </div>
             </div>
-            <div className="rowTwoCol">
-                <div>Comprobante tablero</div>
+            <div className="rowButtons-modal">
+                <Button startDecorator={<SpeedSharpIcon/>}>Comprobante tablero</Button>
                 {viajeSelected.carga_combustible ? 
-                (<div>Comprobante carga</div>):(<></>)
+                (<Button startDecorator={<LocalGasStationSharpIcon />}>Comprobante carga</Button>):(<></>)
                 }
-                <div style={{ width: "100%" }} onClick={() => openModalMapa(true)}>
-                    {viajeSelected?.lat_inicio!== null && viajeSelected?.lng_inicio!== null && viajeSelected?.lat_fin!== null && viajeSelected?.lng_fin!== null &&(
-                        <MapaPreview puntoI={{ lat: viajeSelected!.lat_inicio, lng: viajeSelected!.lng_inicio }} puntoD={{ lat: viajeSelected!.lat_fin, lng: viajeSelected!.lng_fin }} interaction={false} />
-                    )}
-                </div>
+                <Button startDecorator={<MapSharpIcon />} onClick={() => openModalMapa(true)}>
+                    Mapa de la ruta seguida
+                </Button>
             </div> 
             </div>
         )}
@@ -142,7 +141,7 @@ function dataViewViaje({viajeSelected,modo}:prop ) {
                     Viaje {viajeSelected?.id_viaje}
                 </DialogTitle>
                 <Divider />
-                <DialogContent sx={{ minWidth:"90%",minHeight:"90vh"}}>
+                <DialogContent sx={{ minWidth:"90%"}}>
                    
                     {viajeSelected?.lat_inicio!== null && viajeSelected?.lng_inicio!== null && viajeSelected?.lat_fin!== null && viajeSelected?.lng_fin!== null &&(
                         <MapaPreview puntoI={{ lat: viajeSelected!.lat_inicio, lng: viajeSelected!.lng_inicio }} puntoD={{ lat: viajeSelected!.lat_fin, lng: viajeSelected!.lng_fin }} interaction={true} />

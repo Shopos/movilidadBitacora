@@ -168,9 +168,6 @@ function menuAdmin(){
                                     <button onClick={()=>handleModalViajeView(viaje)}>
                                         <VisibilityIcon />
                                     </button>
-                                    <button >
-                                        <PictureAsPdfIcon />
-                                    </button>
                                     {Number(viaje.estado_viaje) === 0 ? 
                                        ( 
                                         <button onClick={()=>editarViajeModal(viaje)}>

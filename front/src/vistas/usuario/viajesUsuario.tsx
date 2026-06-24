@@ -126,9 +126,10 @@ function viajesUsuario(){
                     </tbody>
                 </Table>
                 
-
-                <button className="botonPaso" onClick={()=>volverMenu()}>Volver</button>
-                <button className="botonPaso" onClick={()=>exportarPDF()}>Exportar Tabla a PDF</button>
+                <div style={{display:"flex", flexDirection:"row", justifyContent:"space-around"}}>
+                    <button className="botonPaso" onClick={()=>volverMenu()}>Volver</button>
+                    <button className="botonPaso" onClick={()=>exportarPDF()}>Exportar Tabla a PDF</button>
+                </div>
 
                 <Modal open={openModalViaje} onClose={() => setOpenModalViaje(false)}>
                 <ModalDialog variant="outlined" role="alertdialog">

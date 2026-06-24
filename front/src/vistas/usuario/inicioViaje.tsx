@@ -240,6 +240,12 @@ function inicioViaje() {
                     <input disabled name={usuario.nombre} value={usuario.nombre} type="text"></input>
                 </div>
             </div>
+            <div className="full-width">
+                <div className="itemInput2">
+                    <label>Motivo</label>
+                    <textarea name="motivo" value={formInicio.motivo} onChange={handleChange} placeholder="Explique el objetivo del viaje"></textarea>
+                </div>
+            </div>
 
 
             {isMobile ? (
@@ -249,13 +255,8 @@ function inicioViaje() {
 
 
 
+            
             <div className="full-width">
-                <div className="itemInput2">
-                    <label>Motivo</label>
-                    <textarea name="motivo" value={formInicio.motivo} onChange={handleChange} placeholder="Explique el objetivo del viaje"></textarea>
-                </div>
-            </div>
-            <div className="full-width-map">
                 {destinoChange > 1 ?
                     (<>
                         <div className="leaflet-container-preview">
@@ -282,9 +283,11 @@ function inicioViaje() {
                                 <Routing point1={dataGPS} point2={dataGPSDestino} />
                             </MapContainer>
 
-                            <button className="buttonFormularioInicio" onClick={() => openModalDestino(true)}>Cambiar destino</button>
+                            <div style={{display:"flex",flexDirection:"column", marginLeft:"1%" , padding:"1px"}}>
+                                <button style={{background:"#696AE3",color:"white",border:"#696AE3", borderRadius:"20px",padding:"5%"}} onClick={() => openModalDestino(true)}>Cambiar destino</button>
 
-                            <span>Destino</span><input type="text"></input>
+                                <span>Destino</span><input type="text"></input>
+                            </div>
                         </div>
                     </>)
                     :

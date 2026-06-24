@@ -350,7 +350,7 @@ function recursosAdmin() {
                                     </select>
                                     <label>Tipo de licencia</label>
                                     <select defaultValue={""} onChange={(e) => setFormAddU({ ...formAddU, tipo_licencia: (e.target.value) })}>
-                                        <option value={""}>Selecciona el tipo de licencia del usuario</option>
+                                        <option value={""} disabled>Selecciona el tipo de licencia del usuario</option>
                                         <option>A1</option>
                                         <option>A2</option>
                                         <option>A3</option>
@@ -401,7 +401,7 @@ function recursosAdmin() {
                         <label>Patente del vehiculo</label>
                         <select defaultValue={""} onChange={(e) => setFormMantencion({ ...formMantencion, patente: e.target.value })}>
                             <option value={""} disabled>Selecciona la patente a agregar mantención</option>
-                            {vehiculos?.length && vehiculos!.map((veh: Vehiculo) => (
+                            {vehiculos && vehiculos!.map((veh: Vehiculo) => (
                                 <option key={veh.patente} value={veh.patente}>{veh.patente}</option>
                             ))}
                         </select>
@@ -502,7 +502,7 @@ function recursosAdmin() {
                                             <option>Administrativo</option>
                                         </select>
                                         <select defaultValue={""} value={formU.tipo_licencia} onChange={(e) => setFormU({ ...formU, tipo_licencia: (e.target.value) })}>
-                                            <option value={""}>Selecciona el tipo de licencia del usuario</option>
+                                            <option value={""} disabled>Selecciona el tipo de licencia del usuario</option>
                                             <option>A1</option>
                                             <option>A2</option>
                                             <option>A3</option>

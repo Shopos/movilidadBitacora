@@ -1,18 +1,18 @@
 .botonPasoFin2{
     width: 20%;
-    background-color:#57A450 ;
+    background-color:#696AE3 ;
     color:white;
-    height: 5vh;
+    height: 4vh;
     border-radius: 20px;
-    border: #57A450;
+    border: #696AE3;
 }
 .botonPasoFin{
     width: 20%;
-    background-color:#EC221F ;
+    background-color:#696AE3;
     color:white;
-    height: 5vh;
+    height: 4vh;
     border-radius: 20px;
-    border: #EC221F;
+    border: #696AE3;
 }
 .botonPasoFin:hover{
     cursor:pointer
@@ -75,5 +75,8 @@
     color:black;
     height: 5vh;
     border-radius: 20px;
-    border-color:black;
+    border-color:#696AE3;
+}
+.displayModal button:hover{
+    cursor: pointer;
 }

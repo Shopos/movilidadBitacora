@@ -45,3 +45,13 @@ export async function editVehiculo(patenteBusqueda:string|string[], data:vehicul
     //@ts-ignore
     return (resultado.affectedRows > 0)
 }
+
+export async function changeStatus(patente:string,status:string):Promise<boolean>{
+    const [res] = await connection.query(
+        "UPDATE vehiculos SET estado=? WHERE patente = ?",
+        [status,patente]
+    )
+    console.log("Vehiculo cambia estado", status)
+    //@ts-ignore
+    return (res.affectedRows > 0)
+}

@@ -1,12 +1,14 @@
 import { useNavigate } from "react-router-dom"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import NavBar from "../../componentes/navBar.tsx"
 import "../../estilos/cierreViaje.css"
+import type { Viaje, ViajeInputFin } from "../../tipos/tipoSistema.ts"
 
 import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button} from "@mui/joy"
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import { isMobile } from "react-device-detect"
+import { addDataViajeFin } from "../../utils/auxiliar.ts"
 
 
 function cierreViaje(){
@@ -15,21 +17,87 @@ function cierreViaje(){
     //al finalizar cambia los estados del viaje y vehiculo asociados
     const navigate = useNavigate()
     const volverProceso = () =>navigate("/viajeProceso")
-    const cerrarYvolver = () =>navigate("/menuUsuario")
-    
+
     const [openModal,setOpenModal] = useState<boolean>(false)
     const [modalFoto, setOpenModalFoto] = useState<boolean>(false)
-    const [checkCarga,setCheckCarga] = useState<number>(0)
+    const [formFin,setFormFin] = useState<ViajeInputFin>({
+        cantidad_combustible:0,
+        carga_combustible:false,
+        fecha_hora_fin:"",
+        lat_fin_real:0,
+        lng_fin_real:0,
+        modificado_por:"",
+        ultima_modificacion:"",
+        obs_viaje:"",
+        kms_fin:0,
+        estado_viaje:true,
+        patente:"",
+        id_usuario:0
+    })
+    const [check,setCheck] = useState(false)
+    const [time,setTime] = useState("")
+    const [dataGPS,setDataGPS] = useState({
+        lat:0,lng:0
+    })
+    const d = new Date()
+    const date = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
 
+    useEffect(()=>{
+        navigator.geolocation.getCurrentPosition(pos =>{
+            setDataGPS({lat:pos.coords.latitude,lng:pos.coords.longitude})
+        })
+    },[dataGPS])
+    
 
-    const handleCheck=()=>{
-        if(checkCarga===0){
-            setCheckCarga(1)
-        }else{
-            setCheckCarga(0)
+    const updateDatoFin=async()=>{
+        const info = localStorage.getItem('viajeEnProceso')
+        if(info!){
+            const data:Viaje = JSON.parse(info)
+
+            setFormFin((prevData)=>({
+            ...prevData,
+            modificado_por: data.modificado_por,
+            ultima_modificacion: `${date} ${time}`,
+            fecha_hora_fin: `${date} ${time}`,
+            estado_viaje:false,
+            lat_fin_real: dataGPS.lat,
+            lng_fin_real:dataGPS.lng,
+            id_usuario: data.id_usuario,
+            patente: data.patente
+        }))
+        localStorage.removeItem('viajeEnProceso')
         }
+        
     }
 
+    const handleSendDataFin = async() =>{
+        await updateDatoFin()
+    }
+
+    useEffect(()=>{
+        if(formFin.estado_viaje === false){
+            console.log(formFin)
+            //se envia update
+            addDataViajeFin(formFin.patente,formFin)
+            navigate("/menuUsuario")
+        }
+    },[formFin])
+
+    const handleChange = (event:React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)=>{
+        const {name,value} = event.target
+        setFormFin((prevData)=>({
+            ...prevData,
+            [name] : value
+        }))
+    }
+
+    const handleCheck=()=>{
+        setCheck(!check)
+        setFormFin((prev)=>({
+            ...prev,
+            carga_combustible:!formFin.carga_combustible
+        }))
+    }
     /*
     Vista fin cierre bitacora
         >inputs que recolectan la informacion de cierre
@@ -45,35 +113,35 @@ function cierreViaje(){
                 <div className="gridInput">
                     <div className="itemInput">
                         <label>Llegada</label>
-                        <input type="time"></input>
+                        <input name="time" type="time" value={time} onChange={(e)=>setTime(e.target.value)}></input>
                     </div>
                     <div className="itemInput">
                         <label>Kilometraje final</label>
-                        <input type="number"></input>
+                        <input type="number" name="kms_fin" value={formFin.kms_fin} onChange={handleChange}></input>
                     </div>
                 </div>
                 <div className="argumento">
                     <label>Comentarios</label>
-                    <textarea  placeholder="En el viaje ocurrio..."></textarea>
+                    <textarea  placeholder="En el viaje ocurrio..." name="obs_viaje" value={formFin.obs_viaje} onChange={handleChange}></textarea>
                 </div>
                 <div className="selectInput">
                     <div className="itemInputSelect">
                         <label>Carga combustible</label>
-                        <input name="carga" onChange={()=>handleCheck()} value={checkCarga} type="checkbox"></input>
+                        <input name="carga_combustible" onChange={()=>handleCheck()} 
+                            value={check ? "true":"false"} type="checkbox"></input>
                     </div>
-                    {checkCarga===1 ? 
+                    {formFin.carga_combustible ? 
                     (<div className="itemInputSelect">
                         <label>Cantidad</label>
-                        <input type="number"></input>
-                    </div>):(
-                        <>
-
-                        </>
+                        <input type="number" value={formFin.cantidad_combustible} name="cantidad_combustible" onChange={handleChange}></input>
+                    </div>):
+                    (
+                        <></>
                     )
                     }
                 </div>
                 
-                {checkCarga===1 && isMobile ? (
+                {formFin.carga_combustible && isMobile ? (
                     <>
                     <div className="displayModal">
                         <p>Comprobante</p>
@@ -100,7 +168,9 @@ function cierreViaje(){
                     Al hacerlo no podras ingresar más datos al viaje actual.
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="solid" color="success" onClick={() => cerrarYvolver()}>
+                    <Button variant="solid" color="success" onClick={() => {
+                        handleSendDataFin()
+                        }}>
                     Finalizar viaje
                     </Button>
                     <Button variant="plain" color="danger" onClick={() => setOpenModal(false)}>

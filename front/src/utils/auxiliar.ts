@@ -1,4 +1,4 @@
-import type { Mantencion, Vehiculo, User } from "../tipos/tipoSistema";
+import type { Mantencion, Vehiculo, User, Viaje, ViajeInputFin } from "../tipos/tipoSistema";
 
 export default async function getVehiculos() {
   try {
@@ -192,6 +192,54 @@ export async function editarUsuario(correo:string,data:User){
     }catch(e){
       console.error('Error:', e);
       console.log({ msg: "Error al editar usuario" })
+    }
+  }
+}
+
+export async function addViajeInicial(data:Viaje){
+  if(data){
+    const url = `http://localhost:4000/viajes`
+    const payload = data
+    try{
+      const res = await fetch(url,{
+        method: 'POST',
+        headers:{
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      })
+      if(!res.ok){
+        throw new Error(`HTTP error! Status: ${res.status}`)
+      }
+      const data = await res.json()
+      console.log('Succes: ',data)
+    }catch(e){
+      console.error('Error: ',e)
+      console.log({msg: "Error al agregar viaje, revisar datos enviados"})
+    }
+  }
+}
+
+export async function addDataViajeFin(patente:string,data:ViajeInputFin){
+  if(data && patente){
+    const url = `http://localhost:4000/viajes/${patente}`
+    const payload = data
+    try{
+      const res = await fetch(url,{
+        method: 'PUT',
+        headers:{
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      })
+      if(!res.ok){
+        throw new Error(`HTTP error! Status: ${res.status}`)
+      }
+      const data = await res.json()
+      console.log('Succes: ',data)
+    }catch(e){
+      console.error('Error: ',e)
+      console.log({msg: "Error al agregar datos para finalizar viaje"})
     }
   }
 }

@@ -30,7 +30,7 @@ export interface ViajeInputInicio{
     vehiculo:string,
     id_usuario:number,
     patente:string,
-    kms_inicio:number,
+    kms_inicial:number,
     fecha_hora_inicio:string,
     lat_inicio:number,
     lng_inicio:number,
@@ -41,7 +41,8 @@ export interface ViajeInputInicio{
     nombre_funcionario:string,
     estado_viaje:boolean,
     ultima_modificacion:string,
-    modificado_por:string
+    modificado_por:string,
+    kms_fin:number
 }
 export interface ViajeInputFin{
     fecha_hora_fin:string,
@@ -52,6 +53,8 @@ export interface ViajeInputFin{
     cantidad_combustible:number,
     ultima_modificacion:string,
     modificado_por: string
+    kms_fin:number
+    estado_viaje:boolean
 }
 
 export async function getAllViajes(): Promise<Viaje[]>{
@@ -82,31 +85,31 @@ export async function getViajePatente(id:string): Promise<Viaje[]>{
     )
     return rows
 }
+//Comprobar si la patente existe y esta dentro de un viaje activo
+export async function checkPatenteEstado(id:string): Promise<Viaje[]>{
+    const [rows] = await connection.query<Viaje[]>(
+        "SELECT * FROM viajes WHERE patente= ? AND estado_viaje = ?", [id, 1]
+    )
+    return rows
+}
 
 export async function addViajeInicio(data:ViajeInputInicio): Promise<ViajeInputInicio>{
     const [resultado] = await connection.query(
-         `INSERT INTO viajes (
-         vehiculo,
-         id_usuario,
-         patente,
-         kms_inicio,
-         fecha_hora_inicio,
-         lat_inicio,
-         lng_inicio,
-         destino,
-         lat_fin,
-         lng_fin,
-         motivo,
-         nombre_funcionario,
-         estado_viaje,
+         `INSERT INTO viajes (vehiculo,id_usuario,patente,kms_inicial,fecha_hora_inicio,lat_inicio,lng_inicio,destino,lat_fin,
+        lng_fin,
+        motivo,
+        nombre_funcionario,
+        estado_viaje,
         ultima_modificacion,
-        modificado_por)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) `,
+        modificado_por,
+        kms_fin
+        )
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) `,
         [
             data.vehiculo,
             data.id_usuario,
             data.patente,
-            data.kms_inicio,
+            data.kms_inicial,
             data.fecha_hora_inicio,
             data.lat_inicio,
             data.lng_inicio,
@@ -116,13 +119,15 @@ export async function addViajeInicio(data:ViajeInputInicio): Promise<ViajeInputI
             data.motivo,
             data.nombre_funcionario,
             data.estado_viaje,
-            data.ultima_modificacion
+            data.ultima_modificacion,
+            data.modificado_por,
+            data.kms_fin
         ]
     )
     //@ts-ignore
     return resultado.insertId
 }
-export async function editViajeFin(patente:string,user:number,data:ViajeInputFin): Promise<boolean>{
+export async function editViajeFin(patente:string|string[],data:ViajeInputFin): Promise<boolean>{
     const [resultado] = await connection.query(
         `UPDATE viajes SET 
         fecha_hora_fin = ?, 
@@ -130,12 +135,13 @@ export async function editViajeFin(patente:string,user:number,data:ViajeInputFin
         lng_fin_real = ?,
         obs_viaje = ?,
         carga_combustible = ?,
-        cantidad_combustible = ?,
+        cantidad_carga = ?,
         estado_viaje = ?,
         ultima_modificacion = ?,
-        modificado_por = ?
+        modificado_por = ?,
+        kms_fin = ?
         
-        WHERE patente = ? AND usuario_id = ?
+        WHERE patente = ?
         `,
         [
             data.fecha_hora_fin,
@@ -147,8 +153,8 @@ export async function editViajeFin(patente:string,user:number,data:ViajeInputFin
             false,
             data.ultima_modificacion,
             data.modificado_por,
+            data.kms_fin,
             patente,
-            user
         ]
     )
     //@ts-ignore

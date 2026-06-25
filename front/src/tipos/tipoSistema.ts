@@ -5,6 +5,7 @@ export type Vehiculo={
     estado:"DISPONIBLE"|"EN REPARACION"|"EN RUTA"|"DADO DE BAJA"
 }
 export type User={
+    id_usuario:number,
     correo:string,
     pass:string,
     tipo_licencia:string,
@@ -36,11 +37,26 @@ export type Viaje = {
     motivo:string,
     obs_viaje:string,
     carga_combustible:boolean,
-    cantidad_combustible:number,
+    cantidad_carga:number,
     nombre_funcionario:string, //
     estado_viaje:boolean,
     ultima_modificacion:string,
     modificado_por:string
+}
+
+export type ViajeInputFin = {
+    fecha_hora_fin:string,
+    lat_fin_real:number,
+    lng_fin_real:number,
+    obs_viaje:string,
+    carga_combustible:boolean,
+    cantidad_combustible:number,
+    ultima_modificacion:string,
+    modificado_por: string
+    kms_fin:number,
+    estado_viaje:boolean
+    patente:string,
+    id_usuario:number
 }
 
 export type mantencionProp={

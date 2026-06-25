@@ -5,7 +5,6 @@ import "../../estilos/menuAdmin.css"
 import { useState,useEffect } from "react";
 import Table from '@mui/joy/Table';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import EditDocumentIcon from '@mui/icons-material/EditDocument';
 import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button, Chip, Input} from "@mui/joy"
 import TodayOutlinedIcon from '@mui/icons-material/TodayOutlined';
@@ -65,7 +64,7 @@ function menuAdmin(){
             (viaje.fecha_hora_inicio.slice(0,10)+" "+viaje.fecha_hora_inicio.slice(11,19)),
             viaje.destino,
             (viaje.fecha_hora_fin ? (viaje.fecha_hora_fin.slice(0,10)+" "+viaje.fecha_hora_fin.slice(11,19)) : "-"),
-            (viaje.estado_viaje ? "Activo":"Terminado")
+            (viaje.estado_viaje ? "En ruta":"Terminado")
         ])
         doc.setFontSize(12)
         doc.text("Reporte de viajes departamento de movilización",20,20)
@@ -162,7 +161,7 @@ function menuAdmin(){
                             
                             <td>{viaje.fecha_hora_fin ? (viaje.fecha_hora_fin.slice(11,19)):("-")}</td>
                             
-                            <td>{viaje.estado_viaje === true ? "En proceso" : "Terminado"}</td>
+                            <td>{viaje.estado_viaje ? "En ruta" : "Terminado"}</td>
                             <td>
                                 <div style={{display:"flex",gap:"10px"}}>
                                     <button onClick={()=>handleModalViajeView(viaje)}>

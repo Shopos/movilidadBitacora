@@ -27,6 +27,7 @@ const mantencionVacia: Mantencion = {
     ultimo_cambio_aceite: ""
 }
 const usuarioVacio: User = {
+    id_usuario:0,
     cargo: "Funcionario",
     correo: "",
     estado: false,

@@ -3,9 +3,9 @@ import NavBar from "../../componentes/navBar.tsx"
 import "../../estilos/inicioViaje.css"
 import React, { useEffect, useState } from "react";
 import { Modal, ModalDialog, DialogTitle, Divider, DialogContent, DialogActions, Button } from "@mui/joy"
-import type { Vehiculo, User } from "../../tipos/tipoSistema.ts";
+import type { Vehiculo, User, Viaje } from "../../tipos/tipoSistema.ts";
 import Routing from "../../componentes/routing.tsx" /*Componente para marcar la ruta entre inicio y destino en mapa*/
-import getVehiculos from "../../utils/auxiliar.ts";
+import getVehiculos, { addViajeInicial } from "../../utils/auxiliar.ts";
 import 'leaflet/dist/leaflet.css';
 import L from "leaflet"
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
@@ -34,25 +34,33 @@ function inicioViaje() {
     })
     const points: GPS[] = [dataGPS, dataGPSDestino]
 
-    const [formInicio, setFormInicio] = useState({
-        fecha: "",
+    const [formInicio, setFormInicio] = useState<Viaje>({
+        id_viaje:0,
+        fecha_hora_inicio:"",
         patente: "",
-        horaInicio: "",
         motivo: "",
-        modelo: "",
-        kmsInicio: "",
-        horaLlegada: "",
-        kmsFinViaje: "",
-        funcionario: "",
-        combustible: false,
-        cantidad: 0,
-        observaciones: "",
-        latInicio: 0,
-        lngInicio: 0,
-        latFin: 0,
-        lngFin: 0
+        vehiculo: "",
+        kms_inicial: 0,
+        fecha_hora_fin: "",
+        kms_fin:0,
+        nombre_funcionario: "",
+        carga_combustible: false,
+        cantidad_carga: 0,
+        obs_viaje: "",
+        lat_inicio: 0,
+        lng_inicio: 0,
+        lat_fin: 0,
+        lng_fin: 0,
+        destino:"",
+        estado_viaje:false, //inicio viaje -> cambiar
+        id_usuario:0, //inicio viaje -> cambiar
+        lat_fin_real:0,
+        lng_fin_real:0,
+        modificado_por:"", //inicio viaje -> cambiar
+        ultima_modificacion:"", //inicio viaje ->cambiar
     })
     const usuario: User = {
+        id_usuario:2,
         cargo: "Funcionario",
         correo: "usr@usr.cl",
         nombre: "Pepe pape",
@@ -62,6 +70,8 @@ function inicioViaje() {
     }
     const [vehiculos, setVehiculos] = useState<[Vehiculo]>()
 
+    const [dia,setDia] = useState("")
+    const [time,setTime] = useState("")
     /*Funcion para dar colores especificos a los Marker de leaflet y poder diferenciar punto de inicio y destino */
     const createCustomIcon = (color: string) => {
         return L.divIcon({
@@ -95,17 +105,19 @@ function inicioViaje() {
         setFormInicio((prevData) => ({
             ...prevData,
             patente: patenteselected,
-            modelo: vehiculoEncontrado ? vehiculoEncontrado.modelo : "",
-            kmsInicio: vehiculoEncontrado ? vehiculoEncontrado.kms_actual.toString() : ""
+            vehiculo: vehiculoEncontrado ? vehiculoEncontrado.modelo : "",
+            kms_inicial: vehiculoEncontrado ? vehiculoEncontrado.kms_actual : 0
         }))
 
 
     }
 
+    
+
     /*Efecto para conseguir el nombre del usuario registrado y su posicion actual dependiendo del GPS, solo si ha sido aceptado en app */
     useEffect(() => {
         
-
+       
         navigator.geolocation.getCurrentPosition(position => {
             setDestinoChange(destinoChange)
             setDataGPS({ lat: position.coords.latitude, lng: position.coords.longitude })
@@ -118,7 +130,7 @@ function inicioViaje() {
             }
             setFormInicio((prevData) => ({
             ...prevData,
-            funcionario: usuario.nombre,
+            nombre_funcionario: usuario.nombre,
             }))
             setCargando(true)
         }
@@ -145,10 +157,10 @@ function inicioViaje() {
     useEffect(() => {
         const actualiza = {
             ...formInicio,
-            latInicio: dataGPS.lat,
-            lngInicio: dataGPS.lng,
-            latFin: dataGPSDestino.lat,
-            lngFin: dataGPSDestino.lng
+            lat_inicio: dataGPS.lat,
+            lng_inicio: dataGPS.lng,
+            lat_fin: dataGPSDestino.lat,
+            lng_fin: dataGPSDestino.lng
         }
         setFormInicio(actualiza)
         setDestinoChange(destinoChange + 1)
@@ -178,10 +190,45 @@ function inicioViaje() {
 
     const navigate = useNavigate()
 
-    /*Almacena los datos ingresados dentro de formInicio en db y deja el estado del viaje en "true" (viaje activo -> true/viaje terminado ->false) --> vehiculo a "ACTIVO" */
-    const continuarProceso = () => {
-        navigate("/viajeProceso", {})
+    const formatoFecha = () =>{
+        const d = new Date()
+        const year = d.getFullYear()
+        const month = String(d.getMonth()+1).padStart(2,'0')
+        const day = String(d.getDate()).padStart(2,'0')
+        const hour = String(d.getHours()).padStart(2,'0')
+        const min = String(d.getMinutes()).padStart(2,'0')
+
+        const formato = `${year}-${month}-${day} ${hour}:${min}`
+        return formato
     }
+
+    const updateData  = async()=>{
+        setFormInicio((prevData) =>({
+            ...prevData,
+            fecha_hora_inicio: `${dia} ${time}`,
+            ultima_modificacion: formatoFecha(),
+            modificado_por: usuario.nombre,
+            id_usuario: usuario.id_usuario,
+            estado_viaje:true,
+
+        }))
+    }
+
+    useEffect(()=>{
+        if(formInicio.estado_viaje===true){       
+            //enviar a bd datos iniciales
+            addViajeInicial(formInicio)
+            localStorage.setItem('viajeEnProceso',JSON.stringify(formInicio))
+            navigate("/viajeProceso", {})
+        }
+    },[formInicio,navigate])
+
+    /*Almacena los datos ingresados dentro de formInicio en db y deja el estado del viaje en "true" (viaje activo -> true/viaje terminado ->false) --> vehiculo a "ACTIVO" */
+    const continuarProceso = async() => {
+        await updateData().then()
+    }
+
+
     const volverMenu = () => navigate("/menuUsuario")
 
     return (
@@ -204,7 +251,7 @@ function inicioViaje() {
             <div className="inputsInicio">
                 <div className="itemInput">
                     <label>Fecha</label>
-                    <input name="fecha" type="date" value={formInicio.fecha} onChange={handleChange}></input>
+                    <input name="dia" type="date" value={dia} onChange={(e)=>setDia(e.target.value)}></input>
                 </div>
 
                 <div className="itemInput">
@@ -222,7 +269,7 @@ function inicioViaje() {
 
                 <div className="itemInput">
                     <label>Modelo Vehículo</label>
-                    <input disabled value={formInicio.modelo} placeholder=""></input>
+                    <input disabled value={formInicio.vehiculo} placeholder=""></input>
                 </div>
 
                 <div className="itemInput">
@@ -232,7 +279,7 @@ function inicioViaje() {
 
                 <div className="itemInput">
                     <label>Hora inicio</label>
-                    <input name="horaInicio" value={formInicio.horaInicio} onChange={handleChange} type="time"></input>
+                    <input name="time" value={time} onChange={(e)=>setTime(e.target.value)} type="time"></input>
                 </div>
 
                 <div className="itemInput">
@@ -286,7 +333,7 @@ function inicioViaje() {
                             <div style={{display:"flex",flexDirection:"column", marginLeft:"1%" , padding:"1px"}}>
                                 <button style={{background:"#696AE3",color:"white",border:"#696AE3", borderRadius:"20px",padding:"5%"}} onClick={() => openModalDestino(true)}>Cambiar destino</button>
 
-                                <span>Destino</span><input type="text"></input>
+                                <span>Destino</span><input name="destino" value={formInicio.destino} onChange={handleChange} type="text"></input>
                             </div>
                         </div>
                     </>)

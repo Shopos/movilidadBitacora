@@ -30,7 +30,7 @@ function dataViewViaje({viajeSelected,modo}:prop ) {
         {modo===0 ? 
         (
             <div className="modalDataBitacora">
-            Bitácora vehículo {viajeSelected.id_viaje}
+            Bitácora vehículo
             <label style={{ display: "flex", flexDirection: "row", width: "100%" }}>Fecha: {fechaInicio.slice(0,10)}</label>
             <div className="modalDataItemRow">
                 <div className="item">
@@ -48,7 +48,7 @@ function dataViewViaje({viajeSelected,modo}:prop ) {
             </div>
             <div className="modalDataItemCol">
                 <div className="modalDataItemRow">
-                    <span>Destino: </span>{viajeSelected?.destino}
+                    <span>Destino: </span>{viajeSelected.destino}
                 </div>
                 <div className="modalDataItemRow">
                     <span>Funcionario: </span>{viajeSelected?.nombre_funcionario}
@@ -59,7 +59,7 @@ function dataViewViaje({viajeSelected,modo}:prop ) {
             </div>
             <div className="modalDataItemRow">
                 <span>Carga combustible: </span>{viajeSelected?.carga_combustible ? "Si":"No"}
-                <span>Cantidad: </span>{viajeSelected.carga_combustible ? viajeSelected?.cantidad_combustible : "No carga combustible"}
+                <span>Cantidad: </span>{viajeSelected.carga_combustible ? viajeSelected?.cantidad_carga : "No carga combustible"}
             </div>
             <div className="modalDataItemCol">
                 <div className="modalDataItemRow">
@@ -84,7 +84,7 @@ function dataViewViaje({viajeSelected,modo}:prop ) {
         </div> ) 
         : (
             <div className="modalDataBitacora">
-            Edición de bitácora {viajeSelected.id_viaje}
+            Edición de bitácora
             <label style={{ display: "flex", flexDirection: "row", width: "100%" }}>Fecha: {fechaInicio.slice(0,10)}</label>
             <div className="modalDataItemRow">
                 <div className="item">
@@ -113,14 +113,14 @@ function dataViewViaje({viajeSelected,modo}:prop ) {
             </div>
             <div className="modalDataItemRow">
                 <span>Carga combustible: </span>{viajeSelected?.carga_combustible ? "Si":"No"}
-                <span>Cantidad: </span>{viajeSelected.carga_combustible ? viajeSelected?.cantidad_combustible : "No carga combustible"}
+                <span>Cantidad: </span>{viajeSelected.carga_combustible ? viajeSelected?.cantidad_carga : "No carga combustible"}
             </div>
             <div className="modalDataItemCol">
                 <div className="modalDataItemRow">
                     <span>Observaciones: </span>{viajeSelected?.obs_viaje}
                 </div>
                 <div>
-                    <span>Estado del viaje: </span>{viajeSelected?.estado_viaje == true ? "En proceso" : "Terminado"}
+                    <span>Estado del viaje: </span>{viajeSelected.estado_viaje === true ? "En proceso" : "Terminado"}
                 </div>
             </div>
             <div className="rowButtons-modal">
@@ -138,7 +138,7 @@ function dataViewViaje({viajeSelected,modo}:prop ) {
          <Modal  open={modalMapa} onClose={() => openModalMapa(false)} >
             <ModalDialog variant="outlined" size="lg" >
                 <DialogTitle>
-                    Viaje {viajeSelected?.id_viaje}
+                    Viaje 
                 </DialogTitle>
                 <Divider />
                 <DialogContent sx={{ minWidth:"90%"}}>

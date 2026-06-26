@@ -42,6 +42,8 @@ function cierreViaje(){
     const d = new Date()
     const date = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
 
+    /* Si el usuario tiene activo y permitido el acceso a su localizacion, recupera su latitud y longitud final para 
+    almacenar estos valores en la BD*/
     useEffect(()=>{
         navigator.geolocation.getCurrentPosition(pos =>{
             setDataGPS({lat:pos.coords.latitude,lng:pos.coords.longitude})
@@ -49,6 +51,7 @@ function cierreViaje(){
     },[dataGPS])
     
 
+    /*Metodo para actualizar los datos antes del envio de estos a la BD */
     const updateDatoFin=async()=>{
         const info = localStorage.getItem('viajeEnProceso')
         if(info!){
@@ -74,6 +77,10 @@ function cierreViaje(){
         await updateDatoFin()
     }
 
+    /* Metodo para almacenar los datos en BD, esto solo se ejecuta si el valor de estado_viaje pasa a Falso
+    esto ocurriendo en el caso de dar terminado el viaje
+    Una vez subido estos datos se envia el formulario final a actualizar dicho viaje en BD
+    */
     useEffect(()=>{
         if(formFin.estado_viaje === false){
             console.log(formFin)
@@ -104,6 +111,11 @@ function cierreViaje(){
         >Check por si se realiza carga de combustible -> 
             >1 --> Señala que si se realizo y se pide informacion
             >0 --> Quedan vacios
+
+            
+        >VERIFICAR PREVIO ENVIO DE INFORMACION QUE EL VALOR INGRESADO AL KMS FINAL DEBE SER MAYOR O IGUAL AL KMS INICIAL
+
+
         >Se pide confirmacion para cerrar el proceso-->se guardan los datos finales y viaje queda en estado false indicando que el viaje ya no esta activo
     */
     return(

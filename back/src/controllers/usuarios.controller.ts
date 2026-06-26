@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import * as usuarioModel from "../models/usuario.model"
 
+/*Controladores para el llamado al modelo de usuarios con el fin de manejar correctamente la informacion solicitada y recibida */
+
+
+/* Metodo para solicitar los usuarios al modelo de usuarios */
 export async function getUsuarios(req:Request,res:Response){
     try{
         const usuarios = await usuarioModel.getAllUsuarios()
@@ -10,7 +14,11 @@ export async function getUsuarios(req:Request,res:Response){
         res.status(500).json({error: " error al listar usuarios "})
     }
 }
+/* Metodo para solicitar el usuario cuyo correo coincida con el solicitado
 
+    parametro esperado a solicitar correo:string
+    parametro esperado a recibir usuario:Usuario
+*/
 export async function getUsuarioCorreo(req:Request,res:Response){
     try{
         const correoUsuario = req.params.correo
@@ -25,6 +33,11 @@ export async function getUsuarioCorreo(req:Request,res:Response){
     }
 }
 
+/* Metodo para solicitar el usuario cuyo correo coincida con el solicitado
+
+    parametro esperado a solicitar id:number
+    parametro esperado a recibir usuario:Usuario
+*/
 export async function getUsuarioId(req:Request,res:Response){
     try{
         const id = Number(req.params.id)
@@ -39,6 +52,11 @@ export async function getUsuarioId(req:Request,res:Response){
     }
 }
 
+/*Metodo para solicitar agregar un usuario cuyos datos sean del tipo Usuario
+    paramentro esperado a solicitar usuario:UsuarioInput
+
+    si los parametros contienen informacion vacia en cualquiera sea de sus campos la solicitud es rechazada
+*/
 export async function agregarUsuario(req:Request,res:Response) {
     try{
         const {correo,pass,tipo_licencia,nombre,cargo,estado} = req.body
@@ -53,6 +71,10 @@ export async function agregarUsuario(req:Request,res:Response) {
     }
 }
 
+/* Metodo para solicitar la edicion de un usuario cuyos datos coincidan con el correo solicitado
+
+    parametros esperados a solicitar id:string (correo) datos{}: (datos a editar) --> estado y tipo de licencia
+*/
 export async function editarUsuario(req:Request,res:Response){
     try{
         const id = req.params.correo

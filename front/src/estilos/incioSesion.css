@@ -21,6 +21,7 @@
 .textoTituloInicio{
     margin-top: 10%;
     margin-bottom: 20%;
+    font-family: "Spline Sans", sans-serif;
 }
 .contenido-formulario{
     display: flex;

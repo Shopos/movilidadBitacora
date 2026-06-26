@@ -57,6 +57,7 @@ export interface ViajeInputFin{
     estado_viaje:boolean
 }
 
+//Metodo que devuelve todos los viajes
 export async function getAllViajes(): Promise<Viaje[]>{
     const [rows] = await connection.query<Viaje[]>(
         "SELECT * FROM viajes"
@@ -64,6 +65,7 @@ export async function getAllViajes(): Promise<Viaje[]>{
     return rows
 }
 
+//Metodo que devuelve los viajes segun el id de un usuario
 export async function getViajeIdUsuario(id:number): Promise<Viaje[]>{
     const [rows] = await connection.query<Viaje[]>(
         "SELECT * FROM viajes WHERE id_usuario = ?",[id]
@@ -71,6 +73,7 @@ export async function getViajeIdUsuario(id:number): Promise<Viaje[]>{
     return rows
 } 
 
+//Metodo que devuelve los viajes de un usuario cuyo nombre sea igual al solicitado
 export async function getViajeNombreUsuario(id:string): Promise<Viaje[]>{
     const [rows] = await connection.query<Viaje[]>(
         "SELECT usuarios.nombre, viajes.* FROM viajes,usuarios WHERE viajes.id_usuario = usuarios.id_usuario and usuarios.nombre = ? ",
@@ -79,12 +82,14 @@ export async function getViajeNombreUsuario(id:string): Promise<Viaje[]>{
     return rows
 }
 
+//Metodo que devuelve los viajes segun la patente solicitada
 export async function getViajePatente(id:string): Promise<Viaje[]>{
     const [rows] = await connection.query<Viaje[]>(
         "SELECT * FROM viajes WHERE patente = ?",[id]
     )
     return rows
 }
+
 //Comprobar si la patente existe y esta dentro de un viaje activo
 export async function checkPatenteEstado(id:string): Promise<Viaje[]>{
     const [rows] = await connection.query<Viaje[]>(
@@ -93,6 +98,7 @@ export async function checkPatenteEstado(id:string): Promise<Viaje[]>{
     return rows
 }
 
+//Metodo para agregar un viaje con los datos necesarios para comenzar uno
 export async function addViajeInicio(data:ViajeInputInicio): Promise<ViajeInputInicio>{
     const [resultado] = await connection.query(
          `INSERT INTO viajes (vehiculo,id_usuario,patente,kms_inicial,fecha_hora_inicio,lat_inicio,lng_inicio,destino,lat_fin,
@@ -127,6 +133,8 @@ export async function addViajeInicio(data:ViajeInputInicio): Promise<ViajeInputI
     //@ts-ignore
     return resultado.insertId
 }
+
+//Metodo para editar/agregar informacion de un viaje que termina su recoleccion de informacion
 export async function editViajeFin(patente:string|string[],data:ViajeInputFin): Promise<boolean>{
     const [resultado] = await connection.query(
         `UPDATE viajes SET 

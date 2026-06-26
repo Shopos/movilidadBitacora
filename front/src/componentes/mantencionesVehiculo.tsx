@@ -14,6 +14,12 @@ const getListaMantencionesVehiculo = async (patente: string) => {
     }
     return []
 }
+
+/* Componente para mostrar la informacion de las mantenciones de un vehiculo en particular
+    Este componente trabaja en conjunto con el modal de mostrar informacion de un vehiculo, por tanto
+    muestra las mantenciones de dicho vehiculo en particular
+*/
+
 function mantencionesVehiculo({ patenteBuscada }: mantencionProp) {
 
     const [mantenciones, setMantenciones] = useState<Mantencion[]>()

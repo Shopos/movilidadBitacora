@@ -24,6 +24,8 @@ function menuAdmin(){
     const [modalEdicion,setOpenModalEdit] = useState<boolean>(false)
     const [cargando,setCargando] = useState<boolean>(false)
 
+
+    /* Metodo para obtener la lista de viajes */
     useEffect(()=>{
         const getListaViajes = async()=>{
             try{
@@ -47,10 +49,9 @@ function menuAdmin(){
         return
     }
 
-
+    /* Metodo para exportar a documento la tabla de viajes actual */
     const exportarViajesPDF =()=>{
         const doc = new jsPDF('l','pt','a4')
-
         const columns = ['ID','Vehiculo','Patente','Funcionario','kM inicio','kM fin','Hora inicio','Destino','Hora llegada','Estado del viaje']
 
         if(viajes){
@@ -81,6 +82,8 @@ function menuAdmin(){
     }
         return
     }
+
+
     const editarViajeModal = (viaje:Viaje) =>{
         //Visualiza y permite editar la informacion de un viaje X, solo si el viaje ha sido terminado previamente
         setViajeEditSelected(viaje)

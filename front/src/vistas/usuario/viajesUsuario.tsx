@@ -22,7 +22,7 @@ function viajesUsuario(){
             fecha_hora_fin:"13:30",
             kms_fin:110,
             estado_viaje:false,
-            cantidad_combustible:10,
+            cantidad_carga:10,
             carga_combustible:true,
             destino:"santa cruz",
             lat_inicio: -34.639464, 
@@ -48,6 +48,11 @@ function viajesUsuario(){
         setViajeSelected(viaje)
         setOpenModalViaje(true)
     }
+
+    /*Exporta la tabla de viajes, con los datos actuales que presente la lista de viajes activos
+    Dentro del informe se encuentran los datos importantes a considerar por los viajes
+    */
+
     const exportarPDF=()=>{
         if(Viajes){
             const doc = new jsPDF('l','pt','a4')

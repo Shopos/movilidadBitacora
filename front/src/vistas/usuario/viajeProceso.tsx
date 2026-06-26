@@ -12,9 +12,7 @@ import "../../estilos/viajeProceso.css"
 import NoCrashOutlinedIcon from '@mui/icons-material/NoCrashOutlined';
 
 /*
-    Pasar datos desde viaje inicio 
-    recolectar gps?
-    pasar info a fin
+    datos de las latitudes y longitudes en localStorage
 */
 type GPS={
     lat:number,

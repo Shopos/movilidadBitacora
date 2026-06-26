@@ -18,6 +18,7 @@ export interface mantencionInput{
     patente:string
 }
 
+//Metodo que devuelve todas las mantenciones de un vehiculo cuya patente sea igual a la solicitada
 export async function getMantencionesVehiculo(patenteBuscada:string|string[]):Promise<Mantencion[]|null>{
     const [rows]=await connection.query<Mantencion[]>(
         "SELECT * FROM mantenciones WHERE patente = ?", [patenteBuscada]
@@ -25,6 +26,7 @@ export async function getMantencionesVehiculo(patenteBuscada:string|string[]):Pr
     return rows
 }
 
+//Metodo que agrega una mantencion
 export async function addMantencion(data:mantencionInput):Promise<number> {
     const [resultado] = await connection.query(
         "INSERT INTO mantenciones (ultimo_cambio_aceite,taller,ultima_mantencion,detalle_mantencion,patente) VALUES (?,?,?,?,?)",

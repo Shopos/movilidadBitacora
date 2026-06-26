@@ -56,6 +56,8 @@ function recursosAdmin() {
     const [formMantencion, setFormMantencion] = useState<Mantencion>(mantencionVacia)
     const [formAddU, setFormAddU] = useState<User>(usuarioVacio)
 
+
+    /* Metodo para obtener los vehiculos desde BD */
     useEffect(() => {
         const getListaVehiculos = async () => {
             try {
@@ -70,6 +72,7 @@ function recursosAdmin() {
         getListaVehiculos()
     }, [refresh, modalAdd, modalEdit])
 
+    /* Metodo para obtener los usuarios desde BD */
     useEffect(() => {
         const getListaUsuarios = async () => {
             try {
@@ -105,9 +108,13 @@ function recursosAdmin() {
         openModalEdit(true)
     }
 
-
+    /* Metodo para enviar la informacion editada en modal de edicion a BD
+        Si el recurso es vehiculo comprueba que el atributo este dentro de la informacion enviada
+        Caso contrario comprueba que exista el atributo correo para verificar si es un usuario
+    */
     const handleEditVehiculo = async () => {
         if (!recursoEdit && cargando) return
+
         if (recursoEdit && 'patente' in recursoEdit) {
             setCargando(true)
             const patente = recursoEdit.patente
@@ -128,6 +135,7 @@ function recursosAdmin() {
         }
     }
 
+    /* Metodo para agregar un nuevo vehiculo a BD */
     const handleAgregar = async () => {
         if (!formAddV || cargando) return
         setCargando(true)
@@ -136,7 +144,7 @@ function recursosAdmin() {
         setCargando(false)
         setRefresh(!refresh)
     }
-
+    /* Metodo para agregar un nuevo usuario a BD */
     const handleAgregarUsuario = async () => {
         if (!formAddU || cargando) return
         setCargando(true)
@@ -146,6 +154,7 @@ function recursosAdmin() {
         setRefresh(!refresh)
     }
 
+    /* Metodo para agregar una nueva mantencion a un vehiculo */
     const handleAgregarMantencion = async () => {
         if (!formMantencion || cargando) return
         setCargando(true)
@@ -155,6 +164,10 @@ function recursosAdmin() {
         setRefresh(!refresh)
     }
 
+    /* Metodo para exportar los recursos que se encuentren activo
+    Si la vistaActual es verdadero exporta la lista de vehiculos
+    Si la vistaActual es falsa exporta la lista de usuarios
+    */
     const exportarPdf = () => {
         const doc = new jsPDF('l', 'pt', 'a4')
         doc.setFontSize(12)

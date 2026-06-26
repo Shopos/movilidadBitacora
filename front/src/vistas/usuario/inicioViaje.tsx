@@ -190,6 +190,7 @@ function inicioViaje() {
 
     const navigate = useNavigate()
 
+    /* método para formatear la fecha, para poder enviar correctamente la informacion a DB, devuelve el formato correcto */
     const formatoFecha = () =>{
         const d = new Date()
         const year = d.getFullYear()
@@ -202,6 +203,7 @@ function inicioViaje() {
         return formato
     }
 
+    /* Método para actualizar la informacion antes del envio de esta misma a la DB */
     const updateData  = async()=>{
         setFormInicio((prevData) =>({
             ...prevData,
@@ -214,6 +216,10 @@ function inicioViaje() {
         }))
     }
 
+
+    /* Efecto que se activa la momento de actualizar algun valor en formInicio o navigate, si detecta algun cambio en el 
+    formInicio y al mismo tiempo el estado de viaje es verdadero, hace envio de la informacion inicial a DB, guarda
+    esta misma informacion en localStorage y envia a la vista de viaje en proceso */
     useEffect(()=>{
         if(formInicio.estado_viaje===true){       
             //enviar a bd datos iniciales

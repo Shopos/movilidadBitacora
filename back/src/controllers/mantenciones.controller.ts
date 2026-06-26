@@ -1,6 +1,13 @@
 import { Request, Response } from "express";
 import * as mantencionModel from "../models/mantencion.model"
 
+/* Controladores para el llamado al modelo de mantenciones con el fin de manejar correctamente la informacion solicitada y recibida */
+
+/* Metodo para solicitar las mantenciones cuya patente coincida con la solicitada
+
+    parametro esperado a solicitar patente:string
+    parametro esperado a recibir mantenciones:Mantencion
+*/
 export async function getMantencionesPatente(req:Request,res:Response){
     try{
         const patenteBuscada = req.params.patente
@@ -16,6 +23,10 @@ export async function getMantencionesPatente(req:Request,res:Response){
     }
 }
 
+/* Metodo para agregar una nueva mantencion cuyos datos sean del tipo Mantencion
+    
+    parametros esperados a solicitar datos{}:(datos a editar) :Mantencion
+*/
 export async function agregarMantencion(req:Request,res:Response) {
     try{
         const {ultimo_cambio_aceite,taller,ultima_mantencion,detalle_mantencion,patente} = req.body

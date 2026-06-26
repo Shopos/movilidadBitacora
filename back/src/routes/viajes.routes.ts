@@ -3,10 +3,13 @@ import { addViajeInicio, getViajes, addViajeFin } from "../controllers/viajes.co
 
 const router = Router()
 
+//Obtiene todos los viajes
 router.get('/',getViajes)
 
+//Agrega un viaje inicialmente
 router.post('/', addViajeInicio)
 
+//Agrega(edita) la informacion de un viaje 
 router.put('/:patente', addViajeFin)
 
 export default router

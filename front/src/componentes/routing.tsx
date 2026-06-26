@@ -24,6 +24,7 @@ function Routing({ point1, point2 }: RoutingProps) {
     const start = L.latLng(point1.lat, point1.lng);
     const end = L.latLng(point2.lat, point2.lng);
 
+
     const routingControl = L.Routing.control({
       waypoints: [start, end],
       plan: L.Routing.plan([start,end],{

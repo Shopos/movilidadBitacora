@@ -9,4 +9,26 @@
     cursor: pointer;
     background-color: #2C2C2C;
 }
+.cell-header{
+    display: none;
+}
 
+@media (max-width:576px) {
+    th {
+    display: none;
+  }
+  .cell-header {
+    display: block;
+    font-weight: bold;
+  }
+  td {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .buttonIconTable{
+    border-radius: 50px;
+    width: 40px;
+    padding: 0;
+  }
+}

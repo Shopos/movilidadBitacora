@@ -153,7 +153,7 @@ function cierreViaje(){
                     }
                 </div>
                 
-                {formFin.carga_combustible && isMobile ? (
+                {formFin.carga_combustible ? (
                     <>
                     <div className="displayModal">
                         <p>Comprobante</p>

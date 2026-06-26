@@ -5,6 +5,8 @@ import MapSharpIcon from '@mui/icons-material/MapSharp';
 import LocalGasStationSharpIcon from '@mui/icons-material/LocalGasStationSharp';
 import SpeedSharpIcon from '@mui/icons-material/SpeedSharp';
 
+import "../estilos/dataViewViaje.css"
+
 import type {Viaje} from "../tipos/tipoSistema"
 import MapaPreview from "../componentes/mapa"
 
@@ -69,7 +71,7 @@ function dataViewViaje({viajeSelected,modo}:prop ) {
                     <span>Estado del viaje: </span>{viajeSelected?.estado_viaje == true ? "En proceso" : "Terminado"}
                 </div>
             </div>
-            <div style={{display:"flex",flexDirection:"row", gap:"0.5%", marginTop:"1%"}}>
+            <div className='modalDataItemCol'>
                 <Button startDecorator={<SpeedSharpIcon/>}>Comprobante tablero</Button>
                 {viajeSelected.carga_combustible ? 
                 (<Button startDecorator={<LocalGasStationSharpIcon />}>Comprobante carga</Button>):(<></>)
@@ -123,7 +125,7 @@ function dataViewViaje({viajeSelected,modo}:prop ) {
                     <span>Estado del viaje: </span>{viajeSelected.estado_viaje === true ? "En proceso" : "Terminado"}
                 </div>
             </div>
-            <div className="rowButtons-modal">
+            <div className="rowButtonsView">
                 <Button startDecorator={<SpeedSharpIcon/>}>Comprobante tablero</Button>
                 {viajeSelected.carga_combustible ? 
                 (<Button startDecorator={<LocalGasStationSharpIcon />}>Comprobante carga</Button>):(<></>)

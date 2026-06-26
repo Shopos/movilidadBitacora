@@ -263,7 +263,7 @@ function inicioViaje() {
                 <div className="itemInput">
                     <label>Patente</label>
                     <select name="Patentes" defaultValue={""} onChange={manejarDataVehiculo}>
-                        <option value={""} disabled>Selecciona una de las patentes disponibles</option>
+                        <option value={""} disabled>Selecciona una patente disponible</option>
                         {/**Solo se muestran las patentes de vehiculos disponibles */}
                         {vehiculos && vehiculos!.filter(vehiculo => vehiculo.estado === "DISPONIBLE").map((vehiculo) => (
                             <option key={vehiculo.patente} value={vehiculo.patente}>
@@ -336,7 +336,7 @@ function inicioViaje() {
                                 <Routing point1={dataGPS} point2={dataGPSDestino} />
                             </MapContainer>
 
-                            <div style={{display:"flex",flexDirection:"column", marginLeft:"1%" , padding:"1px"}}>
+                            <div style={{display:"flex",flexDirection:"column", marginLeft:"1%" , padding:"1px", width:"30%"}}>
                                 <button style={{background:"#696AE3",color:"white",border:"#696AE3", borderRadius:"20px",padding:"5%"}} onClick={() => openModalDestino(true)}>Cambiar destino</button>
 
                                 <span>Destino</span><input name="destino" value={formInicio.destino} onChange={handleChange} type="text"></input>

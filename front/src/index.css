@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300..700&display=swap');
 :root {
-  --text: #6b6375;
+  --text: #2a292b;
   --text-h: #08060d;
   --bg: #fff;
   --border: #e5e4e7;
@@ -16,8 +16,8 @@
   --heading: "Spline Sans", sans-serif;
   --mono: "Spline Sans", monospace;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
+  font: 18px/180% var(--sans);
+  letter-spacing: 0.2px;
   color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
@@ -76,7 +76,7 @@ h2 {
 
 h1 {
   font-size: 56px;
-  letter-spacing: -1.68px;
+  letter-spacing: -2px;
   margin: 32px 0;
   @media (max-width: 1024px) {
     font-size: 36px;
@@ -96,3 +96,10 @@ p {
   margin: 0;
 }
 
+input{
+  font-family: var(--sans)
+}
+
+textarea{
+  font-family: var(--sans);
+}

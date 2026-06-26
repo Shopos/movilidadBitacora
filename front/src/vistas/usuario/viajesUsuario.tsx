@@ -37,6 +37,106 @@ function viajesUsuario(){
             lng_fin_real:0,
             modificado_por:"",
             ultima_modificacion:""
+        },
+        {
+            id_viaje:1,
+            patente:"yzx123",
+            nombre_funcionario:"sanchez miguel",
+            fecha_hora_inicio:"12:00",
+            kms_inicial:100,
+            fecha_hora_fin:"13:30",
+            kms_fin:110,
+            estado_viaje:false,
+            cantidad_carga:10,
+            carga_combustible:true,
+            destino:"santa cruz",
+            lat_inicio: -34.639464, 
+            lng_inicio: -71.365910,
+            lat_fin:-34.627511,
+            lng_fin:-71.349689,
+            motivo:"Visita a parque",
+            obs_viaje:"-",
+            vehiculo:"Toyota",
+            id_usuario:3,
+            lat_fin_real:0,
+            lng_fin_real:0,
+            modificado_por:"",
+            ultima_modificacion:""
+        },
+        {
+            id_viaje:1,
+            patente:"yzx123",
+            nombre_funcionario:"sanchez miguel",
+            fecha_hora_inicio:"12:00",
+            kms_inicial:100,
+            fecha_hora_fin:"13:30",
+            kms_fin:110,
+            estado_viaje:false,
+            cantidad_carga:10,
+            carga_combustible:true,
+            destino:"santa cruz",
+            lat_inicio: -34.639464, 
+            lng_inicio: -71.365910,
+            lat_fin:-34.627511,
+            lng_fin:-71.349689,
+            motivo:"Visita a parque",
+            obs_viaje:"-",
+            vehiculo:"Toyota",
+            id_usuario:3,
+            lat_fin_real:0,
+            lng_fin_real:0,
+            modificado_por:"",
+            ultima_modificacion:""
+        },
+        {
+            id_viaje:1,
+            patente:"yzx123",
+            nombre_funcionario:"sanchez miguel",
+            fecha_hora_inicio:"12:00",
+            kms_inicial:100,
+            fecha_hora_fin:"13:30",
+            kms_fin:110,
+            estado_viaje:false,
+            cantidad_carga:10,
+            carga_combustible:true,
+            destino:"santa cruz",
+            lat_inicio: -34.639464, 
+            lng_inicio: -71.365910,
+            lat_fin:-34.627511,
+            lng_fin:-71.349689,
+            motivo:"Visita a parque",
+            obs_viaje:"-",
+            vehiculo:"Toyota",
+            id_usuario:3,
+            lat_fin_real:0,
+            lng_fin_real:0,
+            modificado_por:"",
+            ultima_modificacion:""
+        },
+        {
+            id_viaje:1,
+            patente:"yzx123",
+            nombre_funcionario:"sanchez miguel",
+            fecha_hora_inicio:"12:00",
+            kms_inicial:100,
+            fecha_hora_fin:"13:30",
+            kms_fin:110,
+            estado_viaje:false,
+            cantidad_carga:10,
+            carga_combustible:true,
+            destino:"santa cruz",
+            lat_inicio: -34.639464, 
+            lng_inicio: -71.365910,
+            lat_fin:-34.627511,
+            lng_fin:-71.349689,
+            motivo:"Visita a parque",
+            obs_viaje:"-",
+            vehiculo:"Toyota",
+            id_usuario:3,
+            lat_fin_real:0,
+            lng_fin_real:0,
+            modificado_por:"",
+            ultima_modificacion:""
         }
     ]
     let name = Viajes.at(0)?.nombre_funcionario
@@ -96,7 +196,7 @@ function viajesUsuario(){
         <>  
             <NavBar type={0} texto=""/>
             <div>
-                <Table hoverRow borderAxis="y" sx={
+                <Table hoverRow borderAxis="y" stripe={"odd"} sx={
                             {'& td':{textAlign:'left',paddingLeft:1.9}}
                         }>
                     <thead>
@@ -114,12 +214,13 @@ function viajesUsuario(){
                         
                         {Viajes.map((viaje)=>(
                         <tr>
-                            <td>{viaje.id_viaje}</td>
-                            <td>{viaje.patente}</td>
-                            <td>{viaje.fecha_hora_inicio}</td>
-                            <td>{viaje.fecha_hora_fin}</td>
-                            <td>{viaje.estado_viaje === true ? "En proceso" : "Terminado"}</td>
+                            <td><span className="cell-header">ID</span>{viaje.id_viaje}</td>
+                            <td><span className="cell-header">Patente vehiculo</span>{viaje.patente}</td>
+                            <td><span className="cell-header">Hora inicio</span>{viaje.fecha_hora_inicio}</td>
+                            <td><span className="cell-header">Hora llegada</span>{viaje.fecha_hora_fin}</td>
+                            <td><span className="cell-header">Estado viaje</span>{viaje.estado_viaje === true ? "En proceso" : "Terminado"}</td>
                             <td>
+                                <span className="cell-header">Acciones</span>
                                 <div style={{display:"flex",gap:"10px"}}>
                                     <button className="buttonIconTable" onClick={()=>handleModalViajeView(viaje)}>
                                         <VisibilityIcon />

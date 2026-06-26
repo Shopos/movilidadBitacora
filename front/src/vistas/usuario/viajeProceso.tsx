@@ -108,7 +108,7 @@ function viajeProceso(){
                     <p>Manten la vista en el camino, una vez finalizado el viaje continua el proceso de bitácora</p>
                 </div>
                 
-                <button className="botonPaso" onClick={()=>finViaje()}>terminar viaje</button>
+                <button className="botonTerminar" onClick={()=>finViaje()}>terminar viaje</button>
             </div>
         </>
     )

@@ -18,13 +18,22 @@
     align-self: center;
 
 }
-.mapaProceso{
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap:20px;
-    width: 100%;
-    margin: auto;
+.leaflet-container{
+    width: 50vw;
+}
+
+.botonTerminar{
+    background-color: #3A3B61;
+    width: 30%;
+    color: white;
+    border: #3A3B61;
     padding: 10px;
-    align-items: center;
-    justify-items: center;
+    border-radius: 25px;
+    height: 10%; 
+    margin-top: 15px;
+}
+@media (max-width:576px) {
+    .leaflet-container{
+        width: 80vw;
+    }
 }

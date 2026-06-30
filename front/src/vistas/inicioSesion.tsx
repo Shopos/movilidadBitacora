@@ -23,12 +23,11 @@ function inicioSesion(){
             setError(resultadoInicio.msg || "No se pudo iniciar sesión")
             return
         }
-        if(resultadoInicio.ok){
-            console.log(usuario!.cargo)
-            setFormData({mail:"",pass:""})
+        
+        setFormData({mail:"",pass:""})
             //buscar cargo de usuario inicio en resultado    
-            navigate(usuario!.cargo === "Administrativo" ? "/menuAdmin" : "/menuUsuario")
-        }
+        navigate(resultadoInicio.usuario!.cargo === "Administrativo" ? "/menuAdmin" : "/menuUsuario")
+        
     }
     const handleChange=(event: React.ChangeEvent<HTMLInputElement>)=>{
         const {name,value} = event.target

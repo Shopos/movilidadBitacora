@@ -39,9 +39,9 @@ export function AuthProvider({children}: {children: ReactNode}){
             setUsuario(data.usuario)
             setToken(data.token)
             localStorage.setItem("token",data.token)
-            return {ok:true}
+            return {ok:true, usuario: data.usuario}
         }catch(e){
-            return {ok:false, msg: " ERROR AL CONECTAR CON SERVIDOR "}
+            return {ok:false, msg:" ERROR AL CONECTAR CON SERVIDOR "}
         }
     }
 

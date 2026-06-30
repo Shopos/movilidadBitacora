@@ -16,7 +16,7 @@ export interface UsuarioInput {
     pass:string,
     tipo_licencia:string,
     nombre:string,
-    cargo:string,
+    cargo:string, //Administrativo || Funcionario
     estado:boolean
 }
 export interface UsuarioEdit{

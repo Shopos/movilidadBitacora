@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import * as usuarioModel from "../models/usuario.model"
+import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
+import dotenv from "dotenv"
 
+dotenv.config()
 /*Controladores para el llamado al modelo de usuarios con el fin de manejar correctamente la informacion solicitada y recibida */
 
 
@@ -89,4 +93,49 @@ export async function editarUsuario(req:Request,res:Response){
         console.error(e)
         res.status(500).json({error: " Error al editar usuario "})
     }
+}
+
+export async function login(req:Request,res:Response){
+    try{
+        const {correo,pass} = req.body
+        console.log(correo,pass)
+        if(correo==="" && pass===""){
+            return res.status(400).json({error: " Los campos correo y contraseña son obligatorios "})
+        }
+        const usuarios = await usuarioModel.getUsuarioCorreo(correo)
+        const usuarioEncontrado = usuarios[0]
+        console.log(usuarioEncontrado)
+        if(!usuarioEncontrado){
+            return res.status(401).json({error: " Credenciales invalidas "})
+        }
+        if(!usuarioEncontrado.estado){
+            return res.status(402).json({error: " Usuario bloqueado, comunicarse con administración "})
+        }
+        const passUser = bcrypt.compareSync(pass,String(usuarioEncontrado.pass))
+
+        if(!passUser){
+            return res.status(403).json({error: " Credenciales invalidas "})
+        }
+
+        const payload = {
+            cargo: usuarioEncontrado.cargo,
+            correo: usuarioEncontrado.correo,
+            nombre: usuarioEncontrado.nombre
+        }
+
+        const token = jwt.sign(
+            payload, 
+            process.env.JWT_SECRET as string, 
+            {expiresIn: (process.env.JWT_EXPIRES || '9h') as any}
+        )
+        res.json({token, usuario: payload})
+
+    }catch(e){
+        console.error(e)
+        res.status(500).json({error: " Error al iniciar sesión "})
+    }
+}
+
+export async function perfil(req:Request,res:Response){
+    res.json({usuario: req.usuario })
 }

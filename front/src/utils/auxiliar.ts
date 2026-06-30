@@ -23,6 +23,20 @@ export default async function getVehiculos() {
     return null;
   }
 }
+export async function getFuncionarios(){
+  try{
+    const response = await fetch('http://localhost:4000/usuarios')
+    if(!response.ok){
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    const filter  = await response.json()
+    const funcionarios =  filter.filter((usr:User)=>usr.cargo==="Funcionario")
+    return funcionarios
+  }catch(e){
+    console.error('Error encontrando usuarios funcionarios:', e);
+    return null;
+  }
+}
 
 export async function getUsuarios(){
   try{

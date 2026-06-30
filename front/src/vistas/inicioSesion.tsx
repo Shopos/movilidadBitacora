@@ -1,37 +1,33 @@
 import { useNavigate } from "react-router-dom"
 import '../estilos/incioSesion.css'
 import { useState } from "react"
+import { useAuth } from "../context/AuthContext"
 
-type User={
-    correo:string,
-    contraseña:string,
-}
+
 function inicioSesion(){
-    const Admin:User={
-        correo:"admin@admin.cl",
-        contraseña:"123abc"
-    }
-    const user:User={
-        correo:"usr@usr.cl",
-        contraseña:"123"
-    }
+    
     const [formData,setFormData]=useState({
         mail:"",
         pass:""
     })
+    const { login,usuario } = useAuth()
+    const [error,setError] = useState("")
 
     const navigate = useNavigate()
-    const manejoNavigate = () => navigate("/menuUsuario")
-    const manejoNavigate2 = () => navigate("/menuAdmin")
-
     /*Maneja los datos ingresados en los inputs de inicio de sesión
     >los datos de inicio se almacenan en formData y se deben comprobar en DB    
     */
-    const handleRedirection = () =>{
-        if(formData.mail === Admin.correo && formData.pass===Admin.contraseña){
-            manejoNavigate2()
-        }if(formData.mail === user.correo && formData.pass === user.contraseña){
-            manejoNavigate()
+    const handleRedirection = async() =>{
+        const resultadoInicio = await login(formData.mail,formData.pass)
+        if(!resultadoInicio.ok){
+            setError(resultadoInicio.msg || "No se pudo iniciar sesión")
+            return
+        }
+        if(resultadoInicio.ok){
+            console.log(usuario!.cargo)
+            setFormData({mail:"",pass:""})
+            //buscar cargo de usuario inicio en resultado    
+            navigate(usuario!.cargo === "Administrativo" ? "/menuAdmin" : "/menuUsuario")
         }
     }
     const handleChange=(event: React.ChangeEvent<HTMLInputElement>)=>{

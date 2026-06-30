@@ -39,7 +39,7 @@ export type Viaje = {
     carga_combustible:boolean,
     cantidad_carga:number,
     nombre_funcionario:string, //
-    estado_viaje:boolean,
+    estado_viaje:"En espera"|"En proceso"|"Terminado",
     ultima_modificacion:string,
     modificado_por:string
 }

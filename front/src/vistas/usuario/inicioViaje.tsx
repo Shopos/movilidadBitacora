@@ -52,7 +52,7 @@ function inicioViaje() {
         lat_fin: 0,
         lng_fin: 0,
         destino:"",
-        estado_viaje:false, //inicio viaje -> cambiar
+        estado_viaje:"Terminado", //inicio viaje -> cambiar
         id_usuario:0, //inicio viaje -> cambiar
         lat_fin_real:0,
         lng_fin_real:0,
@@ -211,7 +211,7 @@ function inicioViaje() {
             ultima_modificacion: formatoFecha(),
             modificado_por: usuario.nombre,
             id_usuario: usuario.id_usuario,
-            estado_viaje:true,
+            estado_viaje:"En proceso",
 
         }))
     }
@@ -221,7 +221,7 @@ function inicioViaje() {
     formInicio y al mismo tiempo el estado de viaje es verdadero, hace envio de la informacion inicial a DB, guarda
     esta misma informacion en localStorage y envia a la vista de viaje en proceso */
     useEffect(()=>{
-        if(formInicio.estado_viaje===true){       
+        if(formInicio.estado_viaje==="En proceso"){       
             //enviar a bd datos iniciales
             addViajeInicial(formInicio)
             localStorage.setItem('viajeEnProceso',JSON.stringify(formInicio))

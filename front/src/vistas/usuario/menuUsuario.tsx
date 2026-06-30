@@ -30,6 +30,9 @@ function menuUsuario(){
         }
         return false
     }
+
+    //Verificar en db si existen viajes activos o no terminados y dicho usuario es el actual
+
     /* Metodo para comprobar si existe un viaje activo en localStorage llamando verificarViajeActivo
     Si esto ocurre devuelve a viaje en proceso
     Caso contrario continua la navegacion a menuUsuario

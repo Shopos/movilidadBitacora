@@ -4,7 +4,7 @@ import "../estilos/navBar.css"
 import PersonIcon from '@mui/icons-material/Person';
 import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button} from "@mui/joy"
 import type { navBarProps } from '../tipos/tipoSistema';
-
+import { useAuth } from '../context/AuthContext';
 
 
 function navBar({type,texto}:navBarProps){
@@ -13,9 +13,10 @@ function navBar({type,texto}:navBarProps){
     const irBitacoras = () =>navigate("/menuAdmin")
     const irRecursos =()=> navigate("/recursos")
 
-
+    const {logOut} = useAuth()
     /*Si usuario(cualquiera) selecciona el icono de usuario, comienza proceso cierre de sesión y se devuelve al home de la app (/) */
     const handleCierreSesion =()=>{
+        logOut()
         setOpenModalCierre(false)
         navigate("/")
     }

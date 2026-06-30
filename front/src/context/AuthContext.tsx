@@ -12,7 +12,7 @@ export type AuthContextType = {
     token: string | null
     cargando: boolean
     autenticado: boolean
-    login: (correo:string,pass:string)=>Promise<{ok:boolean ; msg?:string}>
+    login: (correo:string,pass:string)=>Promise<{ok:boolean ; msg?:string; usuario?:usuarioLog}>
     logOut:()=>void
 }
 
@@ -52,6 +52,7 @@ export function AuthProvider({children}: {children: ReactNode}){
     }
 
     useEffect(()=>{
+        console.log("intentando restaurar sesion")
         const restaurarSesion = async()=>{
             const tokenSaved = localStorage.getItem("token")
             if(!tokenSaved){
@@ -62,14 +63,23 @@ export function AuthProvider({children}: {children: ReactNode}){
                 const res = await fetch('http://localhost:4000/usuarios/perfil',{
                     headers:{ Authorization: `Bearer ${tokenSaved}`}
                 })
+                if(res.status === 401 || res.status === 403){
+                    localStorage.removeItem("token")
+                    setCargando(false)
+                    return
+                }
                 if(!res.ok){
+                    setCargando(false)
                     throw new Error( "Token invalido")
                 }
+                console.log("Sesion restaurada")
                 const data = await res.json()
                 setUsuario(data.usuario)
                 setToken(tokenSaved)
             }catch(e){
-                return localStorage.removeItem("token")
+                setCargando(false)
+                console.log({msg: "Error al comprobar token",e})
+                //return localStorage.removeItem("token")
             }finally{
                 setCargando(false)
             }

@@ -10,7 +10,7 @@ type ProtectedRouteProp = {
 function ProtectedRoute({children,rolesPermitidos}: ProtectedRouteProp) {
     const {autenticado, usuario,cargando} = useAuth()
     if(cargando){
-        return null
+        return <div>...Cargando...</div>
     }
     if(!autenticado){
         return <Navigate to="/" replace />

@@ -30,7 +30,6 @@ export async function addViajeInicio(req:Request,res:Response){
             id_usuario,
             patente,
             kms_inicial,
-            fecha_hora_inicio,
             lat_inicio,
             lng_inicio,
             destino,
@@ -41,7 +40,8 @@ export async function addViajeInicio(req:Request,res:Response){
             estado_viaje,
             ultima_modificacion,
             modificado_por,
-            kms_fin
+            kms_fin,
+            modo
         } = req.body
 
         console.log(req.body)
@@ -53,7 +53,6 @@ export async function addViajeInicio(req:Request,res:Response){
             id_usuario,
             patente,
             kms_inicial,
-            fecha_hora_inicio,
             lat_inicio,
             lng_inicio,
             destino,
@@ -64,7 +63,8 @@ export async function addViajeInicio(req:Request,res:Response){
             estado_viaje,
             ultima_modificacion,
             modificado_por,
-            kms_fin
+            kms_fin,
+            modo
         })
     await vehiculoModel.changeStatus(patente,"EN RUTA")
 
@@ -114,6 +114,7 @@ export async function addViajeFin(req:Request,res:Response){
             }
             res.json({msg: " Viaje finalizado"})
             await vehiculoModel.changeStatus(String(id),"DISPONIBLE")
+            await handleChangeKMS(kms_fin,String(id))
         }else{
             console.log({msg: " Problema al agregar nuevos datos a este viaje"})
         }
@@ -128,4 +129,27 @@ async function checkPatente (patente:string) : Promise<boolean>{
     const res = await viajesModel.checkPatenteEstado(patente)
 
     return res.length > 0
+}
+
+async function handleChangeKMS(cantidad:Number,patente:string){
+    const res:vehiculoModel.Vehiculo[]|null = await vehiculoModel.getVehiculo(patente)
+
+    if(res && res[0].kms_actual < cantidad){
+        await vehiculoModel.changeKms(patente,cantidad)
+    }
+}
+
+export async function getViajeIdUsuario(req:Request,res:Response){
+    try{
+        console.log(Number(req.params.id))
+        const viajeBuscado = Number( req.params.id)
+        const viaje = await viajesModel.getViajeIdUsuario((viajeBuscado))
+        if(!viaje){
+            return res.status(404).json({Error:" Error encontrando viaje "})
+        }
+        res.json(viaje)
+    }catch(e){
+        console.error(e)
+        res.status(500).json({error: " Error encontrando viaje"})
+    }
 }

@@ -7,7 +7,7 @@ const router = Router()
 
 router.post('/login', login)
 
-router.get('/perfil',perfil)
+router.get('/perfil',autenticarJWT,perfil)
 
 //Obtener todos los usuarios
 router.get('/',getUsuarios)
@@ -16,8 +16,8 @@ router.get('/correos/:correo',getUsuarioCorreo)
 //Obtener usuario cual id sea igual a
 router.get('/id/:id', getUsuarioId)
 //Agregar usuario
-router.post('/',agregarUsuario)
+router.post('/',autenticarJWT,verifyAdmin,agregarUsuario)
 //Editar usuario cual correo sea igual a
-router.put('/:correo',verifyAdmin,autenticarJWT, editarUsuario)
+router.put('/:correo',autenticarJWT,verifyAdmin ,editarUsuario)
 
 export default router

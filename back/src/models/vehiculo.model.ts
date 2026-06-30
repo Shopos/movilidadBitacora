@@ -61,3 +61,12 @@ export async function changeStatus(patente:string,status:string):Promise<boolean
     //@ts-ignore
     return (res.affectedRows > 0)
 }
+
+export async function changeKms(patente:string, cantidad:Number):Promise<boolean>{  
+    const [res] = await connection.query(
+        "UPDATE vehiculos set kms_actual= ? WHERE patente= ?",
+        [cantidad,patente]
+    )
+    //@ts-ignore
+    return (res.affectedRows>0)
+}

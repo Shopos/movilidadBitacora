@@ -31,7 +31,6 @@ export interface ViajeInputInicio{
     id_usuario:number,
     patente:string,
     kms_inicial:number,
-    fecha_hora_inicio:string,
     lat_inicio:number,
     lng_inicio:number,
     destino:string,
@@ -42,7 +41,12 @@ export interface ViajeInputInicio{
     estado_viaje:boolean,
     ultima_modificacion:string,
     modificado_por:string,
-    kms_fin:number
+    kms_fin:number,
+    modo:string
+}
+export interface ViajeInputFuncionarioInicio{
+    fecha_hora_inicio:string,
+    //Foto tablero
 }
 export interface ViajeInputFin{
     fecha_hora_fin:string,
@@ -67,8 +71,9 @@ export async function getAllViajes(): Promise<Viaje[]>{
 
 //Metodo que devuelve los viajes segun el id de un usuario
 export async function getViajeIdUsuario(id:number): Promise<Viaje[]>{
+    console.log(id)
     const [rows] = await connection.query<Viaje[]>(
-        "SELECT * FROM viajes WHERE id_usuario = ?",[id]
+        "SELECT * FROM viajes WHERE id_usuario = ? && estado_viaje = ? ",[id,"En espera"]
     )
     return rows
 } 
@@ -101,14 +106,23 @@ export async function checkPatenteEstado(id:string): Promise<Viaje[]>{
 //Metodo para agregar un viaje con los datos necesarios para comenzar uno
 export async function addViajeInicio(data:ViajeInputInicio): Promise<ViajeInputInicio>{
     const [resultado] = await connection.query(
-         `INSERT INTO viajes (vehiculo,id_usuario,patente,kms_inicial,fecha_hora_inicio,lat_inicio,lng_inicio,destino,lat_fin,
-        lng_fin,
-        motivo,
-        nombre_funcionario,
-        estado_viaje,
-        ultima_modificacion,
-        modificado_por,
-        kms_fin
+         `INSERT INTO viajes (
+         vehiculo,
+         id_usuario,
+         patente,
+         kms_inicial,
+         lat_inicio,
+         lng_inicio,
+         destino,
+         lat_fin,
+         lng_fin,
+         motivo,
+         nombre_funcionario,
+         estado_viaje,
+         ultima_modificacion,
+         modificado_por,
+         kms_fin,
+         modo
         )
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) `,
         [
@@ -116,7 +130,6 @@ export async function addViajeInicio(data:ViajeInputInicio): Promise<ViajeInputI
             data.id_usuario,
             data.patente,
             data.kms_inicial,
-            data.fecha_hora_inicio,
             data.lat_inicio,
             data.lng_inicio,
             data.destino,
@@ -127,7 +140,8 @@ export async function addViajeInicio(data:ViajeInputInicio): Promise<ViajeInputI
             data.estado_viaje,
             data.ultima_modificacion,
             data.modificado_por,
-            data.kms_fin
+            data.kms_fin,
+            data.modo
         ]
     )
     //@ts-ignore

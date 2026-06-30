@@ -91,7 +91,20 @@ export async function getMantencionesVehiculo(patente: string) {
     return null;
   }
 }
-
+export async function getViajeUsuario(id_usuario:number){
+  try{
+    if(id_usuario){
+    const response = await fetch(`http://localhost:4000/viajes/${id_usuario}`)
+     if(!response.ok){
+      throw new Error(`HTTP error! Status: ${response.status}`)
+   }
+   return await response.json()
+  }
+}catch(e){
+  console.error('Error encontrando viaje-usuario:', e);
+    return null;
+}
+}
 /** Metodos para solicitar agregar informacion hacia backend
  * 
  * Considerando "/{algo}" se agregara informacion a la tabla asociada a dicha ruta descrita en backend

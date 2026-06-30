@@ -8,6 +8,7 @@ import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Bu
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import { isMobile } from "react-device-detect"
+import { useAuth } from "../../context/AuthContext.tsx"
 import { addDataViajeFin } from "../../utils/auxiliar.ts"
 
 
@@ -15,6 +16,7 @@ function cierreViaje(){
     //inputs de recoleccion y cierre final con dialogo de confirmacion
     //es posible cancelar y volver al estado de viajeProceso si es necesario
     //al finalizar cambia los estados del viaje y vehiculo asociados
+    const { usuario } = useAuth()
     const navigate = useNavigate()
     const volverProceso = () =>navigate("/viajeProceso")
 
@@ -34,6 +36,7 @@ function cierreViaje(){
         patente:"",
         id_usuario:0
     })
+    const [formAux,setFormAux] = useState<Viaje>()
     const [check,setCheck] = useState(false)
     const [time,setTime] = useState("")
     const [dataGPS,setDataGPS] = useState({
@@ -54,6 +57,7 @@ function cierreViaje(){
     /*Metodo para actualizar los datos antes del envio de estos a la BD */
     const updateDatoFin=async()=>{
         const info = localStorage.getItem('viajeEnProceso')
+        
         if(info!){
             const data:Viaje = JSON.parse(info)
 
@@ -68,10 +72,36 @@ function cierreViaje(){
             id_usuario: data.id_usuario,
             patente: data.patente
         }))
+        if(data.modo === "ida"){
+            //Generar viaje "vuelta" mismo usuario
+        }
         localStorage.removeItem('viajeEnProceso')
         }
         
     }
+
+    /**const hanldeNewViaje=()=>{
+        setFormAux((prev)=>({
+            cantidad_carga:0,
+            carga_combustible:false,
+            destino:"Municipalidad de Santa Cruz",
+            estado_viaje:"En espera",
+            fecha_hora_fin:"",
+            fecha_hora_inicio:formFin.fecha_hora_fin,
+            id_usuario: usuario?.id_usuario,
+            kms_fin:0,
+            kms_inicial:formFin.kms_fin,
+            lat_inicio: , 
+            lng_inicio:,
+            lat_fin:-34.639739,
+            lng_fin:-71.365916,
+            modo:"vuelta",
+            motivo:"Viaje devuelta a municipalidad",
+            nombre_funcionario: usuario?.nombre,
+            modificado_por: usuario?.nombre,
+            ultima_modificacion: 
+        }))
+    }**/
 
     const handleSendDataFin = async() =>{
         await updateDatoFin()

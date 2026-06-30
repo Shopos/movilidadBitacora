@@ -10,6 +10,7 @@ import 'leaflet/dist/leaflet.css';
 import L from "leaflet"
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
 import { isMobile } from "react-device-detect"
+import { useAuth } from "../../context/AuthContext.tsx";
 
 type GPS = {
     lat: number,
@@ -25,7 +26,7 @@ function inicioViaje() {
     const [modalDestino, openModalDestino] = useState<boolean>(false)
     const [modalCamara, openModalCamara] = useState<boolean>(false)
     const [destinoChange, setDestinoChange] = useState<number>(0)
-    const [cargando,setCargando] = useState<boolean>(false)
+    const [cargando, setCargando] = useState<boolean>(false)
     const [dataGPS, setDataGPS] = useState<GPS>({
         lat: -34.639739, lng: -71.365916
     })
@@ -35,14 +36,14 @@ function inicioViaje() {
     const points: GPS[] = [dataGPS, dataGPSDestino]
 
     const [formInicio, setFormInicio] = useState<Viaje>({
-        id_viaje:0,
-        fecha_hora_inicio:"",
+        id_viaje: 0,
+        fecha_hora_inicio: "",
         patente: "",
         motivo: "",
         vehiculo: "",
         kms_inicial: 0,
         fecha_hora_fin: "",
-        kms_fin:0,
+        kms_fin: 0,
         nombre_funcionario: "",
         carga_combustible: false,
         cantidad_carga: 0,
@@ -51,27 +52,20 @@ function inicioViaje() {
         lng_inicio: 0,
         lat_fin: 0,
         lng_fin: 0,
-        destino:"",
-        estado_viaje:"Terminado", //inicio viaje -> cambiar
-        id_usuario:0, //inicio viaje -> cambiar
-        lat_fin_real:0,
-        lng_fin_real:0,
-        modificado_por:"", //inicio viaje -> cambiar
-        ultima_modificacion:"", //inicio viaje ->cambiar
+        destino: "",
+        estado_viaje: "Terminado", //inicio viaje -> cambiar
+        id_usuario: 0, //inicio viaje -> cambiar
+        lat_fin_real: 0,
+        lng_fin_real: 0,
+        modificado_por: "", //inicio viaje -> cambiar
+        ultima_modificacion: "", //inicio viaje ->cambiar,
+        modo: ""
     })
-    const usuario: User = {
-        id_usuario:2,
-        cargo: "Funcionario",
-        correo: "usr@usr.cl",
-        nombre: "Pepe pape",
-        estado: false,
-        tipo_licencia: "A1",
-        pass: ""
-    }
+    const {usuario} = useAuth()
     const [vehiculos, setVehiculos] = useState<[Vehiculo]>()
 
-    const [dia,setDia] = useState("")
-    const [time,setTime] = useState("")
+    const [dia, setDia] = useState("")
+    const [time, setTime] = useState("")
     /*Funcion para dar colores especificos a los Marker de leaflet y poder diferenciar punto de inicio y destino */
     const createCustomIcon = (color: string) => {
         return L.divIcon({
@@ -91,46 +85,15 @@ function inicioViaje() {
         })
     }
 
-    /*Trigger por select --> Ajusta los datos del vehiculo cuya patente ha sido seleccionada en esta vista */
-
-    const manejarDataVehiculo = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const patenteselected = event.target.value
-
-        const vehiculoEncontrado = vehiculos!.find(
-            (vehiculo) => vehiculo.patente === patenteselected
-        )
-        if (vehiculoEncontrado) {
-            setVehiculoSelected(vehiculoEncontrado || null)
-        }
-        setFormInicio((prevData) => ({
-            ...prevData,
-            patente: patenteselected,
-            vehiculo: vehiculoEncontrado ? vehiculoEncontrado.modelo : "",
-            kms_inicial: vehiculoEncontrado ? vehiculoEncontrado.kms_actual : 0
-        }))
-
-
-    }
-
-    
-
     /*Efecto para conseguir el nombre del usuario registrado y su posicion actual dependiendo del GPS, solo si ha sido aceptado en app */
     useEffect(() => {
-        
-       
-        navigator.geolocation.getCurrentPosition(position => {
-            setDestinoChange(destinoChange)
-            setDataGPS({ lat: position.coords.latitude, lng: position.coords.longitude })
-            setDataGPSDestino({ lat: position.coords.latitude, lng: position.coords.longitude })
-        });
+        const getViaje=async()=>{
+            //await getViajeUsuario()
+        }
         const getData = async () => {
-            const data = await getVehiculos()
-            if (data) {
-                setVehiculos(data)
-            }
             setFormInicio((prevData) => ({
-            ...prevData,
-            nombre_funcionario: usuario.nombre,
+                ...prevData,
+                nombre_funcionario: usuario!.nombre,
             }))
             setCargando(true)
         }
@@ -191,27 +154,27 @@ function inicioViaje() {
     const navigate = useNavigate()
 
     /* método para formatear la fecha, para poder enviar correctamente la informacion a DB, devuelve el formato correcto */
-    const formatoFecha = () =>{
+    const formatoFecha = () => {
         const d = new Date()
         const year = d.getFullYear()
-        const month = String(d.getMonth()+1).padStart(2,'0')
-        const day = String(d.getDate()).padStart(2,'0')
-        const hour = String(d.getHours()).padStart(2,'0')
-        const min = String(d.getMinutes()).padStart(2,'0')
+        const month = String(d.getMonth() + 1).padStart(2, '0')
+        const day = String(d.getDate()).padStart(2, '0')
+        const hour = String(d.getHours()).padStart(2, '0')
+        const min = String(d.getMinutes()).padStart(2, '0')
 
         const formato = `${year}-${month}-${day} ${hour}:${min}`
         return formato
     }
 
     /* Método para actualizar la informacion antes del envio de esta misma a la DB */
-    const updateData  = async()=>{
-        setFormInicio((prevData) =>({
+    const updateData = async () => {
+        setFormInicio((prevData) => ({
             ...prevData,
             fecha_hora_inicio: `${dia} ${time}`,
             ultima_modificacion: formatoFecha(),
-            modificado_por: usuario.nombre,
-            id_usuario: usuario.id_usuario,
-            estado_viaje:"En proceso",
+            modificado_por: usuario!.nombre,
+            id_usuario: usuario!.id_usuario,
+            estado_viaje: "En espera",
 
         }))
     }
@@ -220,17 +183,17 @@ function inicioViaje() {
     /* Efecto que se activa la momento de actualizar algun valor en formInicio o navigate, si detecta algun cambio en el 
     formInicio y al mismo tiempo el estado de viaje es verdadero, hace envio de la informacion inicial a DB, guarda
     esta misma informacion en localStorage y envia a la vista de viaje en proceso */
-    useEffect(()=>{
-        if(formInicio.estado_viaje==="En proceso"){       
+    useEffect(() => {
+        if (formInicio.estado_viaje === "En espera") {
             //enviar a bd datos iniciales
             addViajeInicial(formInicio)
-            localStorage.setItem('viajeEnProceso',JSON.stringify(formInicio))
+            localStorage.setItem('viajeEnProceso', JSON.stringify(formInicio))
             navigate("/viajeProceso", {})
         }
-    },[formInicio,navigate])
+    }, [formInicio, navigate])
 
     /*Almacena los datos ingresados dentro de formInicio en db y deja el estado del viaje en "true" (viaje activo -> true/viaje terminado ->false) --> vehiculo a "ACTIVO" */
-    const continuarProceso = async() => {
+    const continuarProceso = async () => {
         await updateData().then()
     }
 
@@ -246,167 +209,104 @@ function inicioViaje() {
         */
         <>
             <NavBar type={0} texto="" />
-            {cargando ? 
-            ( 
-                <div>
-            <div className="tituloPaso">
-                <h1>Iniciar un viaje</h1>
-                <h2>Ingresa los datos necesarios</h2>
-            </div>
+            {cargando ?
+                (
+                    <div>
+                        <div className="tituloPaso">
+                            <h1>Iniciar un viaje</h1>
+                            <h2>Ingresa los datos necesarios</h2>
+                        </div>
 
-            <div className="inputsInicio">
-                <div className="itemInput">
-                    <label>Fecha</label>
-                    <input name="dia" type="date" value={dia} onChange={(e)=>setDia(e.target.value)}></input>
-                </div>
+                        <div className="inputsInicio">
+                            <div className="itemInput">
+                                <label>Fecha</label>
+                                <input name="dia" type="date" value={dia} onChange={(e) => setDia(e.target.value)}></input>
+                            </div>
 
-                <div className="itemInput">
-                    <label>Patente</label>
-                    <select name="Patentes" defaultValue={""} onChange={manejarDataVehiculo}>
-                        <option value={""} disabled>Selecciona una patente disponible</option>
-                        {/**Solo se muestran las patentes de vehiculos disponibles */}
-                        {vehiculos && vehiculos!.filter(vehiculo => vehiculo.estado === "DISPONIBLE").map((vehiculo) => (
-                            <option key={vehiculo.patente} value={vehiculo.patente}>
-                                {vehiculo.patente}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                            <div className="itemInput">
+                                <label>Patente</label>
+                                <input disabled value={formInicio.patente}></input>
+                            </div>
 
-                <div className="itemInput">
-                    <label>Modelo Vehículo</label>
-                    <input disabled value={formInicio.vehiculo} placeholder=""></input>
-                </div>
+                            <div className="itemInput">
+                                <label>Modelo Vehículo</label>
+                                <input disabled value={formInicio.vehiculo} placeholder=""></input>
+                            </div>
 
-                <div className="itemInput">
-                    <label>Kilometraje actual</label>
-                    <input disabled type="number" name="kmsInicio" value={vehiculoSelected?.kms_actual}></input>
-                </div>
+                            <div className="itemInput">
+                                <label>Kilometraje actual</label>
+                                <input disabled type="number" name="kmsInicio" value={vehiculoSelected?.kms_actual}></input>
+                            </div>
 
-                <div className="itemInput">
-                    <label>Hora inicio</label>
-                    <input name="time" value={time} onChange={(e)=>setTime(e.target.value)} type="time"></input>
-                </div>
+                            <div className="itemInput">
+                                <label>Hora inicio</label>
+                                <input name="time" value={time} onChange={(e) => setTime(e.target.value)} type="time"></input>
+                            </div>
 
-                <div className="itemInput">
-                    <label>Funcionario</label>
-                    <input disabled name={usuario.nombre} value={usuario.nombre} type="text"></input>
-                </div>
-            </div>
-            <div className="full-width">
-                <div className="itemInput2">
-                    <label>Motivo</label>
-                    <textarea name="motivo" value={formInicio.motivo} onChange={handleChange} placeholder="Explique el objetivo del viaje"></textarea>
-                </div>
-            </div>
-
-
-            {isMobile ? (
-                <div className="full-width">
-                    <button className="buttonFormularioInicio" onClick={() => openModalCamara(true)}>Agregar imagen tablero</button>
-                </div>) : (<></>)}
-
-
-
-            
-            <div className="full-width">
-                {destinoChange > 1 ?
-                    (<>
-                        <div className="leaflet-container-preview">
-                            <MapContainer center={[dataGPSDestino.lat, dataGPSDestino.lng]} zoom={18}>
-                                <TileLayer
-                                    url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>'
-                                    subdomains="abcd"
-                                    minZoom={8}
-                                    maxZoom={18}
-                                />
-                                <Marker
-                                    position={[dataGPS.lat, dataGPS.lng]}
-                                    draggable={false}
-                                    icon={createCustomIcon("#3b40cf")}
-                                />
-                                <Marker
-                                    position={[dataGPSDestino.lat, dataGPSDestino.lng]}
-                                    draggable={false}
-                                    icon={createCustomIcon('#57A450')}
-                                >
-                                </Marker>
-                                <FitBounds points={points}></FitBounds>
-                                <Routing point1={dataGPS} point2={dataGPSDestino} />
-                            </MapContainer>
-
-                            <div style={{display:"flex",flexDirection:"column", marginLeft:"1%" , padding:"1px", width:"30%"}}>
-                                <button style={{background:"#696AE3",color:"white",border:"#696AE3", borderRadius:"20px",padding:"5%"}} onClick={() => openModalDestino(true)}>Cambiar destino</button>
-
-                                <span>Destino</span><input name="destino" value={formInicio.destino} onChange={handleChange} type="text"></input>
+                            <div className="itemInput">
+                                <label>Funcionario</label>
+                                <input disabled name={usuario!.nombre} value={usuario!.nombre} type="text"></input>
                             </div>
                         </div>
-                    </>)
-                    :
-                    (<>
-                        <button className="buttonFormularioInicio" onClick={() => openModalDestino(true)}>Agregar destino del viaje</button>
-                    </>)}
-
-            </div>
-
-            <div className="botonesPaso">
-                <button className="botonPaso" onClick={() => volverMenu()}>Volver</button>
-                <button className="botonPaso" onClick={() => continuarProceso()}>Continuar</button>
-            </div>
-            </div>
-            ):(<>Cargando...</>)}
-
-
-            {/*Modal para la seleccion de destino del viaje */}
-            <Modal open={modalDestino} onClose={() => openModalDestino(false)}>
-                <ModalDialog variant="soft" size="lg">
-                    <DialogTitle>
-                        Mueve el pin al lugar de destino aproximado
-                    </DialogTitle>
-                    <Divider />
-                    <DialogContent>
-                        <div className="leaflet-container">
-                            <MapContainer center={[dataGPS.lat, dataGPS.lng]} zoom={15} scrollWheelZoom={false}>
-                                <TileLayer
-                                    url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>'
-                                    subdomains="abcd"
-                                    maxZoom={20}
-                                />
-                                <Marker
-                                    position={[dataGPS.lat, dataGPS.lng]}
-                                    draggable={false} // Queda estatico con la posicion actual del usuario
-                                    icon={createCustomIcon("#3b40cf")}
-                                />
-                                <Marker
-                                    position={[dataGPSDestino.lat, dataGPSDestino.lng]}
-                                    draggable={true} // El usuario mueve este para determinar el destino
-                                    autoPan={true}
-                                    eventHandlers={{
-                                        dragend: manejarMovimientoDestino // Captura la nueva posición al soltarlo
-                                    }}
-                                    riseOnHover={true}
-                                    icon={createCustomIcon('#57A450')}
-                                >
-
-                                </Marker>
-
-                                <FitBounds points={points}></FitBounds>
-                                <Routing point1={dataGPS} point2={dataGPSDestino} />
-                            </MapContainer>
+                        <div className="full-width">
+                            <div className="itemInput2">
+                                <label>Motivo</label>
+                                <textarea name="motivo" value={formInicio.motivo} onChange={handleChange} disabled></textarea>
+                            </div>
                         </div>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button variant="solid" color="success" onClick={() => openModalDestino(false)}>
-                            Agregar destino
-                        </Button>
-                        <Button variant="plain" color="danger" onClick={() => openModalDestino(false)}>
-                            Cancelar
-                        </Button>
-                    </DialogActions>
-                </ModalDialog>
-            </Modal>
+
+
+                        {isMobile ? (
+                            <div className="full-width">
+                                <button className="buttonFormularioInicio" onClick={() => openModalCamara(true)}>Agregar imagen tablero</button>
+                            </div>) : (<></>)}
+
+
+
+
+                        <div className="full-width">
+                            <>
+                            <div>Destino {formInicio.destino}</div>
+                                <div className="leaflet-container-preview">
+                                    <MapContainer center={[dataGPSDestino.lat, dataGPSDestino.lng]} zoom={18}>
+                                        <TileLayer
+                                            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>'
+                                            subdomains="abcd"
+                                            minZoom={8}
+                                            maxZoom={18}
+                                        />
+                                        <Marker
+                                            position={[formInicio.lat_inicio, formInicio.lng_fin]}
+                                            draggable={false}
+                                            icon={createCustomIcon("#3b40cf")}
+                                        />
+                                        <Marker
+                                            position={[formInicio.lat_fin, formInicio.lng_fin]}
+                                            draggable={false}
+                                            icon={createCustomIcon('#57A450')}
+                                        >
+                                        </Marker>
+                                        <FitBounds points={points}></FitBounds>
+                                        <Routing point1={dataGPS} point2={dataGPSDestino} />
+                                    </MapContainer>
+
+                                    <div style={{ display: "flex", flexDirection: "column", marginLeft: "1%", padding: "1px", width: "30%" }}>
+                                        <button style={{ background: "#696AE3", color: "white", border: "#696AE3", borderRadius: "20px", padding: "5%" }} onClick={() => openModalDestino(true)}>Cambiar destino</button>
+
+                                        <span>Destino</span><input name="destino" value={formInicio.destino} onChange={handleChange} type="text"></input>
+                                    </div>
+                                </div>
+                            </>
+
+                        </div>
+
+                        <div className="botonesPaso">
+                            <button className="botonPaso" onClick={() => volverMenu()}>Volver</button>
+                            <button className="botonPaso" onClick={() => continuarProceso()}>Continuar</button>
+                        </div>
+                    </div>
+                ) : (<>Cargando...</>)}
 
             {/*Modal para ingreso de documentacion tablero vehiculo ya sea imagen previa o con camara */}
             <Modal open={modalCamara} onClose={() => openModalCamara(false)}>

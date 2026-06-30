@@ -87,3 +87,51 @@
     width: 100% ;
     overflow-x: auto;
 }
+
+.itemInput-Modal{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+}
+.itemInput-Modal option{
+    overflow: hidden;
+}
+.itemInput2-Modal{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+.itemInput2-Modal textarea{
+    height: 100%;
+    max-height: 20vh;
+    field-sizing: content;
+    resize: none;
+    overflow-y: auto;
+}
+.itemInput-Modal input{
+    width: 50%;
+}
+.items-Modal{
+    display: flex;
+    flex-direction: column;
+}
+.buttonLabel-Modal{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: baseline;
+}
+.buttonLabel-Modal button{
+    margin-top: 3%;
+    padding:3%;
+    border-radius: 10px;
+    background-color: #0B6BCB;
+    border: #0B6BCB;
+    color: white;
+    justify-items: space-between;
+}
+.buttonLabel-Modal button:hover{
+    cursor: pointer;
+    background-color: #0e4669;
+}

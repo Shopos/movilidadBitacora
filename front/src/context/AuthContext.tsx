@@ -73,6 +73,7 @@ export function AuthProvider({children}: {children: ReactNode}){
                     throw new Error( "Token invalido")
                 }
                 console.log("Sesion restaurada")
+                
                 const data = await res.json()
                 setUsuario(data.usuario)
                 setToken(tokenSaved)
@@ -88,9 +89,7 @@ export function AuthProvider({children}: {children: ReactNode}){
     },[])
 
     return (
-        <AuthContext.Provider value={{usuario,token
-            ,cargando, autenticado:!!usuario,login,logOut
-        }}>{children}</AuthContext.Provider>
+        <AuthContext.Provider value={{usuario,token,cargando, autenticado: !!usuario, login, logOut}}>{children}</AuthContext.Provider>
     )
 }
 

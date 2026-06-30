@@ -14,7 +14,7 @@ import { jsPDF } from "jspdf"
 import autoTable from "jspdf-autotable";
 
 import type { Vehiculo, Viaje, User } from "../../tipos/tipoSistema.ts"
-import getVehiculos, { getViajes, getFuncionarios } from "../../utils/auxiliar.ts";
+import getVehiculos, { getViajes, getFuncionarios, addViajeInicial } from "../../utils/auxiliar.ts";
 import { useAuth } from "../../context/AuthContext.tsx";
 
 import 'leaflet/dist/leaflet.css';
@@ -31,6 +31,7 @@ interface prop {
     points: GPS[]
 }
 function menuAdmin() {
+    const { usuario } = useAuth() //usuario ingresado en el inicio de sesión
     const [viajes, setViajes] = useState<[Viaje]>()
     const [viajeSelected, setViajeSelected] = useState<Viaje | null>(null)
     const [viajeEdit, setViajeEditSelected] = useState<Viaje | null>(null)
@@ -68,6 +69,7 @@ function menuAdmin() {
         lng_fin_real: 0,
         modificado_por: "", //inicio viaje -> cambiar
         ultima_modificacion: "", //inicio viaje ->cambiar
+        modo: "ida" //modo ida (inicial) -> modo vuelta --->nuevo viaje con datos inversos
     })
 
     /* Metodo para obtener la lista de viajes */
@@ -171,11 +173,14 @@ function menuAdmin() {
         const usuarioFind = listaUsuarios!.find(
             (usr) => usr.nombre === usuarioSelected
         )
-        setFormInicio((prevData) => ({
-            ...prevData,
-            id_usuario: usuarioFind ? usuarioFind.id_usuario : 0,
-            nombre_funcionario: usuarioFind ? usuarioFind.nombre : ""
-        }))
+        if (usuarioFind && usuarioFind.id_usuario !== 0) {
+            console.log(usuarioFind.id_usuario)
+            setFormInicio((prevData) => ({
+                ...prevData,
+                id_usuario: usuarioFind ? usuarioFind.id_usuario : 0,
+                nombre_funcionario: usuarioFind ? usuarioFind.nombre : ""
+            }))
+        }
     }
 
     const editarViajeModal = (viaje: Viaje) => {
@@ -186,44 +191,41 @@ function menuAdmin() {
     }
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-            const { name, value } = event.target
-            setFormInicio((prevData) => ({
-                ...prevData,
-                [name]: value
-            }))
-        }
-    
-    const {usuario} = useAuth()
-    console.log(localStorage.getItem("token"))
-    console.log(usuario)
+        const { name, value } = event.target
+        setFormInicio((prevData) => ({
+            ...prevData,
+            [name]: value
+        }))
+    }
+
 
     /*Mapa */
-    const [modalDestino,openModalDestino] = useState(false)
+    const [modalDestino, openModalDestino] = useState(false)
     const [dataGPS, setDataGPS] = useState<GPS>({
-            lat: -34.639739, lng: -71.365916
-        })
-        const [dataGPSDestino, setDataGPSDestino] = useState<GPS>({
-            lat: -34.639739, lng: -71.365916
-        })
+        lat: -34.639739, lng: -71.365916
+    })
+    const [dataGPSDestino, setDataGPSDestino] = useState<GPS>({
+        lat: -34.639739, lng: -71.365916
+    })
     const points: GPS[] = [dataGPS, dataGPSDestino]
     function FitBounds({ points }: prop) {
-            const map = useMap()
-    
-            useEffect(() => {
-                const bound = points.map(p => [p.lat, p.lng] as [number, number])
-                if (points.length > 0) {
-                    map.fitBounds(bound, {
-                        padding: [50, 50],
-                        maxZoom: 15,
-                    })
-                }
-            }, [map, points])
-            return null
-        }
+        const map = useMap()
+
+        useEffect(() => {
+            const bound = points.map(p => [p.lat, p.lng] as [number, number])
+            if (points.length > 0) {
+                map.fitBounds(bound, {
+                    padding: [50, 50],
+                    maxZoom: 15,
+                })
+            }
+        }, [map, points])
+        return null
+    }
     const createCustomIcon = (color: string) => {
-            return L.divIcon({
-                className: 'custom-div-icon',
-                html: `<div style="
+        return L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="
                 background-color: ${color};
                 width: 24px;
                 height: 24px;
@@ -234,10 +236,10 @@ function menuAdmin() {
                 top: -12px;
                 border: 2px solid white;
                 "></div>`,
-                iconAnchor: [0, 12]
-            })
-        }
-         const manejarMovimientoDestino = (e: any) => {
+            iconAnchor: [0, 12]
+        })
+    }
+    const manejarMovimientoDestino = (e: any) => {
         const marker = e.target;
         if (marker != null) {
             const gps = marker.getLatLng();
@@ -246,6 +248,63 @@ function menuAdmin() {
             setDataGPSDestino({ lat: gps.lat, lng: gps.lng });
         }
     };
+
+    useEffect(() => {
+        const actualiza = {
+            ...formInicio,
+            lat_inicio: dataGPS.lat,
+            lng_inicio: dataGPS.lng,
+            lat_fin: dataGPSDestino.lat,
+            lng_fin: dataGPSDestino.lng
+        }
+        setFormInicio(actualiza)
+    }, [dataGPSDestino]
+    )
+
+    const formatoFecha = () => {
+        const d = new Date()
+        const year = d.getFullYear()
+        const month = String(d.getMonth() + 1).padStart(2, '0')
+        const day = String(d.getDate()).padStart(2, '0')
+        const hour = String(d.getHours()).padStart(2, '0')
+        const min = String(d.getMinutes()).padStart(2, '0')
+
+        const formato = `${year}-${month}-${day} ${hour}:${min}`
+        return formato
+    }
+
+    //Ultimos cambios antes de subir informacion a db
+    const handleAgendaViaje = () => {
+        setFormInicio((prevData) => ({
+            ...prevData,
+            fecha_hora_inicio: `${dia} ${time}`,
+            ultima_modificacion: formatoFecha(),
+            modificado_por: usuario!.nombre,
+            estado_viaje: "En espera",
+            modo: "ida"
+        }))
+    }
+
+    /* Efecto que se activa la momento de actualizar algun valor en formInicio o navigate, si detecta algun cambio en el 
+        formInicio y al mismo tiempo el estado de viaje es verdadero, hace envio de la informacion inicial a DB, guarda
+        esta misma informacion en localStorage y envia a la vista de viaje en proceso */
+    useEffect(() => {
+        if (formInicio.estado_viaje === "En espera") {
+
+            //enviar a bd datos iniciales
+            console.log(formInicio)
+            addViajeInicial(formInicio)
+            //Limpiar formInicio
+            setModalNewViaje(false)
+
+        }
+    }, [formInicio])
+
+    const handleCierre = () => {
+        //limpiar formInicio
+        setModalNewViaje(false)
+    }
+
     /*
     Vista menu administracion
     >Directamente abre la tabla de las bitacoras
@@ -419,16 +478,9 @@ function menuAdmin() {
                     </DialogTitle>
                     <Divider />
                     <DialogContent>
-                        <div>
-                            <div className="itemInput">
-                                <label>Fecha</label>
-                                <input name="dia" type="date" value={dia} onChange={(e) => setDia(e.target.value)}></input>
-                            </div>
-                            <div className="itemInput">
-                                <label>Hora inicio</label>
-                                <input name="time" value={time} onChange={(e) => setTime(e.target.value)} type="time"></input>
-                            </div>
-                            <div className="itemInput">
+                        <div className="items-Modal">
+
+                            <div className="itemInput-Modal">
                                 <label>Patente</label>
                                 <select name="Patentes" defaultValue={""} onChange={manejarDataVehiculo}>
                                     <option value={""} disabled>Selecciona una patente disponible</option>
@@ -440,7 +492,7 @@ function menuAdmin() {
                                     ))}
                                 </select>
                             </div>
-                            <div className="itemInput">
+                            <div className="itemInput-Modal">
                                 <label>Funcionario</label>
                                 <select name="funcionarios" defaultValue={""} onChange={manejarDataFuncionario}>
                                     <option value={""} disabled>Designa un funcionario</option>
@@ -449,24 +501,28 @@ function menuAdmin() {
                                     ))}
                                 </select>
                             </div>
-                            <div className="itemInput">
+                            <div className="itemInput-Modal">
                                 <label>Modelo Vehículo</label>
                                 <input disabled value={formInicio.vehiculo} placeholder=""></input>
                             </div>
-                            <div className="itemInput">
+                            <div className="itemInput-Modal">
                                 <label>Kilometraje actual</label>
                                 <input disabled type="number" name="kmsInicio" value={vehiculoSelected?.kms_actual}></input>
                             </div>
-                            <div className="itemInput2">
+                            <div className="itemInput2-Modal">
                                 <label>Motivo</label>
                                 <textarea name="motivo" value={formInicio.motivo} onChange={handleChange} placeholder="Explique el objetivo del viaje"></textarea>
                             </div>
-                            <div>
-                                <button>Cambiar destino del viaje</button>
-                                <button>Agregar destino del viaje</button>
+                            <div className="buttonLabel-Modal">
+                                <button onClick={() => openModalDestino(true)}>Agregar destino del viaje</button>
+                                {formInicio.destino ? <label>Destino: {formInicio.destino}</label> : <></>}
                             </div>
                         </div>
                     </DialogContent>
+                    <DialogActions>
+                        <Button variant="solid" color="success" onClick={() => handleAgendaViaje()}>Agendar Viaje</Button>
+                        <Button variant="outlined" color="danger" onClick={() => handleCierre()}>Cancelar</Button>
+                    </DialogActions>
                 </ModalDialog>
             </Modal>
 
@@ -479,6 +535,10 @@ function menuAdmin() {
                     </DialogTitle>
                     <Divider />
                     <DialogContent>
+                        <div>
+                            <label>Agrega el destino del viaje</label>
+                            <input type="text" name="destino" value={formInicio.destino} onChange={handleChange}></input>
+                        </div>
                         <div className="leaflet-container">
                             <MapContainer center={[dataGPS.lat, dataGPS.lng]} zoom={15} scrollWheelZoom={false}>
                                 <TileLayer

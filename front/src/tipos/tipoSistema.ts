@@ -41,7 +41,8 @@ export type Viaje = {
     nombre_funcionario:string, //
     estado_viaje:"En espera"|"En proceso"|"Terminado",
     ultima_modificacion:string,
-    modificado_por:string
+    modificado_por:string,
+    modo:string
 }
 
 export type ViajeInputFin = {

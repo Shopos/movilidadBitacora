@@ -1,10 +1,11 @@
 import { connection } from "../config/database"
 import { RowDataPacket } from "mysql2"
+import { getIdUsuario } from "./usuario.model"
 
 export interface Viaje extends RowDataPacket{
     id_viaje:number,
     vehiculo:string, 
-    id_usuario:number,
+    id_usuario:string,
     patente:string, 
     kms_inicio:number, 
     fecha_hora_inicio:string, //separar fecha y hora al pedir datos
@@ -22,9 +23,10 @@ export interface Viaje extends RowDataPacket{
     carga_combustible:boolean,
     cantidad_combustible:number,
     nombre_funcionario:string, //
-    estado_viaje:boolean,
+    estado_viaje:"En espera"|"En proceso"|"Terminado",
     ultima_modificacion:string,
     modificado_por:string
+    modo:"ida"|"vuelta"
 }
 export interface ViajeInputInicio{
     vehiculo:string,
@@ -46,8 +48,21 @@ export interface ViajeInputInicio{
 }
 export interface ViajeInputFuncionarioInicio{
     fecha_hora_inicio:string,
+    ultima_modificacion:string,
+    modificado_por:string
     //Foto tablero
 }
+
+export interface ViajeInputFuncionarioFin{
+    fecha_hora_fin:string,
+    obs_viaje:string,
+    carga_combustible:boolean,
+    cantidad_combustible:number,
+    ultima_modificacion:string,
+    modificado_por: string
+    kms_fin:number
+}
+
 export interface ViajeInputFin{
     fecha_hora_fin:string,
     lat_fin_real:number,
@@ -69,8 +84,15 @@ export async function getAllViajes(): Promise<Viaje[]>{
     return rows
 }
 
+export async function getViajeIdUsuario(id:number|number[]): Promise<Viaje[]>{
+    const [rows] = await connection.query<Viaje[]>(
+        "SELECT * FROM viajes WHERE id_usuario = ?",[id]
+    )
+    return rows
+}
+
 //Metodo que devuelve los viajes segun el id de un usuario
-export async function getViajeIdUsuario(id:number): Promise<Viaje[]>{
+export async function getViajeIdUsuarioEspera(id:number|number[]): Promise<Viaje[]>{
     console.log(id)
     const [rows] = await connection.query<Viaje[]>(
         "SELECT * FROM viajes WHERE id_usuario = ? && estado_viaje = ? ",[id,"En espera"]
@@ -78,8 +100,15 @@ export async function getViajeIdUsuario(id:number): Promise<Viaje[]>{
     return rows
 } 
 
+export async function getViajeId(id:number|number[]): Promise<Viaje[]>{
+    const [rows] = await connection.query<Viaje[]>(
+        "SELECT * FROM viajes WHERE id_viaje = ? ",[id]
+    )
+    return rows
+}
+
 //Metodo que devuelve los viajes de un usuario cuyo nombre sea igual al solicitado
-export async function getViajeNombreUsuario(id:string): Promise<Viaje[]>{
+export async function getViajeNombreUsuario(id:string|string[]): Promise<Viaje[]>{
     const [rows] = await connection.query<Viaje[]>(
         "SELECT usuarios.nombre, viajes.* FROM viajes,usuarios WHERE viajes.id_usuario = usuarios.id_usuario and usuarios.nombre = ? ",
         [id]
@@ -182,4 +211,26 @@ export async function editViajeFin(patente:string|string[],data:ViajeInputFin): 
     //@ts-ignore
     return (resultado.affectedRows > 0)
 
+}
+
+export async function parcheInicio(id:number,data:ViajeInputFuncionarioInicio): Promise<boolean>{
+    const [res] = await connection.query(
+        `UPDATE viajes SET fecha_hora_inicio = ?, ultima_modificacion = ?, modificado_por = ?, estado_viaje = ? WHERE id_viaje = ? AND estado_viaje= ? `,
+        [data.fecha_hora_inicio,data.ultima_modificacion,data.modificado_por,"En proceso",id,"En espera"]
+    )
+    //@ts-ignore
+    return (res.affectedRows > 0)
+}
+//cambia el estado del viaje
+export async function changeStatusViaje(id:number,status:string): Promise<boolean>{
+    const [res] = await connection.query(
+        `UPDATE viajes set estado_viaje = ? WHERE id_viaje = ?`,[status,id]
+    )
+    //@ts-ignore
+    return (res.affectedRows > 0)
+}
+
+export async function parcheFin(id:number,data:ViajeInputFuncionarioFin): Promise<boolean>{
+    //@ts-ignore
+    return (res.affectedRows > 0)
 }

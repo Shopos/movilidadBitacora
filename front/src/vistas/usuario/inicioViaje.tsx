@@ -3,14 +3,15 @@ import NavBar from "../../componentes/navBar.tsx"
 import "../../estilos/inicioViaje.css"
 import React, { useEffect, useState } from "react";
 import { Modal, ModalDialog, DialogTitle, Divider, DialogContent, DialogActions, Button } from "@mui/joy"
-import type { Vehiculo, User, Viaje } from "../../tipos/tipoSistema.ts";
+import type { Viaje } from "../../tipos/tipoSistema.ts";
 import Routing from "../../componentes/routing.tsx" /*Componente para marcar la ruta entre inicio y destino en mapa*/
-import getVehiculos, { addViajeInicial } from "../../utils/auxiliar.ts";
 import 'leaflet/dist/leaflet.css';
 import L from "leaflet"
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
 import { isMobile } from "react-device-detect"
 import { useAuth } from "../../context/AuthContext.tsx";
+import { getViajeUsuarioEspera, patchInicio } from "../../utils/auxiliar.ts";
+
 
 type GPS = {
     lat: number,
@@ -20,52 +21,23 @@ type GPS = {
 interface prop {
     points: GPS[]
 }
-/**Solo toma la segunda vez que se hace drag del pin */
-function inicioViaje() {
-    const [vehiculoSelected, setVehiculoSelected] = useState<Vehiculo | null>(null)
-    const [modalDestino, openModalDestino] = useState<boolean>(false)
-    const [modalCamara, openModalCamara] = useState<boolean>(false)
-    const [destinoChange, setDestinoChange] = useState<number>(0)
-    const [cargando, setCargando] = useState<boolean>(false)
-    const [dataGPS, setDataGPS] = useState<GPS>({
-        lat: -34.639739, lng: -71.365916
-    })
-    const [dataGPSDestino, setDataGPSDestino] = useState<GPS>({
-        lat: -34.639739, lng: -71.365916
-    })
-    const points: GPS[] = [dataGPS, dataGPSDestino]
 
-    const [formInicio, setFormInicio] = useState<Viaje>({
-        id_viaje: 0,
-        fecha_hora_inicio: "",
-        patente: "",
-        motivo: "",
-        vehiculo: "",
-        kms_inicial: 0,
-        fecha_hora_fin: "",
-        kms_fin: 0,
-        nombre_funcionario: "",
-        carga_combustible: false,
-        cantidad_carga: 0,
-        obs_viaje: "",
-        lat_inicio: 0,
-        lng_inicio: 0,
-        lat_fin: 0,
-        lng_fin: 0,
-        destino: "",
-        estado_viaje: "Terminado", //inicio viaje -> cambiar
-        id_usuario: 0, //inicio viaje -> cambiar
-        lat_fin_real: 0,
-        lng_fin_real: 0,
-        modificado_por: "", //inicio viaje -> cambiar
-        ultima_modificacion: "", //inicio viaje ->cambiar,
-        modo: ""
-    })
+function inicioViaje() {
+    const [modalCamara, openModalCamara] = useState<boolean>(false)
+    const [cargando, setCargando] = useState<boolean>(false)
+    const [formInicio, setFormInicio] = useState<Viaje|null>()
+    const [dataGPS, setDataGPS] = useState<GPS>({
+            lat: 0, lng: 0
+        })
+        const [dataGPSDestino, setDataGPSDestino] = useState<GPS>({
+            lat: 0, lng: 0
+        })
+        const points: GPS[] = [dataGPS, dataGPSDestino]
     const {usuario} = useAuth()
-    const [vehiculos, setVehiculos] = useState<[Vehiculo]>()
 
     const [dia, setDia] = useState("")
     const [time, setTime] = useState("")
+
     /*Funcion para dar colores especificos a los Marker de leaflet y poder diferenciar punto de inicio y destino */
     const createCustomIcon = (color: string) => {
         return L.divIcon({
@@ -85,21 +57,6 @@ function inicioViaje() {
         })
     }
 
-    /*Efecto para conseguir el nombre del usuario registrado y su posicion actual dependiendo del GPS, solo si ha sido aceptado en app */
-    useEffect(() => {
-        const getViaje=async()=>{
-            //await getViajeUsuario()
-        }
-        const getData = async () => {
-            setFormInicio((prevData) => ({
-                ...prevData,
-                nombre_funcionario: usuario!.nombre,
-            }))
-            setCargando(true)
-        }
-        getData()
-    }, [])
-
     /*Funcion para centrar el preview del mapa dependiendo de los puntos seleccionados */
     function FitBounds({ points }: prop) {
         const map = useMap()
@@ -116,40 +73,43 @@ function inicioViaje() {
         return null
     }
 
-    /*Efecto para guardar los puntos del destino luego de terminar el drag del marcador de destino*/
-    useEffect(() => {
-        const actualiza = {
-            ...formInicio,
-            lat_inicio: dataGPS.lat,
-            lng_inicio: dataGPS.lng,
-            lat_fin: dataGPSDestino.lat,
-            lng_fin: dataGPSDestino.lng
+
+    useEffect(()=>{
+        const getViajeEspera=async()=>{
+            try{
+                if(usuario){
+                    const response = await getViajeUsuarioEspera(usuario.id)
+                    if(response && Object.keys(response).length>0){
+                        setFormInicio(response[0])
+                        
+                        setCargando(true)
+                    }else{
+                        setFormInicio(null)
+                    }
+                }
+            }catch(e){
+                console.error( " Error encontrando viaje ")
+                setFormInicio(null)
+            }
         }
-        setFormInicio(actualiza)
-        setDestinoChange(destinoChange + 1)
-    }, [dataGPSDestino]
-    )
+        getViajeEspera()
+    },[usuario])
+
+    useEffect(()=>{
+        if(formInicio?.lat_inicio){
+            setDataGPS({lat:formInicio!.lat_inicio, lng:formInicio!.lng_inicio})
+            setDataGPSDestino({lat:formInicio!.lat_fin,lng:formInicio!.lng_fin})
+        }
+    },[formInicio])
 
     /*Funcion para manejar los cambios de los inputs disponibles */
     const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = event.target
         setFormInicio((prevData) => ({
-            ...prevData,
+            ...prevData!,
             [name]: value
         }))
     }
-
-    /*Funciona para manejar el cambio de destino y guardar esta posicion al finalizar el drag */
-    const manejarMovimientoDestino = (e: any) => {
-        const marker = e.target;
-        if (marker != null) {
-            const gps = marker.getLatLng();
-            console.log(gps)
-            // Actualizamos solo el estado del destino
-            setDataGPSDestino({ lat: gps.lat, lng: gps.lng });
-        }
-    };
-
 
     const navigate = useNavigate()
 
@@ -168,32 +128,36 @@ function inicioViaje() {
 
     /* Método para actualizar la informacion antes del envio de esta misma a la DB */
     const updateData = async () => {
-        setFormInicio((prevData) => ({
-            ...prevData,
-            fecha_hora_inicio: `${dia} ${time}`,
-            ultima_modificacion: formatoFecha(),
-            modificado_por: usuario!.nombre,
-            id_usuario: usuario!.id_usuario,
-            estado_viaje: "En espera",
-
-        }))
+        if(formInicio){
+           setFormInicio((prevData) => ({
+                ...prevData!,
+                fecha_hora_inicio: `${dia} ${time}`,
+                ultima_modificacion: formatoFecha(),
+                modificado_por: usuario!.nombre,
+                estado_viaje: "En proceso",
+            }))
+        }
     }
 
-
-    /* Efecto que se activa la momento de actualizar algun valor en formInicio o navigate, si detecta algun cambio en el 
-    formInicio y al mismo tiempo el estado de viaje es verdadero, hace envio de la informacion inicial a DB, guarda
-    esta misma informacion en localStorage y envia a la vista de viaje en proceso */
-    useEffect(() => {
-        if (formInicio.estado_viaje === "En espera") {
-            //enviar a bd datos iniciales
-            addViajeInicial(formInicio)
-            localStorage.setItem('viajeEnProceso', JSON.stringify(formInicio))
-            navigate("/viajeProceso", {})
+    useEffect(()=>{
+        if(formInicio?.estado_viaje === "En proceso"){
+            localStorage.setItem("idViaje",String(formInicio.id_viaje))//guardar idViaje para consulta futura
+            patchInicio(formInicio.id_viaje,{
+                fecha_hora_inicio: formInicio.fecha_hora_inicio,
+                ultima_modificacion: formInicio.ultima_modificacion,
+                modificado_por: formInicio.modificado_por
+            })
+            navigate("/viajeProceso")
         }
-    }, [formInicio, navigate])
+    })
+
+
+
 
     /*Almacena los datos ingresados dentro de formInicio en db y deja el estado del viaje en "true" (viaje activo -> true/viaje terminado ->false) --> vehiculo a "ACTIVO" */
     const continuarProceso = async () => {
+        //Almacenar en localStorage id_viaje
+        //Hacer patch al viaje y cambiar estado del vehiculo y usuario a en ruta, como tambien al viaje
         await updateData().then()
     }
 
@@ -209,7 +173,7 @@ function inicioViaje() {
         */
         <>
             <NavBar type={0} texto="" />
-            {cargando ?
+            {cargando && formInicio ?
                 (
                     <div>
                         <div className="tituloPaso">
@@ -235,7 +199,7 @@ function inicioViaje() {
 
                             <div className="itemInput">
                                 <label>Kilometraje actual</label>
-                                <input disabled type="number" name="kmsInicio" value={vehiculoSelected?.kms_actual}></input>
+                                <input disabled type="number" name="kmsInicio" value={formInicio.kms_inicial}></input>
                             </div>
 
                             <div className="itemInput">
@@ -263,12 +227,12 @@ function inicioViaje() {
 
 
 
-
+                        <div>Destino {formInicio.destino}</div>
                         <div className="full-width">
                             <>
-                            <div>Destino {formInicio.destino}</div>
+                            
                                 <div className="leaflet-container-preview">
-                                    <MapContainer center={[dataGPSDestino.lat, dataGPSDestino.lng]} zoom={18}>
+                                    <MapContainer zoom={18}>
                                         <TileLayer
                                             url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>'
@@ -277,7 +241,7 @@ function inicioViaje() {
                                             maxZoom={18}
                                         />
                                         <Marker
-                                            position={[formInicio.lat_inicio, formInicio.lng_fin]}
+                                            position={[formInicio.lat_inicio, formInicio.lng_inicio]}
                                             draggable={false}
                                             icon={createCustomIcon("#3b40cf")}
                                         />
@@ -290,12 +254,6 @@ function inicioViaje() {
                                         <FitBounds points={points}></FitBounds>
                                         <Routing point1={dataGPS} point2={dataGPSDestino} />
                                     </MapContainer>
-
-                                    <div style={{ display: "flex", flexDirection: "column", marginLeft: "1%", padding: "1px", width: "30%" }}>
-                                        <button style={{ background: "#696AE3", color: "white", border: "#696AE3", borderRadius: "20px", padding: "5%" }} onClick={() => openModalDestino(true)}>Cambiar destino</button>
-
-                                        <span>Destino</span><input name="destino" value={formInicio.destino} onChange={handleChange} type="text"></input>
-                                    </div>
                                 </div>
                             </>
 

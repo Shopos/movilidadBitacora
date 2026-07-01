@@ -109,7 +109,7 @@ function menuAdmin() {
         getListaUsuarios()
         getListaVehiculos()
     }, [cargando])
-
+    
     const handleModalViajeView = (viaje: Viaje) => {
         //Visualiza la informacion del viaje en un modal, si el viaje esta en proceso muestra la informacion del viaje hasta el momento
         setViajeSelected(viaje)
@@ -169,12 +169,11 @@ function menuAdmin() {
     }
 
     const manejarDataFuncionario = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const usuarioSelected = (event.target.value).split(" / ")[0]
+        const usuarioSelected = (event.target.value).split(" / ")
         const usuarioFind = listaUsuarios!.find(
-            (usr) => usr.nombre === usuarioSelected
+            (usr) => usr.nombre === usuarioSelected[0] && usr.correo === usuarioSelected[1] 
         )
         if (usuarioFind && usuarioFind.id_usuario !== 0) {
-            console.log(usuarioFind.id_usuario)
             setFormInicio((prevData) => ({
                 ...prevData,
                 id_usuario: usuarioFind ? usuarioFind.id_usuario : 0,
@@ -372,9 +371,9 @@ function menuAdmin() {
                             {viajes && viajes.map((viaje: Viaje) => (
                                 <tr>
                                     <td>{viaje.patente}</td>
-                                    <td>{(viaje.fecha_hora_inicio.slice(0, 10))}</td>
+                                    <td>{viaje.fecha_hora_inicio ? (viaje.fecha_hora_inicio.slice(0, 10)):("Viaje en espera de inicio")}</td>
                                     <td>{viaje.nombre_funcionario}</td>
-                                    <td>{(viaje.fecha_hora_inicio.slice(11, 19))}</td>
+                                    <td>{viaje.fecha_hora_inicio ? (viaje.fecha_hora_inicio.slice(11, 19)):("")}</td>
 
                                     <td>{viaje.fecha_hora_fin ? (viaje.fecha_hora_fin.slice(11, 19)) : ("-")}</td>
 
@@ -497,7 +496,7 @@ function menuAdmin() {
                                 <select name="funcionarios" defaultValue={""} onChange={manejarDataFuncionario}>
                                     <option value={""} disabled>Designa un funcionario</option>
                                     {listaUsuarios && listaUsuarios.map((usr: User) => (
-                                        <option>{`${usr.nombre} / ${usr.tipo_licencia}`}</option>
+                                        <option value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
                                     ))}
                                 </select>
                             </div>

@@ -49,6 +49,8 @@
 .itemInput input{
     display: flex;
     width: 80%;
+    height: 50%;
+    font-size: medium;
 }
 .argumento{
     margin-top: 2%;
@@ -64,6 +66,7 @@
     field-sizing: content;
     resize: none;
     overflow-y: auto;
+    font-size: medium;
 }
 .selectInput{
     margin-top: 3%;

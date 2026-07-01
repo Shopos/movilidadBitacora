@@ -11,7 +11,8 @@ export type User={
     tipo_licencia:string,
     nombre:string,
     cargo:string,
-    estado:boolean
+    estado:boolean,
+    estado_viaje_usuario:"Disponible"|"Asignado"|"En ruta"
 }
 export type navBarProps={
     type:number;
@@ -47,17 +48,21 @@ export type Viaje = {
 
 export type ViajeInputFin = {
     fecha_hora_fin:string,
-    lat_fin_real:number,
-    lng_fin_real:number,
+    //lat_fin_real:number,
+    //lng_fin_real:number,
     obs_viaje:string,
     carga_combustible:boolean,
     cantidad_combustible:number,
     ultima_modificacion:string,
     modificado_por: string
     kms_fin:number,
-    estado_viaje:boolean
-    patente:string,
-    id_usuario:number
+    estado_viaje:"En espera"|"En proceso"|"Terminado"
+}
+
+export type ViajeInputInicio = {
+    fecha_hora_inicio:string,
+    modificado_por:string,
+    ultima_modificacion:string
 }
 
 export type mantencionProp={

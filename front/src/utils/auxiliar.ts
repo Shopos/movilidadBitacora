@@ -1,4 +1,4 @@
-import type { Mantencion, Vehiculo, User, Viaje, ViajeInputFin } from "../tipos/tipoSistema";
+import type { Mantencion, Vehiculo, User, Viaje, ViajeInputFin,ViajeInputInicio } from "../tipos/tipoSistema";
 
 /* Clase auxiliar para manejar la solicitud de informacion hacia el backend del proyecto */
 
@@ -23,56 +23,56 @@ export default async function getVehiculos() {
     return null;
   }
 }
-export async function getFuncionarios(){
-  try{
+export async function getFuncionarios() {
+  try {
     const response = await fetch('http://localhost:4000/usuarios')
-    if(!response.ok){
+    if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
-    const filter  = await response.json()
-    const funcionarios =  filter.filter((usr:User)=>usr.cargo==="Funcionario")
+    const filter = await response.json()
+    const funcionarios = filter.filter((usr: User) => usr.cargo === "Funcionario" && usr.estado_viaje_usuario === "Disponible")
     return funcionarios
-  }catch(e){
+  } catch (e) {
     console.error('Error encontrando usuarios funcionarios:', e);
     return null;
   }
 }
 
-export async function getUsuarios(){
-  try{
+export async function getUsuarios() {
+  try {
     const response = await fetch('http://localhost:4000/usuarios')
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
     return await response.json();
-  }catch(e){
+  } catch (e) {
     console.error('Error encontrando usuarios:', e);
     return null;
   }
 }
 
-export async function getViajes(){
-  try{
+export async function getViajes() {
+  try {
     const response = await fetch('http://localhost:4000/viajes')
-    if(!response.ok){
+    if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
     return await response.json()
-  }catch(e){
+  } catch (e) {
     console.error(" Error encontrando viajes:  ", e)
     return null
   }
 }
 
-export async function getNameFuncionario(id:number){
-  try{
+export async function getNameFuncionario(id: number) {
+  try {
     const response = await fetch(`http://localhost:4000/usuarios/id/${id}`)
-    if(!response.ok){
+    if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`)
     }
     return await response.json()
-  }catch (e) {
+  } catch (e) {
     console.error('Error encontrando nombre del usuario:', e);
     return null;
   }
@@ -91,19 +91,34 @@ export async function getMantencionesVehiculo(patente: string) {
     return null;
   }
 }
-export async function getViajeUsuario(id_usuario:number){
-  try{
-    if(id_usuario){
-    const response = await fetch(`http://localhost:4000/viajes/${id_usuario}`)
-     if(!response.ok){
-      throw new Error(`HTTP error! Status: ${response.status}`)
-   }
-   return await response.json()
-  }
-}catch(e){
-  console.error('Error encontrando viaje-usuario:', e);
+export async function getViajeUsuarioEspera(id:number) {
+  try {
+    if (id) {
+      const response = await fetch(`http://localhost:4000/viajes/${id}`)
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      return await response.json()
+    }
+  } catch (e) {
+    console.error('Error encontrando viaje-usuario:', e);
     return null;
+  }
 }
+
+export async function getViajeID(id:number){
+  try {
+    if (id) {
+      const response = await fetch(`http://localhost:4000/viajes/id/${id}`)
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      return await response.json()
+    }
+  } catch (e) {
+    console.error('Error encontrando viaje-usuario:', e);
+    return null;
+  }
 }
 /** Metodos para solicitar agregar informacion hacia backend
  * 
@@ -115,7 +130,6 @@ export async function addMantencionVehiculo(data: Mantencion) {
   if (data) {
     const url = `http://localhost:4000/mantenciones`
     const payload = data
-    console.log(payload)
     try {
       const res = await fetch(url, {
         method: 'POST',
@@ -166,11 +180,11 @@ export async function agregarVehiculo(data: Vehiculo) {
 }
 
 
-export async function agregarUsuario(data:User){
-  if(data){
+export async function agregarUsuario(data: User) {
+  if (data) {
     const url = `http://localhost:4000/usuarios`
     const payload = data
-    try{
+    try {
       const res = await fetch(url, {
         method: 'POST',
         headers: {
@@ -183,57 +197,57 @@ export async function agregarUsuario(data:User){
       }
       const data = await res.json();
       console.log('Success:', data);
-    }catch(e){
+    } catch (e) {
       console.error('Error:', e);
       console.log({ msg: "Error al agregar usuario" })
     }
   }
 }
 
-export async function addViajeInicial(data:Viaje){
-  if(data){
+export async function addViajeInicial(data: Viaje) {
+  if (data) {
     const url = `http://localhost:4000/viajes`
     const payload = data
-    try{
-      const res = await fetch(url,{
+    try {
+      const res = await fetch(url, {
         method: 'POST',
-        headers:{
+        headers: {
           'Content-type': 'application/json'
         },
         body: JSON.stringify(payload)
       })
-      if(!res.ok){
+      if (!res.ok) {
         throw new Error(`HTTP error! Status: ${res.status}`)
       }
       const data = await res.json()
-      console.log('Succes: ',data)
-    }catch(e){
-      console.error('Error: ',e)
-      console.log({msg: "Error al agregar viaje, revisar datos enviados"})
+      console.log('Succes: ', data)
+    } catch (e) {
+      console.error('Error: ', e)
+      console.log({ msg: "Error al agregar viaje, revisar datos enviados" })
     }
   }
 }
 
-export async function addDataViajeFin(patente:string,data:ViajeInputFin){
-  if(data && patente){
+export async function addDataViajeFin(patente: string, data: ViajeInputFin) {
+  if (data && patente) {
     const url = `http://localhost:4000/viajes/${patente}`
     const payload = data
-    try{
-      const res = await fetch(url,{
+    try {
+      const res = await fetch(url, {
         method: 'PUT',
-        headers:{
+        headers: {
           'Content-type': 'application/json'
         },
         body: JSON.stringify(payload)
       })
-      if(!res.ok){
+      if (!res.ok) {
         throw new Error(`HTTP error! Status: ${res.status}`)
       }
       const data = await res.json()
-      console.log('Succes: ',data)
-    }catch(e){
-      console.error('Error: ',e)
-      console.log({msg: "Error al agregar datos para finalizar viaje"})
+      console.log('Succes: ', data)
+    } catch (e) {
+      console.error('Error: ', e)
+      console.log({ msg: "Error al agregar datos para finalizar viaje" })
     }
   }
 }
@@ -271,11 +285,11 @@ export async function editarVehiculo(patente: string, data: Vehiculo) {
 }
 
 
-export async function editarUsuario(correo:string,data:User){
-  if(data){
+export async function editarUsuario(correo: string, data: User) {
+  if (data) {
     const url = `http://localhost:4000/usuarios/${correo}`
     const payload = data
-    try{
+    try {
       const res = await fetch(url, {
         method: 'PUT',
         headers: {
@@ -288,10 +302,51 @@ export async function editarUsuario(correo:string,data:User){
       }
       const data = await res.json();
       console.log('Success:', data);
-    }catch(e){
+    } catch (e) {
       console.error('Error:', e);
       console.log({ msg: "Error al editar usuario" })
     }
   }
 }
 
+export async function patchInicio(id:number,data:ViajeInputInicio){
+  if(data){
+    const url = `http://localhost:4000/viajes/inicio/${id}`
+    const payload = data
+    try{
+      const res = await fetch(url,{
+        method: 'PATCH',
+        headers:{
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      })
+      const data  = await res.json()
+      console.log('Success: ',data)
+    }catch(e){
+      console.error('Error:',e)
+      console.log({msg: "Error al parchar viaje"})
+    }
+  }
+}
+
+export async function patchFin(id:number,data:ViajeInputFin){
+  if(data){
+    const url = `http://localhost:4000/viajes/fin/${id}`
+    const payload = data
+    try{
+      const res = await fetch(url,{
+        method: 'PATCH',
+        headers:{
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      })
+      const data = await res.json()
+      console.log('Succes: ',data)
+    }catch(e){
+      console.error('Error:',e)
+      console.log({msg: "Error al parchar viaje"})
+    }
+  }
+}

@@ -2,7 +2,7 @@ import { createContext,useContext,useEffect,useState} from "react";
 import type {ReactNode} from "react"
 
 export type usuarioLog = {
-    id_usuario:number,
+    id:number,
     correo:string,
     nombre:string,
     cargo:string

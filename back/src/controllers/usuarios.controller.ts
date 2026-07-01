@@ -118,6 +118,7 @@ export async function login(req:Request,res:Response){
         }
 
         const payload = {
+            id: usuarioEncontrado.id_usuario,
             cargo: usuarioEncontrado.cargo,
             correo: usuarioEncontrado.correo,
             nombre: usuarioEncontrado.nombre

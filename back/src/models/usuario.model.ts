@@ -9,7 +9,8 @@ export interface Usuario extends RowDataPacket{
     tipo_licencia:String,
     nombre:String,
     cargo:String,
-    estado:boolean
+    estado:boolean,
+    estado_viaje_usuario:string,
 }
 export interface UsuarioInput {
     correo:String,
@@ -37,6 +38,14 @@ export async function getUsuarioCorreo(correo:string|string[]): Promise<Usuario[
     )
     return rows
 }
+
+export async function getIdUsuario(correo:string, nombre:string):Promise<Usuario[]>{
+    const [rows] = await connection.query<Usuario[]>(
+        "SELECT id_usuario FROM usuarios WHERE correo=? AND nombre=?",[correo,nombre]
+    )
+    return rows
+}
+
 //Metodo que devuelve el usuario cual id sea igual al solicitado
 export async function getUsuarioId(id:number): Promise<Usuario[]>{
     const [rows] = await connection.query<Usuario[]>(
@@ -69,4 +78,12 @@ export async function editUsuario(correo:string|string[],data:UsuarioEdit):Promi
     )
     //@ts-ignore
     return(resultado.affectedRows>0)
+}
+//Status viaje usuario
+export async function changeStatus(id:number, status:string):Promise<boolean>{
+    const [res] = await connection.query(
+        "UPDATE usuarios SET estado_viaje_usuario=? WHERE id_usuario=?", [status,id]
+    )
+    //@ts-ignore
+    return(res.affectedRows>0)
 }

@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom"
 import '../estilos/incioSesion.css'
 import { useState } from "react"
 import { useAuth } from "../context/AuthContext"
+import { Alert, Snackbar } from "@mui/material"
 
 
 function inicioSesion(){
@@ -12,6 +13,9 @@ function inicioSesion(){
     })
     const { login,usuario } = useAuth()
     const [error,setError] = useState("")
+    const [snack,setSnack] = useState(false)
+    const [nivel,setNivel] = useState("")
+    const [mensaje,setMensaje] = useState("")
 
     const navigate = useNavigate()
     /*Maneja los datos ingresados en los inputs de inicio de sesión
@@ -21,6 +25,9 @@ function inicioSesion(){
         const resultadoInicio = await login(formData.mail,formData.pass)
         if(!resultadoInicio.ok){
             setError(resultadoInicio.msg || "No se pudo iniciar sesión")
+            setNivel("warning")
+            setMensaje(`Error al iniciar sesión, ${resultadoInicio.msg}`)
+            setSnack(true)
             return
         }
         
@@ -36,7 +43,6 @@ function inicioSesion(){
             [name]:value
         }))
     }
-
     /*Vista inicial de la app
         Muestra directamente el inicio de sesión de la app
     */
@@ -68,7 +74,9 @@ function inicioSesion(){
                 </div>
             </div>
         </div>
-           
+        <Snackbar open={snack} onClose={()=>setSnack(false)} autoHideDuration={2500} >
+            <Alert severity="error" variant="filled">{mensaje}</Alert>
+        </Snackbar>
         </>
     )
 }

@@ -4,7 +4,7 @@ import NavBar from "../../componentes/navBar.tsx"
 import '../../estilos/menuUsuario.css'
 import type { Viaje } from "../../tipos/tipoSistema.ts"
 import { useAuth } from "../../context/AuthContext.tsx"
-import { getViajeID, getViajeUsuarioEspera } from "../../utils/auxiliar.ts"
+import { getViajeProceso, getViajeUsuarioEspera } from "../../utils/auxiliar.ts"
 import { Card, CardActions, CardContent, IconButton, Typography } from "@mui/joy"
 
 /*Vista del menu del usuario
@@ -38,27 +38,21 @@ function menuUsuario(){
         }
         getViajeUsuario()
     },[usuario,cargando])
-
+    /*Verifica si usuario tiene un viaje iniciado "En proceso", si eso es cierto envia a viajeProceso */
     useEffect(()=>{
-        
-        const getViajeUsuarioProceso=async()=>{
-            if(localStorage.getItem("idViaje")){
-                console.log("tienes viaje en proceso")
-                navigate("/viajeProceso")
-            }
-            try{
-                if(usuario){
-                    const response = await getViajeID(usuario.id)
-                    if(response && Object.keys(response).length > 0){
-                        //verificar
-                    }
+        const verificaViajeProceso = async()=>{
+            if(usuario){
+                const response = await getViajeProceso(usuario.id)
+                if(response!==null){
+                    console.log(response)
+                    //show alerta
+                    navigate("/viajeProceso")
                 }
-            }catch(e){
-                console.error( " Error buscando viaje en proceso ")
             }
         }
-        getViajeUsuarioProceso()
-    })
+        verificaViajeProceso()
+    },[usuario])
+
 
     /* Al accionar boton de Card para comenzar viaje se almacena en localStorage id_viaje para futuras consultas
     y se redirige a inicioViaje */
@@ -77,7 +71,7 @@ function menuUsuario(){
             <div className="containerBotones">
             {viajeEspera && viajeEspera.vehiculo!=="" ? 
              (<div style={{display:"flex", flexDirection:"row", justifyContent:"center",marginBottom:"5vh"}}>
-                <Card variant="outlined" sx={{width:"40vw", display:"flex",flexDirection:"column"}}>
+                <Card variant="outlined" sx={{width:"40vw", display:"flex",flexDirection:"column", backgroundColor:"#E7E1B1"}}>
                     <CardContent>
                         <Typography level="h1">Tienes un viaje en espera</Typography>
                         <Typography level="h3">Viaje a {viajeEspera!.destino}</Typography>

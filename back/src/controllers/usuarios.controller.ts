@@ -81,6 +81,7 @@ export async function agregarUsuario(req:Request,res:Response) {
 */
 export async function editarUsuario(req:Request,res:Response){
     try{
+        console.log(req)
         const id = req.params.correo
         const {estado,tipo_licencia} = req.body
 
@@ -98,13 +99,11 @@ export async function editarUsuario(req:Request,res:Response){
 export async function login(req:Request,res:Response){
     try{
         const {correo,pass} = req.body
-        console.log(correo,pass)
         if(correo==="" && pass===""){
             return res.status(400).json({error: " Los campos correo y contraseña son obligatorios "})
         }
         const usuarios = await usuarioModel.getUsuarioCorreo(correo)
         const usuarioEncontrado = usuarios[0]
-        console.log(usuarioEncontrado)
         if(!usuarioEncontrado){
             return res.status(401).json({error: " Credenciales invalidas "})
         }

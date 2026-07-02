@@ -1,18 +1,18 @@
 .botonPasoFin2{
     width: 20%;
-    background-color:#696AE3 ;
+    background-color:var(--buttonPrimary) ;
     color:white;
     height: 4vh;
     border-radius: 20px;
-    border: #696AE3;
+    border: var(--buttonPrimary) ;
 }
 .botonPasoFin{
     width: 20%;
-    background-color:#696AE3;
+    background-color:var(--buttonPrimary) ;
     color:white;
     height: 4vh;
     border-radius: 20px;
-    border: #696AE3;
+    border: var(--buttonPrimary) ;
 }
 .botonPasoFin:hover{
     cursor:pointer

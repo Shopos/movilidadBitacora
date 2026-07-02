@@ -93,7 +93,6 @@ export async function getViajeIdUsuario(id:number|number[]): Promise<Viaje[]>{
 
 //Metodo que devuelve los viajes segun el id de un usuario
 export async function getViajeIdUsuarioEspera(id:number|number[]): Promise<Viaje[]>{
-    console.log(id)
     const [rows] = await connection.query<Viaje[]>(
         "SELECT * FROM viajes WHERE id_usuario = ? && estado_viaje = ? ",[id,"En espera"]
     )

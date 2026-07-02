@@ -28,10 +28,14 @@ export async function getViajeByid(id: number) {
 
 export async function getViajeProceso(req:Request,res:Response) {
     try {
-        console.log("buscando viaje en proceso")
         const ide = Number(req.params.id)
         const viaje = await viajesModel.getViajeProceso(ide)
-        res.json(viaje[0])
+        if(viaje && viaje.length>0){
+            res.json(viaje[0])
+        }else{
+            return res.json(null)
+        }
+        
     } catch (e) {
         console.error(e)
     }
@@ -223,8 +227,6 @@ export async function parcheFin(req: Request, res: Response) {
             } = req.body
         const viaje = await getViajeByid(Number(id))
         
-        console.log(viaje![0])
-        console.log(viaje![0].modo)
         if (!viaje) {
             return res.status(404).json({ error: 'Viaje no encontrado' })
         }
@@ -251,7 +253,6 @@ export async function parcheFin(req: Request, res: Response) {
         }
         
         if(viaje[0].modo==="ida"){
-            console.log(" Agregando viaje modo vuelta ")
             try{
                 const id = await viajesModel.addViajeRegreso(viaje[0],ultima_modificacion,kms_fin)
                 res.status(201).json({ id, mensaje: " Viaje agregado inicialmente " })
@@ -261,7 +262,6 @@ export async function parcheFin(req: Request, res: Response) {
             }
         }
         if(viaje[0].modo==="vuelta"){
-            console.log(" Liberando recursos ")
             //Liberar usuario vehiculo
             await vehiculoModel.changeStatus(viaje[0].patente, "DISPONIBLE")
             await usuarioModel.changeStatus(Number(viaje[0].id_usuario), "Disponible")

@@ -10,9 +10,8 @@ import type { Viaje } from "../../tipos/tipoSistema.ts"
 
 import "../../estilos/viajeProceso.css"
 
-import NoCrashOutlinedIcon from '@mui/icons-material/NoCrashOutlined';
 import { useAuth } from "../../context/AuthContext.tsx";
-import { getViajeID, getViajeProceso, getViajeUsuarioEspera } from "../../utils/auxiliar.ts";
+import {  getViajeProceso } from "../../utils/auxiliar.ts";
 
 /*
     datos de las latitudes y longitudes en localStorage
@@ -96,7 +95,7 @@ function viajeProceso() {
             }
         }
         searchViaje()
-    }, [])
+    }, [cargando])
 
     return (
         <>

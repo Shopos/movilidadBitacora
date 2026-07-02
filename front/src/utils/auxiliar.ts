@@ -30,7 +30,7 @@ export async function getFuncionarios() {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
     const filter = await response.json()
-    const funcionarios = filter.filter((usr: User) => usr.cargo === "Funcionario" && usr.estado_viaje_usuario === "Disponible")
+    const funcionarios = filter.filter((usr: User) => usr.cargo === "Funcionario" && usr.estado_viaje_usuario === "Disponible" && usr.estado)
     return funcionarios
   } catch (e) {
     console.error('Error encontrando usuarios funcionarios:', e);
@@ -128,7 +128,11 @@ export async function getViajeProceso(id:number){
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`)
       }
-      return await response.json()
+      const data = await response.json()
+      if(!data){
+        return null
+      }
+      return data
     }
   } catch (e) {
     console.error('Error encontrando viaje-usuario:', e);
@@ -201,11 +205,13 @@ export async function agregarUsuario(data: User) {
   if (data) {
     const url = `http://localhost:4000/usuarios`
     const payload = data
+    const key = localStorage.getItem("token")
     try {
       const res = await fetch(url, {
         method: 'POST',
         headers: {
-          'Content-type': 'application/json'
+          'Content-type': 'application/json',
+          'Authorization': `Bearer ${key}`,
         },
         body: JSON.stringify(payload)
       })
@@ -306,11 +312,13 @@ export async function editarUsuario(correo: string, data: User) {
   if (data) {
     const url = `http://localhost:4000/usuarios/${correo}`
     const payload = data
+    const key = localStorage.getItem("token")
     try {
       const res = await fetch(url, {
         method: 'PUT',
         headers: {
-          'Content-type': 'application/json'
+          'Content-type': 'application/json',
+          'Authorization': `Bearer ${key}`,
         },
         body: JSON.stringify(payload)
       })

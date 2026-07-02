@@ -21,6 +21,7 @@ import 'leaflet/dist/leaflet.css';
 import L from "leaflet"
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
 import Routing from "../../componentes/routing.tsx" /*Componente para marcar la ruta entre inicio y destino en mapa*/
+import { Alert, Snackbar } from "@mui/material";
 
 type GPS = {
     lat: number,
@@ -31,6 +32,9 @@ interface prop {
     points: GPS[]
 }
 function menuAdmin() {
+    const [snack,setSnack] = useState(false)
+    const [msg,setMSG] = useState("")
+    const [severity,setSeverity] = useState<'success'|'info'|'warning'|'error'>('success')
     const { usuario } = useAuth() //usuario ingresado en el inicio de sesión
     const [viajes, setViajes] = useState<[Viaje]>()
     const [viajeSelected, setViajeSelected] = useState<Viaje | null>(null)
@@ -70,6 +74,32 @@ function menuAdmin() {
         ultima_modificacion: "", //inicio viaje ->cambiar
         modo: "ida" //modo ida (inicial) -> modo vuelta --->nuevo viaje con datos inversos
     })
+    const viajeVacio:Viaje = {
+        id_viaje: 0,
+        fecha_hora_inicio: "",
+        patente: "",
+        motivo: "",
+        vehiculo: "",
+        kms_inicial: 0,
+        fecha_hora_fin: "",
+        kms_fin: 0,
+        nombre_funcionario: "",
+        carga_combustible: false,
+        cantidad_carga: 0,
+        obs_viaje: "",
+        lat_inicio: 0,
+        lng_inicio: 0,
+        lat_fin: 0,
+        lng_fin: 0,
+        destino: "",
+        estado_viaje: "Terminado", //inicio viaje -> cambiar
+        id_usuario: 0, //inicio viaje -> cambiar
+        lat_fin_real: 0,
+        lng_fin_real: 0,
+        modificado_por: "", //inicio viaje -> cambiar
+        ultima_modificacion: "", //inicio viaje ->cambiar
+        modo: "ida" //modo ida (inicial) -> modo vuelta --->nuevo viaje con datos inversos
+    }
 
     /* Metodo para obtener la lista de viajes */
     useEffect(() => {
@@ -81,6 +111,9 @@ function menuAdmin() {
                 }
             } catch (e) {
                 console.error(" Error listando viajes ", e)
+                setSeverity("warning")
+                setMSG("Error al listar viajes, intenta más tarde")
+                setSnack(true)
             }
         }
         const getListaUsuarios = async () => {
@@ -129,7 +162,7 @@ function menuAdmin() {
                 viaje.nombre_funcionario,
                 viaje.kms_inicial,
                 (viaje.kms_fin ? viaje.kms_fin : 0),
-                (viaje.fecha_hora_inicio.slice(0, 10) + " " + viaje.fecha_hora_inicio.slice(11, 19)),
+                (viaje.fecha_hora_inicio ? (viaje.fecha_hora_inicio.slice(0, 10) + " " + viaje.fecha_hora_inicio.slice(11, 19)):("")),
                 viaje.destino,
                 (viaje.fecha_hora_fin ? (viaje.fecha_hora_fin.slice(0, 10) + " " + viaje.fecha_hora_fin.slice(11, 19)) : "-"),
                 (viaje.estado_viaje ? "En ruta" : "Terminado")
@@ -146,6 +179,9 @@ function menuAdmin() {
                 headStyles: { fillColor: [41, 120, 120], textColor: 255 }
             })
             doc.save("Reporte.pdf")
+            setSeverity("success")
+            setMSG("Archivo creado")
+            setSnack(true)
         }
         return
     }
@@ -288,13 +324,14 @@ function menuAdmin() {
         esta misma informacion en localStorage y envia a la vista de viaje en proceso */
     useEffect(() => {
         if (formInicio.estado_viaje === "En espera") {
-
             //enviar a bd datos iniciales
-            console.log(formInicio)
             addViajeInicial(formInicio)
             //Limpiar formInicio
             setModalNewViaje(false)
-
+            setCargando(false)
+            setSeverity("success")
+            setMSG("Viaje agendado correctamente")
+            setSnack(true)
         }
     }, [formInicio])
 
@@ -523,7 +560,10 @@ function menuAdmin() {
                     </DialogContent>
                     <DialogActions>
                         <Button variant="solid" color="success" onClick={() => handleAgendaViaje()}>Agendar Viaje</Button>
-                        <Button variant="outlined" color="danger" onClick={() => handleCierre()}>Cancelar</Button>
+                        <Button variant="outlined" color="danger" onClick={() =>{ 
+                            setFormInicio(viajeVacio)
+                            setVehiculoSelected(undefined)
+                            handleCierre()}}>Cancelar</Button>
                     </DialogActions>
                 </ModalDialog>
             </Modal>
@@ -582,6 +622,8 @@ function menuAdmin() {
                     </DialogActions>
                 </ModalDialog>
             </Modal>
+
+            <Snackbar open={snack} autoHideDuration={2500}><Alert severity={severity} variant="filled">{msg}</Alert></Snackbar>
         </>
     )
 }

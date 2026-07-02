@@ -93,7 +93,7 @@ function inicioViaje() {
             }
         }
         getViajeEspera()
-    },[usuario])
+    },[usuario,cargando])
 
     useEffect(()=>{
         if(formInicio?.lat_inicio){

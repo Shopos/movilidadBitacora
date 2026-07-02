@@ -22,7 +22,7 @@
 .buttonsTablaH button:disabled{
     background-color: #01352c;
     border: #01352c;
-    cursor: not-allowed;
+    cursor: default;
 }
 
 .buttonsFlexEnd{

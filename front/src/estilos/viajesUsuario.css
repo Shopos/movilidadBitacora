@@ -1,13 +1,13 @@
 .buttonIconTable{
-   background-color: black;
+   background-color: var(--buttonPrimary);
     color: white;
     border-radius: 10px;
-    border: black;
+    border: var(--buttonPrimary);
     padding: 2%;
 }
 .buttonIconTable:hover{
     cursor: pointer;
-    background-color: #2C2C2C;
+    background-color: var(--buttonShadow);
 }
 .cell-header{
     display: none;

@@ -520,6 +520,7 @@ function recursosAdmin() {
                                             <option>Funcionario</option>
                                             <option>Administrativo</option>
                                         </select>
+                                        <label>Licencia</label>
                                         <select defaultValue={""} value={formU.tipo_licencia} onChange={(e) => setFormU({ ...formU, tipo_licencia: (e.target.value) })}>
                                             <option value={""} disabled>Selecciona el tipo de licencia del usuario</option>
                                             <option>A1</option>
@@ -546,7 +547,7 @@ function recursosAdmin() {
                             handleEditVehiculo()
                             openModalEdit(false)
                         }}>
-                            Agregar
+                            Aplicar cambios
                         </Button>
                         <Button variant="plain" color="danger" onClick={() => {
 

@@ -33,7 +33,7 @@ function dataViewViaje({viajeSelected,modo}:prop ) {
         (
             <div className="modalDataBitacora">
             Bitácora vehículo
-            <label style={{ display: "flex", flexDirection: "row", width: "100%" }}>Fecha: {fechaInicio.slice(0,10)}</label>
+            <label style={{ display: "flex", flexDirection: "row", width: "100%" }}>Fecha: {fechaInicio ? fechaInicio.slice(0,10):"-"}</label>
             <div className="modalDataItemRow">
                 <div className="item">
                     <label>Vehículo:  </label>{viajeSelected?.vehiculo}
@@ -43,7 +43,7 @@ function dataViewViaje({viajeSelected,modo}:prop ) {
                 </div>
             </div>
             <div className="modalDataItemRow">
-                <label>Salida: {fechaInicio.slice(11,19)}</label>
+                <label>Salida: {fechaInicio ? fechaInicio.slice(11,19) : "-" }</label>
                 <label>KMS: {kms_inicio}</label>
                 <label>Llegada: </label>{viajeSelected.fecha_hora_fin ? (<>{fechaFin.slice(0,10)}<span>{fechaFin.slice(11,19)}</span></>):("-")}
                 <label>KMS:  {kms_fin}</label>
@@ -68,7 +68,7 @@ function dataViewViaje({viajeSelected,modo}:prop ) {
                     <span>Observaciones: </span>{viajeSelected?.obs_viaje}
                 </div>
                 <div>
-                    <span>Estado del viaje: </span>{viajeSelected?.estado_viaje == true ? "En proceso" : "Terminado"}
+                    <span>Estado del viaje: </span>{viajeSelected?.estado_viaje ? "En proceso" : "Terminado"}
                 </div>
             </div>
             <div className='modalDataItemCol'>
@@ -97,7 +97,7 @@ function dataViewViaje({viajeSelected,modo}:prop ) {
                 </div>
             </div>
             <div className="modalDataItemRow">
-                <label>Salida: {fechaInicio.slice(11,19)}</label>
+                <label>Salida: {fechaInicio ? fechaInicio.slice(11,19) : "-"}</label>
                 <label>KMS: {kms_inicio}</label>
                 <label>Llegada: </label>{viajeSelected.fecha_hora_fin ? (<>{fechaFin.slice(0,10)}<span>{fechaFin.slice(11,19)}</span></>):("-")}
                 <label>KMS:  {kms_fin}</label>
@@ -122,7 +122,7 @@ function dataViewViaje({viajeSelected,modo}:prop ) {
                     <span>Observaciones: </span>{viajeSelected?.obs_viaje}
                 </div>
                 <div>
-                    <span>Estado del viaje: </span>{viajeSelected.estado_viaje === true ? "En proceso" : "Terminado"}
+                    <span>Estado del viaje: </span>{viajeSelected.estado_viaje ? "En proceso" : "Terminado"}
                 </div>
             </div>
             <div className="rowButtonsView">

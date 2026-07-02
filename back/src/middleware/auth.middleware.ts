@@ -11,7 +11,11 @@ declare global  {
         }
     }
 }
-
+interface UsuarioPayload{
+    correo:string,
+    cargo:string,
+    estado:string,
+}
 export const autenticarJWT = (req:Request,res:Response, next:NextFunction):void =>{
 
     const authHeader = req.headers.authorization
@@ -39,9 +43,9 @@ export const autenticarJWT = (req:Request,res:Response, next:NextFunction):void 
     }
 }
 
-export const verifyAdmin = (req:Request, res:Response,next:NextFunction)=>{
-
-    if("cargo" in req.body.usuario && req.body.usuario?.cargo !== "Administrativo"){
+export const verifyAdmin = (req:Request, res:Response, next:NextFunction)=>{
+    const user = req.usuario as UsuarioPayload | undefined
+    if(user && user.cargo !== "Administrativo"){
         return res.status(400).json({msg: " No tienes credenciales necesarias para entrar en este espacio "})
     }
     next()

@@ -23,14 +23,17 @@
 }
 
 .botonTerminar{
-    background-color: #3A3B61;
+    background-color: var(--buttonPrimary);
     width: 30%;
     color: white;
-    border: #3A3B61;
+    border: var(--buttonPrimary);
     padding: 10px;
     border-radius: 25px;
     height: 10%; 
     margin-top: 15px;
+}
+.botonTerminar:hover{
+    cursor: pointer;
 }
 @media (max-width:576px) {
     .leaflet-container{

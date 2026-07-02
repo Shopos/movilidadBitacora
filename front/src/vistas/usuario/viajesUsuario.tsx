@@ -89,7 +89,10 @@ function viajesUsuario(){
                 <Table hoverRow borderAxis="y" sx={
                             { '& tr:nth-of-type(odd)':{backgroundColor:'#FBF5DD'},
                             '& tr:nth-of-type(even)':{backgroundColor:'#E7E1B1'},
-                            '& td':{textAlign:'left',paddingLeft:1.9}}
+                            '& td':{textAlign:'left',paddingLeft:1.9},
+                            '& th':{backgroundColor:"#bad8b6"},  
+                            marginTop:"1vh"
+                        }
                         }>
                     <thead>
                         <tr>
@@ -108,8 +111,8 @@ function viajesUsuario(){
                         <tr>
                             <td><span className="cell-header">ID</span>{viaje.id_viaje}</td>
                             <td><span className="cell-header">Patente vehiculo</span>{viaje.patente}</td>
-                            <td><span className="cell-header">Hora inicio</span>{`${viaje.fecha_hora_inicio.slice(0, 10)} ${viaje.fecha_hora_inicio.slice(11, 19)}`}</td>
-                            <td><span className="cell-header">Hora llegada</span>{`${viaje.fecha_hora_fin.slice(0, 10)} ${viaje.fecha_hora_fin.slice(11, 19)}`}</td>
+                            <td><span className="cell-header">Hora inicio</span>{viaje.fecha_hora_inicio ? `${viaje.fecha_hora_inicio.slice(0, 10)} ${viaje.fecha_hora_inicio.slice(11, 19)}`: "Aun no iniciado"}</td>
+                            <td><span className="cell-header">Hora llegada</span>{viaje.fecha_hora_fin ? `${viaje.fecha_hora_fin.slice(0, 10)} ${viaje.fecha_hora_fin.slice(11, 19)}`: "Aun no terminado"}</td>
                             <td><span className="cell-header">Estado viaje</span>{viaje.estado_viaje}</td>
                             <td>
                                 <span className="cell-header">Acciones</span>

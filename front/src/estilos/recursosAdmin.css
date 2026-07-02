@@ -4,11 +4,12 @@
     margin-top: 1%;
 }
 .buttonsTablaH button{
-    background-color: #434343;
-    border: #434343;
+    background-color: var(--buttonPrimary);
+    border: var(--buttonPrimary);
     color:white;
     width: 50%;
     padding: 1.5%;
+    cursor: pointer;
 }
 
 .bordeIzquierdoBoton{
@@ -17,10 +18,13 @@
 .bordeDerechaBoton{
     border-top-right-radius: 15px;
 }
+
 .buttonsTablaH button:disabled{
-    background-color: #2C2C2C;
-    border: #2C2C2C;
+    background-color: #01352c;
+    border: #01352c;
+    cursor: not-allowed;
 }
+
 .buttonsFlexEnd{
     display: flex;
     flex-direction: row;
@@ -30,19 +34,20 @@
     gap:2%
 }
 .buttonsFlexEnd button{
-    background-color: #999CFF;
-    border: #999CFF;
+    background-color: var(--buttonPrimary);
+    border: var(--buttonPrimary);
     border-radius: 20px;
     padding: 1%;
+    color: white;
 }
 .buttonsFlexEnd button:hover{
     cursor: pointer;
 }
 .buttonsIconTable button{
-    background-color: black;
+    background-color: var(--fondoBarra);
     color: white;
     border-radius: 10px;
-    border: black;
+    border: var(--fondoBarra);
     padding: 2%;
 }
 .buttonsIconTable button:hover{

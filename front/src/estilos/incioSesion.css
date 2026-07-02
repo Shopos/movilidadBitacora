@@ -54,8 +54,8 @@
     width: 50%;
 }
 .buttonFormulario button{
-    background-color: #3A3B61;
-    border: #3A3B61;
+    background-color: var(--buttonPrimary);
+    border: var(--buttonPrimary);
     color: white;
     font-weight: bold;
     padding: 2%;

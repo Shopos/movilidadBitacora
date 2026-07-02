@@ -43,8 +43,7 @@ function navBar({type,texto}:navBarProps){
                 <button className='buttonBarra' onClick={()=>irRecursos()}>Recursos</button>
                 <button className='buttonBarra' onClick={()=>irBitacoras()}>Bitácoras</button>
                 <button className='buttonBarra' onClick={()=>setOpenModalCierre(true)}>
-                    <PersonIcon style={{
-                        color:"black",
+                    <PersonIcon sx={{color:"black"}} style={{
                         justifyContent:"center",
                         alignContent:"center"
                     }} />   
@@ -62,7 +61,7 @@ function navBar({type,texto}:navBarProps){
             </div>
             <button className="iconSesion" onClick={()=>setOpenModalCierre(true)}>
                 <PersonIcon style={{
-                        color:"black",
+                        color:"white",
                         justifyContent:"center",
                         alignContent:"center"
                     }} /> 

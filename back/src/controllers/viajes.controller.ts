@@ -26,6 +26,17 @@ export async function getViajeByid(id: number) {
     }
 }
 
+export async function getViajeProceso(req:Request,res:Response) {
+    try {
+        console.log("buscando viaje en proceso")
+        const ide = Number(req.params.id)
+        const viaje = await viajesModel.getViajeProceso(ide)
+        res.json(viaje[0])
+    } catch (e) {
+        console.error(e)
+    }
+}
+
 export async function getViajeIdUsuario(req: Request, res: Response) {
     try {
         const viajeBuscado = Number(req.params.id)
@@ -67,8 +78,6 @@ export async function addViajeInicio(req: Request, res: Response) {
             kms_fin,
             modo
         } = req.body
-
-        console.log(req.body)
         if (patente === " " && nombre_funcionario === "" && !estado_viaje) {
             return res.status(400).json({ error: " Los campos patente, nombre funcionario no pueden estar vacios " })
         }
@@ -107,6 +116,7 @@ export async function addViajeInicio(req: Request, res: Response) {
     se hace uso del metodo checkPatente, si es verdadero se agrega la informacion, caso contrario cancela la accion
     Una vez agregada la informacion, libera el vehiculo involucrado cambiando su estado a "DISPONIBLE"
 */
+/*
 export async function addViajeFin(req: Request, res: Response) {
     try {
         const id = req.params.patente
@@ -149,7 +159,7 @@ export async function addViajeFin(req: Request, res: Response) {
         res.status(500).json({ error: " Error al finalizar viaje" })
     }
 }
-
+*/
 /* Metodo para comprobar la patente de un vehiculo */
 async function checkPatente(patente: string): Promise<boolean> {
     const res = await viajesModel.checkPatenteEstado(patente)
@@ -157,13 +167,6 @@ async function checkPatente(patente: string): Promise<boolean> {
     return res.length > 0
 }
 
-async function handleChangeKMS(cantidad: Number, patente: string) {
-    const res: vehiculoModel.Vehiculo[] | null = await vehiculoModel.getVehiculo(patente)
-
-    if (res && res[0].kms_actual < cantidad) {
-        await vehiculoModel.changeKms(patente, cantidad)
-    }
-}
 
 export async function getViajeIdUsuarioEspera(req: Request, res: Response) {
     try {
@@ -219,6 +222,9 @@ export async function parcheFin(req: Request, res: Response) {
             kms_fin
             } = req.body
         const viaje = await getViajeByid(Number(id))
+        
+        console.log(viaje![0])
+        console.log(viaje![0].modo)
         if (!viaje) {
             return res.status(404).json({ error: 'Viaje no encontrado' })
         }
@@ -238,13 +244,29 @@ export async function parcheFin(req: Request, res: Response) {
             kms_fin
             },
         )
+
+        await vehiculoModel.changeKms(viaje[0].patente, kms_fin)
         if(!resultado){
             return res.status(404).json({ error: " No se logro actualizar los datos finales del viaje " })
         }
-        //Liberar usuario
+        
         if(viaje[0].modo==="ida"){
-            //generar viaje de vuelta con datos inversos, En espera
+            console.log(" Agregando viaje modo vuelta ")
+            try{
+                const id = await viajesModel.addViajeRegreso(viaje[0],ultima_modificacion,kms_fin)
+                res.status(201).json({ id, mensaje: " Viaje agregado inicialmente " })
+            }catch(e){
+                console.error(e)
+                res.status(500).json({ error: " Error al agregar viaje de regreso" })
+            }
         }
+        if(viaje[0].modo==="vuelta"){
+            console.log(" Liberando recursos ")
+            //Liberar usuario vehiculo
+            await vehiculoModel.changeStatus(viaje[0].patente, "DISPONIBLE")
+            await usuarioModel.changeStatus(Number(viaje[0].id_usuario), "Disponible")
+        }
+        
     } catch (e) {
         console.error(e)
         res.status(500).json({ error: " Error ingresando datos iniciales " })

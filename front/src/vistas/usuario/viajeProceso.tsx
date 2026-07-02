@@ -12,7 +12,7 @@ import "../../estilos/viajeProceso.css"
 
 import NoCrashOutlinedIcon from '@mui/icons-material/NoCrashOutlined';
 import { useAuth } from "../../context/AuthContext.tsx";
-import { getViajeID, getViajeUsuarioEspera } from "../../utils/auxiliar.ts";
+import { getViajeID, getViajeProceso, getViajeUsuarioEspera } from "../../utils/auxiliar.ts";
 
 /*
     datos de las latitudes y longitudes en localStorage
@@ -76,13 +76,14 @@ function viajeProceso() {
                 setPunto2({lat:viaje!.lat_fin,lng:viaje!.lng_fin})
             }
         },[viaje])
+
     useEffect(() => {
         const searchViaje = async () => {
             try {
                 if (usuario) {
-                    const response = await getViajeID(usuario.id)
+                    const response = await getViajeProceso(usuario.id)
                     if (response && Object.keys(response).length > 0) {
-                        setViaje(response[0])
+                        setViaje(response)
                         setCargando(true)
                         console.log(response)
                     } else {

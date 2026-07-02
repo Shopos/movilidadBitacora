@@ -33,7 +33,8 @@ const usuarioVacio: User = {
     estado: false,
     nombre: "",
     pass: "",
-    tipo_licencia: ""
+    tipo_licencia: "",
+    estado_viaje_usuario:"Disponible"
 }
 function recursosAdmin() {
     const [usuarios, setUsuarios] = useState<[User]>()
@@ -242,8 +243,10 @@ function recursosAdmin() {
                         /* Tabla usuarios */
                         <div>
                             <Table hoverRow borderAxis="y" sx={
-                                { '& td': { textAlign: 'left', paddingLeft: 1.9 } }
-                            }>
+                        { '& tr:nth-of-type(odd)':{backgroundColor:'#FBF5DD'},
+                            '& tr:nth-of-type(even)':{backgroundColor:'#E7E1B1'},
+                            '& td': { textAlign: 'left', paddingLeft: 1.9 },
+                            '& th':{backgroundColor:"#bad8b6"}}}>
                                 <thead>
                                     <tr>
                                         <th style={{ width: "20%", overflow: "clip" }} >Correo</th>
@@ -282,8 +285,10 @@ function recursosAdmin() {
                         /* Tabla vehiculos */
                         <div>
                             <Table hoverRow borderAxis="y" sx={
-                                { '& td': { textAlign: 'left', paddingLeft: 1.9 } }
-                            }>
+                        { '& tr:nth-of-type(odd)':{backgroundColor:'#FBF5DD'},
+                            '& tr:nth-of-type(even)':{backgroundColor:'#E7E1B1'},
+                            '& td': { textAlign: 'left', paddingLeft: 1.9 },
+                            '& th':{backgroundColor:"#bad8b6"}}}>
                                 <thead>
                                     <tr>
                                         <th >Patente</th>

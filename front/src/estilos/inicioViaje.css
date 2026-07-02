@@ -59,10 +59,10 @@
     height: 10%;
 }
 .botonPaso{
-    background-color: #3A3B61;
+    background-color: var(--buttonPrimary);
     width: 25%;
     color: white;
-    border: #3A3B61;
+    border: var(--buttonPrimary);
     padding: 10px;
     border-radius: 25px;
     height: 10%; 

@@ -12,11 +12,11 @@
 .buttonExport{
     font-weight: bold;
     width: 15%;
-    background-color: #999CFF;
-    border: #999CFF;
+    background-color: var(--buttonPrimary);
+    border: var(--buttonPrimary);
     border-radius: 20px;
     padding: 1%;
-    color:black;
+    color:white;
 }
 .buttonExport:hover{
     cursor: pointer;
@@ -33,16 +33,18 @@
 }
 .inputBusqueda button{
     font-weight: bold;
-    width: 100%;
-    background-color: #999CFF;
-    border: #999CFF;
+    width: 120%;
+    background-color: var(--buttonPrimary);
+    border: #61b390;
     border-radius: 15px;
+    height: 85%;
     color:white;
 }
 .inputBusqueda button:hover{
     cursor: pointer;
 }
 .tablaViajes{
+    margin-top:2%;
     width: 100%;
     overflow: auto;
 }
@@ -126,8 +128,8 @@
     margin-top: 3%;
     padding:3%;
     border-radius: 10px;
-    background-color: #0B6BCB;
-    border: #0B6BCB;
+    background-color: var(--buttonPrimary);
+    border: var(--buttonPrimary);
     color: white;
     justify-items: space-between;
 }

@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { addViajeInicio, getViajes, addViajeFin, getViajeIdUsuario,parcheInicio,parcheFin, getViajeByid, getViajeIdUsuarioEspera } from "../controllers/viajes.controller"
+import { addViajeInicio, getViajes, getViajeIdUsuario,parcheInicio,parcheFin, getViajeProceso , getViajeIdUsuarioEspera } from "../controllers/viajes.controller"
 
 const router = Router()
 
@@ -8,6 +8,8 @@ router.get('/',getViajes)
 
 router.get('/:id',getViajeIdUsuarioEspera)
 
+router.get('/search/:id', getViajeProceso)
+
 router.get('/id/:id',getViajeIdUsuario)
 
 
@@ -15,7 +17,7 @@ router.get('/id/:id',getViajeIdUsuario)
 router.post('/', addViajeInicio)
 
 //Agrega(edita) la informacion de un viaje 
-router.put('/:patente', addViajeFin)
+//router.put('/:patente', addViajeFin)
 
 router.patch('/inicio/:id', parcheInicio)
 

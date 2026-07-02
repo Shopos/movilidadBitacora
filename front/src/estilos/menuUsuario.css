@@ -10,7 +10,7 @@
     justify-content: center;
 }
 .containerBotones button{
-    background-color: #3A3B61;
+    background-color: var(--buttonPrimary);
     width: 50%;
     color: white;
     border: #3A3B61;

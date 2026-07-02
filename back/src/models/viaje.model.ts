@@ -100,6 +100,13 @@ export async function getViajeIdUsuarioEspera(id:number|number[]): Promise<Viaje
     return rows
 } 
 
+export async function getViajeProceso(id:number|number[]): Promise<Viaje[]>{
+    const [rows] = await connection.query<Viaje[]>(
+        "SELECT * FROM viajes WHERE id_usuario = ? && estado_viaje = ? ",[id,"En proceso"]
+    )
+    return rows
+} 
+
 export async function getViajeId(id:number|number[]): Promise<Viaje[]>{
     const [rows] = await connection.query<Viaje[]>(
         "SELECT * FROM viajes WHERE id_viaje = ? ",[id]
@@ -231,6 +238,65 @@ export async function changeStatusViaje(id:number,status:string): Promise<boolea
 }
 
 export async function parcheFin(id:number,data:ViajeInputFuncionarioFin): Promise<boolean>{
+    const [res] = await connection.query(
+        `UPDATE viajes 
+        SET fecha_hora_fin = ?, obs_viaje = ?, carga_combustible=?,cantidad_carga=? , ultima_modificacion = ?, modificado_por = ?,kms_fin=? ,estado_viaje = ? 
+        WHERE id_viaje = ?`,
+        [data.fecha_hora_fin,
+            data.obs_viaje,
+            data.carga_combustible,
+            data.cantidad_combustible,
+            data.ultima_modificacion,
+            data.modificado_por,
+            data.kms_fin,
+            "Terminado",
+            id
+        ]
+    )
     //@ts-ignore
     return (res.affectedRows > 0)
+}
+
+export async function addViajeRegreso(viajeInicial:Viaje,modificacion:string,kmsfin:number): Promise<ViajeInputInicio>{
+    const [res] = await connection.query(
+        `INSERT INTO viajes (
+         vehiculo,
+         id_usuario,
+         patente,
+         kms_inicial,
+         lat_inicio,
+         lng_inicio,
+         destino,
+         lat_fin,
+         lng_fin,
+         motivo,
+         nombre_funcionario,
+         estado_viaje,
+         ultima_modificacion,
+         modificado_por,
+         kms_fin,
+         modo
+        )
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) `,
+        [
+            viajeInicial.vehiculo,
+            viajeInicial.id_usuario,
+            viajeInicial.patente,
+            kmsfin,
+            viajeInicial.lat_fin,
+            viajeInicial.lng_fin,
+            "Municipalidad",
+            viajeInicial.lat_inicio,
+            viajeInicial.lng_inicio,
+            `Regreso desde ${viajeInicial.destino}`,
+            viajeInicial.nombre_funcionario,
+            "En espera",
+            modificacion,
+            viajeInicial.modificado_por,
+            0,
+            "vuelta"
+        ]
+    )
+    //@ts-ignore
+    return res.insertId
 }

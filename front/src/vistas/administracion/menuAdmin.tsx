@@ -40,7 +40,6 @@ function menuAdmin() {
     const [cargando, setCargando] = useState<boolean>(false)
     const [modalNewViaje, setModalNewViaje] = useState(false)
     const [vehiculoSelected, setVehiculoSelected] = useState<Vehiculo>()
-    const [funcionarioSelected, setFuncionarioSelected] = useState<User>()
     const [listaUsuarios, setListaUsuarios] = useState<[User]>()
     const [vehiculos, setListaVehiculos] = useState<[Vehiculo]>()
     const [dia, setDia] = useState("")
@@ -351,7 +350,11 @@ function menuAdmin() {
                 </div>
                 {cargando ? (<><div className="tablaViajes">
                     <Table hoverRow borderAxis="y" sx={
-                        { '& td': { textAlign: 'left', paddingLeft: 1.9 } }
+                        { '& tr:nth-of-type(odd)':{backgroundColor:'#FBF5DD'},
+                            '& tr:nth-of-type(even)':{backgroundColor:'#E7E1B1'},
+                            '& td': { textAlign: 'left', paddingLeft: 1.9 },
+                            '& th':{backgroundColor:"#bad8b6"}
+                        }
 
                     }>
                         <thead>

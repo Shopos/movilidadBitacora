@@ -5,7 +5,7 @@
     grid-template-columns: 1fr 3fr 1fr;
     grid-template-rows: 1fr;
     padding: 1%;
-    background-color: #F2F2F2;
+    background-color: var(--buttonPrimary);
     align-items: center;
 }
 .imgIconBar{
@@ -22,6 +22,7 @@
 .textDiv h2{
     display: flex;
     justify-items: start;
+    color: white;
 }
 .iconSesion{
     grid-area: 1/5/2/6;
@@ -52,7 +53,7 @@
     grid-template-columns: 2fr 1fr;
     grid-template-rows: 1fr;
     align-items: center;
-    background-color: #3B3E93;
+    background-color: var(--fondoBarra);
 }
 .barraAux{
     display: grid;
@@ -60,7 +61,7 @@
     grid-template-rows: 1fr;
     justify-items: center;
     align-items: center;
-    background-color: #C8CAFA;
+    background-color: #bad8b6;
     border-radius: 35px;
     height: 50%;
     margin-right: 4%;

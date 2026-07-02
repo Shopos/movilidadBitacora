@@ -2,16 +2,20 @@
 :root {
   --text: #2a292b;
   --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
+  --bg: var(--fondo);
+  --code-bg: #bad8b6;
   --accent: #aa3bff;
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
+  --social-bg:#61b390;
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
+  --fondo:#FBF5DD;
+  --tablaE:#FBF5DD;
+  --tablaO:#E7E1B1;
+  --fondoBarra:#01352c;
+  --buttonPrimary:#306D29;
+  --buttonShadow:#0D530E;
   --sans: "Spline Sans",sans-serif;
   --heading: "Spline Sans", sans-serif;
   --mono: "Spline Sans", monospace;
@@ -102,4 +106,20 @@ input{
 
 textarea{
   font-family: var(--sans);
+}
+
+.first-color { 
+	background: #e1eacd; 
+}
+	
+.second-color { 
+	background: #bad8b6; 
+}
+
+.third-color { 
+	background: #61b390; 
+}
+
+.fourth-color { 
+	background: #01352c; 
 }

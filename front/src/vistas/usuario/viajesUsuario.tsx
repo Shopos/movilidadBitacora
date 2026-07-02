@@ -1,7 +1,7 @@
 import NavBar from "../../componentes/navBar.tsx"
 import Table from '@mui/joy/Table';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button} from "@mui/joy"
 import { useNavigate } from "react-router-dom";
 import "../../estilos/viajesUsuario.css"
@@ -9,137 +9,12 @@ import type {Viaje} from "../../tipos/tipoSistema.ts"
 import DataViewViaje from "../../componentes/dataViewViaje.tsx"
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { useAuth } from "../../context/AuthContext.tsx";
+import { getViajeID } from "../../utils/auxiliar.ts";
 
 function viajesUsuario(){
-
-    const Viajes:Viaje[]=[
-        {
-            id_viaje:1,
-            patente:"yzx123",
-            nombre_funcionario:"sanchez miguel",
-            fecha_hora_inicio:"12:00",
-            kms_inicial:100,
-            fecha_hora_fin:"13:30",
-            kms_fin:110,
-            estado_viaje:false,
-            cantidad_carga:10,
-            carga_combustible:true,
-            destino:"santa cruz",
-            lat_inicio: -34.639464, 
-            lng_inicio: -71.365910,
-            lat_fin:-34.627511,
-            lng_fin:-71.349689,
-            motivo:"Visita a parque",
-            obs_viaje:"-",
-            vehiculo:"Toyota",
-            id_usuario:3,
-            lat_fin_real:0,
-            lng_fin_real:0,
-            modificado_por:"",
-            ultima_modificacion:""
-        },
-        {
-            id_viaje:1,
-            patente:"yzx123",
-            nombre_funcionario:"sanchez miguel",
-            fecha_hora_inicio:"12:00",
-            kms_inicial:100,
-            fecha_hora_fin:"13:30",
-            kms_fin:110,
-            estado_viaje:false,
-            cantidad_carga:10,
-            carga_combustible:true,
-            destino:"santa cruz",
-            lat_inicio: -34.639464, 
-            lng_inicio: -71.365910,
-            lat_fin:-34.627511,
-            lng_fin:-71.349689,
-            motivo:"Visita a parque",
-            obs_viaje:"-",
-            vehiculo:"Toyota",
-            id_usuario:3,
-            lat_fin_real:0,
-            lng_fin_real:0,
-            modificado_por:"",
-            ultima_modificacion:""
-        },
-        {
-            id_viaje:1,
-            patente:"yzx123",
-            nombre_funcionario:"sanchez miguel",
-            fecha_hora_inicio:"12:00",
-            kms_inicial:100,
-            fecha_hora_fin:"13:30",
-            kms_fin:110,
-            estado_viaje:false,
-            cantidad_carga:10,
-            carga_combustible:true,
-            destino:"santa cruz",
-            lat_inicio: -34.639464, 
-            lng_inicio: -71.365910,
-            lat_fin:-34.627511,
-            lng_fin:-71.349689,
-            motivo:"Visita a parque",
-            obs_viaje:"-",
-            vehiculo:"Toyota",
-            id_usuario:3,
-            lat_fin_real:0,
-            lng_fin_real:0,
-            modificado_por:"",
-            ultima_modificacion:""
-        },
-        {
-            id_viaje:1,
-            patente:"yzx123",
-            nombre_funcionario:"sanchez miguel",
-            fecha_hora_inicio:"12:00",
-            kms_inicial:100,
-            fecha_hora_fin:"13:30",
-            kms_fin:110,
-            estado_viaje:false,
-            cantidad_carga:10,
-            carga_combustible:true,
-            destino:"santa cruz",
-            lat_inicio: -34.639464, 
-            lng_inicio: -71.365910,
-            lat_fin:-34.627511,
-            lng_fin:-71.349689,
-            motivo:"Visita a parque",
-            obs_viaje:"-",
-            vehiculo:"Toyota",
-            id_usuario:3,
-            lat_fin_real:0,
-            lng_fin_real:0,
-            modificado_por:"",
-            ultima_modificacion:""
-        },
-        {
-            id_viaje:1,
-            patente:"yzx123",
-            nombre_funcionario:"sanchez miguel",
-            fecha_hora_inicio:"12:00",
-            kms_inicial:100,
-            fecha_hora_fin:"13:30",
-            kms_fin:110,
-            estado_viaje:false,
-            cantidad_carga:10,
-            carga_combustible:true,
-            destino:"santa cruz",
-            lat_inicio: -34.639464, 
-            lng_inicio: -71.365910,
-            lat_fin:-34.627511,
-            lng_fin:-71.349689,
-            motivo:"Visita a parque",
-            obs_viaje:"-",
-            vehiculo:"Toyota",
-            id_usuario:3,
-            lat_fin_real:0,
-            lng_fin_real:0,
-            modificado_por:"",
-            ultima_modificacion:""
-        }
-    ]
-    let name = Viajes.at(0)?.nombre_funcionario
+    const { usuario } = useAuth()
+    const [viajesUsuario,setViajes] = useState<Viaje[]|null>(null)
     const [viajeSelected,setViajeSelected] = useState<Viaje|null>(null)
     const [openModalViaje,setOpenModalViaje] = useState<boolean>(false)
     const navigate = useNavigate()
@@ -154,11 +29,11 @@ function viajesUsuario(){
     */
 
     const exportarPDF=()=>{
-        if(Viajes){
+        if(viajesUsuario){
             const doc = new jsPDF('l','pt','a4')
             doc.setFontSize(12)
             const columns = ['ID','Vehiculo','Patente','kM inicio','kM fin','Hora inicio','Destino','Hora llegada','Estado del viaje']
-            const rows = Viajes.map((vje) => [
+            const rows = viajesUsuario.map((vje) => [
                 vje.id_viaje,
                 vje.vehiculo,
                 vje.patente,
@@ -167,9 +42,9 @@ function viajesUsuario(){
                 (vje.fecha_hora_inicio.slice(0,10)+" "+vje.fecha_hora_inicio.slice(11,19)),
                 vje.destino,
                 (vje.fecha_hora_fin.slice(0,10)+ " "+ vje.fecha_hora_fin.slice(11,19)),
-                (vje.estado_viaje ? "Activo":"Terminado")
+                (vje.estado_viaje)
             ])
-            doc.text(`Reporte de viajes de ${name} - Departamento de Movilización`,20,20)
+            doc.text(`Reporte de viajes de ${usuario?.nombre } - Departamento de Movilización`,20,20)
 
             autoTable(doc,{
                 startY:40,
@@ -185,6 +60,20 @@ function viajesUsuario(){
         }
         return
     }
+
+    useEffect(()=>{
+        const getViajesUsuario=async()=>{
+            try{
+                const response = await getViajeID(usuario!.id)
+                if(response){
+                    setViajes(response)
+                }
+            }catch(e){
+                console.error( "Error listando viajes ",e)
+            }
+        }
+        getViajesUsuario()
+    },[])
     
     /*
     Vista para los viajes del usuario
@@ -196,15 +85,18 @@ function viajesUsuario(){
         <>  
             <NavBar type={0} texto=""/>
             <div>
-                <Table hoverRow borderAxis="y" stripe={"odd"} sx={
-                            {'& td':{textAlign:'left',paddingLeft:1.9}}
+                { viajesUsuario ? (
+                <Table hoverRow borderAxis="y" sx={
+                            { '& tr:nth-of-type(odd)':{backgroundColor:'#FBF5DD'},
+                            '& tr:nth-of-type(even)':{backgroundColor:'#E7E1B1'},
+                            '& td':{textAlign:'left',paddingLeft:1.9}}
                         }>
                     <thead>
                         <tr>
                             <th style={{width:"5%"}}>ID</th>
-                            <th>Patente vehículo</th>
-                            <th style={{width:"10%"}}>Hora inicio</th>
-                            <th style={{width:"10%"}}>Hora llegada</th>
+                            <th style={{width:"12%"}}>Patente vehículo</th>
+                            <th style={{width:"12%"}}>Hora inicio</th>
+                            <th style={{width:"12%"}}>Hora llegada</th>
                             <th>Estado viaje</th>
                             <th>Acciones</th>
                         </tr>
@@ -212,13 +104,13 @@ function viajesUsuario(){
 
                     <tbody>
                         
-                        {Viajes.map((viaje)=>(
+                        {viajesUsuario && viajesUsuario.map((viaje:Viaje)=>(
                         <tr>
                             <td><span className="cell-header">ID</span>{viaje.id_viaje}</td>
                             <td><span className="cell-header">Patente vehiculo</span>{viaje.patente}</td>
-                            <td><span className="cell-header">Hora inicio</span>{viaje.fecha_hora_inicio}</td>
-                            <td><span className="cell-header">Hora llegada</span>{viaje.fecha_hora_fin}</td>
-                            <td><span className="cell-header">Estado viaje</span>{viaje.estado_viaje === true ? "En proceso" : "Terminado"}</td>
+                            <td><span className="cell-header">Hora inicio</span>{`${viaje.fecha_hora_inicio.slice(0, 10)} ${viaje.fecha_hora_inicio.slice(11, 19)}`}</td>
+                            <td><span className="cell-header">Hora llegada</span>{`${viaje.fecha_hora_fin.slice(0, 10)} ${viaje.fecha_hora_fin.slice(11, 19)}`}</td>
+                            <td><span className="cell-header">Estado viaje</span>{viaje.estado_viaje}</td>
                             <td>
                                 <span className="cell-header">Acciones</span>
                                 <div style={{display:"flex",gap:"10px"}}>
@@ -231,10 +123,12 @@ function viajesUsuario(){
                         ))}
                     </tbody>
                 </Table>
-                
+                ):(<>No cuentas con viajes</>)
+                }
                 <div style={{display:"flex", flexDirection:"row", justifyContent:"space-around"}}>
                     <button className="botonPaso" onClick={()=>volverMenu()}>Volver</button>
-                    <button className="botonPaso" onClick={()=>exportarPDF()}>Exportar Tabla a PDF</button>
+                    
+                    {viajesUsuario ? (<button className="botonPaso" onClick={()=>exportarPDF()}>Exportar Tabla a PDF</button>):(<></>)}
                 </div>
 
                 <Modal open={openModalViaje} onClose={() => setOpenModalViaje(false)}>

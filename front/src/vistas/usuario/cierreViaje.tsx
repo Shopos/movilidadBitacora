@@ -9,7 +9,7 @@ import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import { isMobile } from "react-device-detect"
 import { useAuth } from "../../context/AuthContext.tsx"
-import { getViajeID, patchFin } from "../../utils/auxiliar.ts"
+import { getViajeID, getViajeProceso, patchFin } from "../../utils/auxiliar.ts"
 
 
 function cierreViaje() {
@@ -56,10 +56,10 @@ function cierreViaje() {
         const getID = async () => {
             try {
                 if (usuario) {
-                    const response = await getViajeID(usuario.id)
+                    const response = await getViajeProceso(usuario.id)
                     if (response && Object.keys(response).length > 0) {
                         //console.log(response[0].id_viaje)
-                        setViajeID(response[0])
+                        setViajeID(response)
                     } else {
                         setViajeID(null)
                     }
@@ -100,12 +100,10 @@ function cierreViaje() {
     */
     useEffect(() => {
         if (formFin.estado_viaje === "Terminado") {
-            console.log(formFin)
-            console.log(viajeID!.id_viaje)
             //se envia update
-            //patchFin(viajeID!.id_viaje,formFin)
-            //localStorage.removeItem("idViaje")
-            //navigate("/menuUsuario")
+            patchFin(viajeID!.id_viaje,formFin)
+            localStorage.removeItem("idViaje")
+            navigate("/menuUsuario")
         }
     }, [formFin])
 

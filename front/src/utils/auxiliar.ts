@@ -120,6 +120,23 @@ export async function getViajeID(id:number){
     return null;
   }
 }
+
+export async function getViajeProceso(id:number){
+  try {
+    if (id) {
+      const response = await fetch(`http://localhost:4000/viajes/search/${id}`)
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      return await response.json()
+    }
+  } catch (e) {
+    console.error('Error encontrando viaje-usuario:', e);
+    return null;
+  }
+}
+
+
 /** Metodos para solicitar agregar informacion hacia backend
  * 
  * Considerando "/{algo}" se agregara informacion a la tabla asociada a dicha ruta descrita en backend
@@ -332,6 +349,7 @@ export async function patchInicio(id:number,data:ViajeInputInicio){
 
 export async function patchFin(id:number,data:ViajeInputFin){
   if(data){
+    console.log("Agregando info final")
     const url = `http://localhost:4000/viajes/fin/${id}`
     const payload = data
     try{

@@ -1,7 +1,7 @@
 import NavBar from "../../componentes/navBar.tsx"
 import Table from '@mui/joy/Table';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button} from "@mui/joy"
 import { useNavigate } from "react-router-dom";
 import "../../estilos/viajesUsuario.css"
@@ -11,6 +11,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useAuth } from "../../context/AuthContext.tsx";
 import { getViajeID } from "../../utils/auxiliar.ts";
+import { TablePagination } from "@mui/material";
 
 function viajesUsuario(){
     const { usuario } = useAuth()
@@ -61,6 +62,7 @@ function viajesUsuario(){
         return
     }
 
+    /**Consulta los viajes del usuario y los almacena */
     useEffect(()=>{
         const getViajesUsuario=async()=>{
             try{
@@ -75,6 +77,20 @@ function viajesUsuario(){
         getViajesUsuario()
     },[])
     
+    /**Constructores y metodos para la paginacion de la tabla de viajes del usuario */
+    const [page,setPage]=useState(0)
+    const [rowsPerPage,setRowsPerPage] = useState(5)
+
+    const handleChangePage = (event:React.MouseEvent<HTMLButtonElement>|null, newPage:number,)=>{
+        setPage(newPage)
+    }
+
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>,)=>{
+        setRowsPerPage(parseInt(event.target.value,10))
+        setPage(0)
+    }
+
+
     /*
     Vista para los viajes del usuario
         >Se listan los viajes y se muestran en tabla
@@ -86,6 +102,7 @@ function viajesUsuario(){
             <NavBar type={0} texto=""/>
             <div>
                 { viajesUsuario ? (
+                <>
                 <Table hoverRow borderAxis="y" sx={
                             { '& tr:nth-of-type(odd)':{backgroundColor:'#FBF5DD'},
                             '& tr:nth-of-type(even)':{backgroundColor:'#E7E1B1'},
@@ -107,7 +124,7 @@ function viajesUsuario(){
 
                     <tbody>
                         
-                        {viajesUsuario && viajesUsuario.map((viaje:Viaje)=>(
+                        {viajesUsuario && viajesUsuario.slice(page*rowsPerPage,page*rowsPerPage+rowsPerPage).map((viaje:Viaje)=>(
                         <tr>
                             <td><span className="cell-header">ID</span>{viaje.id_viaje}</td>
                             <td><span className="cell-header">Patente vehiculo</span>{viaje.patente}</td>
@@ -126,6 +143,18 @@ function viajesUsuario(){
                         ))}
                     </tbody>
                 </Table>
+                <TablePagination
+                    rowsPerPageOptions={[5,10,25]}
+                    component={"div"}
+                    count={viajesUsuario!.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage={"Cantidad de viajes a mostrar"}
+                    labelDisplayedRows={({from,to,count})=> `${from}-${to} de ${count !== -1 ? count: `más de ${to}`}`}
+                ></TablePagination>
+                </>
                 ):(<>No cuentas con viajes</>)
                 }
                 <div style={{display:"flex", flexDirection:"row", justifyContent:"space-around"}}>

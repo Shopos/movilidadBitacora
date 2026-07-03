@@ -63,7 +63,7 @@ function menuUsuario(){
             navigate("/inicioViaje")
         }
     }
-    /* Verificar si existe viaje en proceso del usuario o mantiene un id_viaje en localStorage, si existe redirigir a viajeProceso */
+   
 
     return(
         <div>

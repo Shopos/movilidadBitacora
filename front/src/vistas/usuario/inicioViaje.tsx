@@ -25,15 +25,15 @@ interface prop {
 function inicioViaje() {
     const [modalCamara, openModalCamara] = useState<boolean>(false)
     const [cargando, setCargando] = useState<boolean>(false)
-    const [formInicio, setFormInicio] = useState<Viaje|null>()
+    const [formInicio, setFormInicio] = useState<Viaje | null>()
     const [dataGPS, setDataGPS] = useState<GPS>({
-            lat: 0, lng: 0
-        })
-        const [dataGPSDestino, setDataGPSDestino] = useState<GPS>({
-            lat: 0, lng: 0
-        })
-        const points: GPS[] = [dataGPS, dataGPSDestino]
-    const {usuario} = useAuth()
+        lat: 0, lng: 0
+    })
+    const [dataGPSDestino, setDataGPSDestino] = useState<GPS>({
+        lat: 0, lng: 0
+    })
+    const points: GPS[] = [dataGPS, dataGPSDestino]
+    const { usuario } = useAuth()
 
     const [dia, setDia] = useState("")
     const [time, setTime] = useState("")
@@ -73,34 +73,33 @@ function inicioViaje() {
         return null
     }
 
-
-    useEffect(()=>{
-        const getViajeEspera=async()=>{
-            try{
-                if(usuario){
+    /**Consulta por el viaje en espera del usuario, si este existe carga los elementos del viaje en el formulario  */
+    useEffect(() => {
+        const getViajeEspera = async () => {
+            try {
+                if (usuario) {
                     const response = await getViajeUsuarioEspera(usuario.id)
-                    if(response && Object.keys(response).length>0){
+                    if (response && Object.keys(response).length > 0) {
                         setFormInicio(response[0])
-                        
                         setCargando(true)
-                    }else{
+                    } else {
                         setFormInicio(null)
                     }
                 }
-            }catch(e){
-                console.error( " Error encontrando viaje ")
+            } catch (e) {
+                console.error(" Error encontrando viaje ")
                 setFormInicio(null)
             }
         }
         getViajeEspera()
-    },[usuario,cargando])
+    }, [usuario, cargando])
 
-    useEffect(()=>{
-        if(formInicio?.lat_inicio){
-            setDataGPS({lat:formInicio!.lat_inicio, lng:formInicio!.lng_inicio})
-            setDataGPSDestino({lat:formInicio!.lat_fin,lng:formInicio!.lng_fin})
+    useEffect(() => {
+        if (formInicio?.lat_inicio) {
+            setDataGPS({ lat: formInicio!.lat_inicio, lng: formInicio!.lng_inicio })
+            setDataGPSDestino({ lat: formInicio!.lat_fin, lng: formInicio!.lng_fin })
         }
-    },[formInicio])
+    }, [formInicio])
 
     /*Funcion para manejar los cambios de los inputs disponibles */
     const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -128,8 +127,8 @@ function inicioViaje() {
 
     /* Método para actualizar la informacion antes del envio de esta misma a la DB */
     const updateData = async () => {
-        if(formInicio){
-           setFormInicio((prevData) => ({
+        if (formInicio) {
+            setFormInicio((prevData) => ({
                 ...prevData!,
                 fecha_hora_inicio: `${dia} ${time}`,
                 ultima_modificacion: formatoFecha(),
@@ -139,16 +138,23 @@ function inicioViaje() {
         }
     }
 
-    useEffect(()=>{
-        if(formInicio?.estado_viaje === "En proceso"){
-            localStorage.setItem("idViaje",String(formInicio.id_viaje))//guardar idViaje para consulta futura
-            patchInicio(formInicio.id_viaje,{
-                fecha_hora_inicio: formInicio.fecha_hora_inicio,
-                ultima_modificacion: formInicio.ultima_modificacion,
-                modificado_por: formInicio.modificado_por
-            })
-            navigate("/viajeProceso")
+    /**Efecto para el envio de informacion del viaje inicial, una vez que el usuario haya ingresado fecha y hora del viaje y confirme los datos
+     * estos son enviados a updateData donde se cambia el estado_viaje a En proceso --> detecta el cambio y se envia la informacion, una vez enviada se navega a 
+     * viajeProceso
+     */
+    useEffect(() => {
+        const patch = async () => {
+            if (formInicio?.estado_viaje === "En proceso") {
+                //localStorage.setItem("idViaje",String(formInicio.id_viaje))//guardar idViaje para consulta futura
+                await patchInicio(formInicio.id_viaje, {
+                    fecha_hora_inicio: formInicio.fecha_hora_inicio,
+                    ultima_modificacion: formInicio.ultima_modificacion,
+                    modificado_por: formInicio.modificado_por
+                })
+                navigate("/viajeProceso")
+            }
         }
+        patch()
     })
 
 
@@ -167,9 +173,8 @@ function inicioViaje() {
     return (
         /*
         Vista inicio de documentacion viaje
-            >Se muestran las patentes de vehiculos cuyo estado sea "DISPONIBLE" y se descartan los otros 
-            >Se agrega directamente el nombre del usuario ingresado dentro del formulario directamente
-            >Modal para agregar primera vista de tablero y seleccion de destino
+            Si existe un viaje En espera para el usuario es enviado a esta ventana donde debe ingresar la hora y fecha de inicio del viaje
+            Si no existe viaje se muestra cargando
         */
         <>
             <NavBar type={0} texto="" />
@@ -230,7 +235,7 @@ function inicioViaje() {
                         <div>Destino {formInicio.destino}</div>
                         <div className="full-width">
                             <>
-                            
+
                                 <div className="leaflet-container-preview">
                                     <MapContainer zoom={18}>
                                         <TileLayer
@@ -264,7 +269,11 @@ function inicioViaje() {
                             <button className="botonPaso" onClick={() => continuarProceso()}>Continuar</button>
                         </div>
                     </div>
-                ) : (<>Cargando...</>)}
+                ) : (<>
+                    <div>Cargando...</div>
+                    <div className="botonesPaso">
+                        <button className="botonPaso" onClick={()=>volverMenu}>Volver</button>                    
+                    </div></>)}
 
             {/*Modal para ingreso de documentacion tablero vehiculo ya sea imagen previa o con camara */}
             <Modal open={modalCamara} onClose={() => openModalCamara(false)}>

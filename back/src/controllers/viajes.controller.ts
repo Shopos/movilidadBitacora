@@ -15,7 +15,7 @@ export async function getViajes(req: Request, res: Response) {
         res.status(500).json({ error: " Error al listar viajes " })
     }
 }
-
+//Metodo para solicitar los viajes cuyo id sea igual al solicitado
 export async function getViajeByid(id: number) {
     try {
         const ide = Number(id)
@@ -25,7 +25,7 @@ export async function getViajeByid(id: number) {
         console.error(e)
     }
 }
-
+//Metodo para solicitar y entregar un viaje que este en estado "En proceso"
 export async function getViajeProceso(req:Request,res:Response) {
     try {
         const ide = Number(req.params.id)
@@ -40,7 +40,7 @@ export async function getViajeProceso(req:Request,res:Response) {
         console.error(e)
     }
 }
-
+//Metodo que solicita y entrega todos los viajes de un usuario
 export async function getViajeIdUsuario(req: Request, res: Response) {
     try {
         const viajeBuscado = Number(req.params.id)
@@ -113,65 +113,9 @@ export async function addViajeInicio(req: Request, res: Response) {
     }
 }
 
-/* Metodo para agregar la informacion faltante a un viaje iniciado 
-    parametro esperado a solicitar id:string --> patente {Para comprobar si el vehiculo realmente esta en ruta}
-    parametro esperado a solicitar {datos}:viajeInputFin
-
-    se hace uso del metodo checkPatente, si es verdadero se agrega la informacion, caso contrario cancela la accion
-    Una vez agregada la informacion, libera el vehiculo involucrado cambiando su estado a "DISPONIBLE"
-*/
-/*
-export async function addViajeFin(req: Request, res: Response) {
-    try {
-        const id = req.params.patente
-        const { cantidad_combustible,
-            carga_combustible,
-            fecha_hora_fin,
-            lat_fin_real,
-            lng_fin_real,
-            modificado_por,
-            ultima_modificacion,
-            obs_viaje,
-            kms_fin,
-            estado_viaje,
-        } = req.body
-
-        if (await checkPatente(String(id))) {
-            const actualiza = await viajesModel.editViajeFin(id, {
-                cantidad_combustible,
-                carga_combustible,
-                fecha_hora_fin,
-                lat_fin_real,
-                lng_fin_real,
-                modificado_por,
-                ultima_modificacion,
-                obs_viaje,
-                kms_fin,
-                estado_viaje,
-            })
-            if (!actualiza) {
-                return res.status(404).json({ error: " no se pudo actualizar el viaje" })
-            }
-            res.json({ msg: " Viaje finalizado" })
-            await vehiculoModel.changeStatus(String(id), "DISPONIBLE")
-            await handleChangeKMS(kms_fin, String(id))
-        } else {
-            console.log({ msg: " Problema al agregar nuevos datos a este viaje" })
-        }
-    } catch (e) {
-        console.error(e)
-        res.status(500).json({ error: " Error al finalizar viaje" })
-    }
-}
-*/
-/* Metodo para comprobar la patente de un vehiculo */
-async function checkPatente(patente: string): Promise<boolean> {
-    const res = await viajesModel.checkPatenteEstado(patente)
-
-    return res.length > 0
-}
 
 
+//Metodo que solicita y entrega los viajes al usuario{id} y el estado del viaje sea "En espera"
 export async function getViajeIdUsuarioEspera(req: Request, res: Response) {
     try {
         const viajeBuscado = Number(req.params.id)
@@ -186,6 +130,10 @@ export async function getViajeIdUsuarioEspera(req: Request, res: Response) {
     }
 }
 
+
+/** Metodo para agregar la informacion necesaria para iniciar un viaje
+ * Se cambia el estado del usuario involucrado en el viaje a "En ruta"
+ */
 export async function parcheInicio(req: Request, res: Response) {
     try {
         const id = Number(req.params.id)
@@ -212,7 +160,12 @@ export async function parcheInicio(req: Request, res: Response) {
         res.status(500).json({ error: " Error ingresando datos iniciales " })
     }
 }
-
+/**Metodo para ingresar los datos faltantes de un viaje 
+ * 
+ * Se cambia el kilometraje del vehiculo por el kilometraje final registrado en el formulario y se asigna al vehiculo
+ * Si el viaje a agregar informacion faltante es del modo "ida" --> se genera un viaje adicional con los datos inversos y con modo "vuelta"
+ * Si el viaje a agregar informacion faltante es del modo "vuelta" --> cambia el estado del vehiculo a "DISPONIBLE" y del usuario involucrado a "Disponible"
+*/
 export async function parcheFin(req: Request, res: Response) {
     try {
         const id = Number(req.params.id)

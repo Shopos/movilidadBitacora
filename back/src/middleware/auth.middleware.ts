@@ -16,33 +16,28 @@ interface UsuarioPayload{
     cargo:string,
     estado:string,
 }
-export const autenticarJWT = (req:Request,res:Response, next:NextFunction):void =>{
 
+/**Verifica que el token JWT sea autentico y no este expirado debido al tiempo */
+export const autenticarJWT = (req:Request,res:Response, next:NextFunction):void =>{
     const authHeader = req.headers.authorization
-    
     if(!authHeader || !authHeader?.startsWith('Bearer ')){
         res.status(401).json({msg: "Acceso denegado: sin token"})
         return
     }
-
-    const token = authHeader.split(' ')[1]
-    
+    const token = authHeader.split(' ')[1]    
     try{
         const secret = process.env.JWT_SECRET
-
         if(!secret){
             throw new Error('JWT no encontrado en variables')
         }
-
         const decoded = jwt.verify(token,secret)
         req.usuario = decoded
-
         next()
     }catch(e){
         res.status(403).json({msg: "Token expirado"})
     }
 }
-
+/**Verifica que la solicitud enviada sea de un usuario con cargo Administrativo */
 export const verifyAdmin = (req:Request, res:Response, next:NextFunction)=>{
     const user = req.usuario as UsuarioPayload | undefined
     if(user && user.cargo !== "Administrativo"){

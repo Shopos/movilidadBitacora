@@ -32,7 +32,7 @@ function inicioSesion(){
         }
         
         setFormData({mail:"",pass:""})
-            //buscar cargo de usuario inicio en resultado    
+        //Navega dependiendo del resultado de resultadoInicio que almacena el usuario si este obtiene un resultado positivo desde login
         navigate(resultadoInicio.usuario!.cargo === "Administrativo" ? "/menuAdmin" : "/menuUsuario")
         
     }

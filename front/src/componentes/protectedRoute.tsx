@@ -7,6 +7,12 @@ type ProtectedRouteProp = {
     rolesPermitidos? : ("Administrativo"|"Funcionario")
 }
 
+/**Componente para proteger rutas-componentes del sistema
+ * 
+ * Si el usuario no inicia sesion, no puede navegar a otro componente 
+ * Si el usuario inicia sesion solo tiene permitido ingresar a aquellos componente donde su rol sea permitido, si intenta 
+ * se redirige a el menu del usuario cuyo cargo corresponda administracion -> menuAdmin funcionario/usuario->menuUsuario
+ */
 function ProtectedRoute({children,rolesPermitidos}: ProtectedRouteProp) {
     const {autenticado, usuario,cargando} = useAuth()
     if(cargando){

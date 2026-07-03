@@ -15,7 +15,7 @@ function navBar({type,texto}:navBarProps){
 
     const {logOut} = useAuth()
     /*Si usuario(cualquiera) selecciona el icono de usuario, comienza proceso cierre de sesión y se devuelve al home de la app (/) */
-    const handleCierreSesion =()=>{
+    const handleCierreSesion = ()=>{
         logOut()
         setOpenModalCierre(false)
         navigate("/")

@@ -95,7 +95,7 @@ export async function editarUsuario(req:Request,res:Response){
         res.status(500).json({error: " Error al editar usuario "})
     }
 }
-
+/** Metodo para validar al usuario dentro de la bd, si se valida devuelve token jwt y al usuario */
 export async function login(req:Request,res:Response){
     try{
         const {correo,pass} = req.body

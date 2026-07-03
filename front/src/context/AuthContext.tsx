@@ -23,7 +23,13 @@ export function AuthProvider({children}: {children: ReactNode}){
     const [token, setToken] = useState<string|null>(null)
     const [cargando, setCargando] = useState(true)
 
-
+    /**Metodo para iniciar sesion dentro del sistema
+     * 
+     * Verifica las credenciales enviadas desde inicioSesion hacia el back
+     * Si esto ocurre regresa al usuario encontrado
+     * Almacena dentro del componente al usuario
+     * Guarda en localStorage el token jwt del usuario para futuras consultas y verificaciones
+     */
     const login = async (correo:string, pass:string) =>{
         try{
             const res = await fetch('http://localhost:4000/usuarios/login' ,{
@@ -45,12 +51,21 @@ export function AuthProvider({children}: {children: ReactNode}){
         }
     }
 
+    /**Cierra sesion del usuario eliminando de la memoria del componente al usuario y al token generado
+     * elimina de localStorage el token
+    */
     const logOut = () =>{
         setUsuario(null)
         setToken(null)
         localStorage.removeItem("token")
     }
 
+    /**Verificar la identidad del usuario que no ha cerrado sesion
+     * Si el usuario refresca la ventana o navega a otra, permite volver a identificar al usuario mientras se tenga el token de sesion del mismo
+     * Si esto ocurre vuelve a almacenar en memoria al usuario
+     * Si el token deja de tener validez, elimina el token y retorna --> debe volver a iniciar sesion
+     * 
+     */
     useEffect(()=>{
         console.log("intentando restaurar sesion")
         const restaurarSesion = async()=>{

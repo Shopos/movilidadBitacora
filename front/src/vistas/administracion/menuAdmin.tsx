@@ -12,6 +12,7 @@ import DateRangeOutlinedIcon from '@mui/icons-material/DateRangeOutlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { jsPDF } from "jspdf"
 import autoTable from "jspdf-autotable";
+import { TablePagination } from "@mui/material"
 
 import type { Vehiculo, Viaje, User } from "../../tipos/tipoSistema.ts"
 import getVehiculos, { getViajes, getFuncionarios, addViajeInicial } from "../../utils/auxiliar.ts";
@@ -101,7 +102,7 @@ function menuAdmin() {
         modo: "ida" //modo ida (inicial) -> modo vuelta --->nuevo viaje con datos inversos
     }
 
-    /* Metodo para obtener la lista de viajes */
+    /* Metodo para obtener la lista de viajes, usuarios y vehiculos */
     useEffect(() => {
         const getListaViajes = async () => {
             try {
@@ -186,6 +187,7 @@ function menuAdmin() {
         return
     }
 
+    /** Si se selecciona un vehiculo desde un modal, reemplaza con los datos de dicho vehiculo en el formulario */
     const manejarDataVehiculo = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const patenteselected = event.target.value
 
@@ -203,6 +205,7 @@ function menuAdmin() {
         }))
     }
 
+    /** Si se selecciona un usuario desde un modal, reemplaza con los datos de dicho usuario en formulario */
     const manejarDataFuncionario = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const usuarioSelected = (event.target.value).split(" / ")
         const usuarioFind = listaUsuarios!.find(
@@ -233,7 +236,7 @@ function menuAdmin() {
     }
 
 
-    /*Mapa */
+    /*Mapa--> Contiene los constructores relacionados al uso del mapa*/
     const [modalDestino, openModalDestino] = useState(false)
     const [dataGPS, setDataGPS] = useState<GPS>({
         lat: -34.639739, lng: -71.365916
@@ -242,6 +245,7 @@ function menuAdmin() {
         lat: -34.639739, lng: -71.365916
     })
     const points: GPS[] = [dataGPS, dataGPSDestino]
+
     function FitBounds({ points }: prop) {
         const map = useMap()
 
@@ -294,7 +298,12 @@ function menuAdmin() {
         setFormInicio(actualiza)
     }, [dataGPSDestino]
     )
+    /**-->Terminan metodos relacionados a mapa */
 
+    /**Metodo para tener un formato correcto de las fechas tanto para hora y fecha pedido en back
+     * 
+     * YYYY-MM-DD HH:MM
+     */
     const formatoFecha = () => {
         const d = new Date()
         const year = d.getFullYear()
@@ -319,14 +328,12 @@ function menuAdmin() {
         }))
     }
 
-    /* Efecto que se activa la momento de actualizar algun valor en formInicio o navigate, si detecta algun cambio en el 
-        formInicio y al mismo tiempo el estado de viaje es verdadero, hace envio de la informacion inicial a DB, guarda
+    /* Efecto que se activa la momento de actualizar algun valor en formInicio, si detecta algun cambio en el 
+        formInicio y al mismo tiempo el estado_viaje de formInicio es "En espera", hace envio de la informacion inicial a DB, guarda
         esta misma informacion en localStorage y envia a la vista de viaje en proceso */
     useEffect(() => {
         if (formInicio.estado_viaje === "En espera") {
-            //enviar a bd datos iniciales
             addViajeInicial(formInicio)
-            //Limpiar formInicio
             setModalNewViaje(false)
             setCargando(false)
             setSeverity("success")
@@ -339,6 +346,18 @@ function menuAdmin() {
         //limpiar formInicio
         setModalNewViaje(false)
     }
+    /**Contructor y metodos para la paginacion de la tabla de viajes*/
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+
+    const handleChangePage= (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number,) => {
+        setPage(newPage);
+    };
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+    /**-->Terminan los contructores y metodos para paginacion de la tabla de viajes */
 
     /*
     Vista menu administracion
@@ -408,7 +427,7 @@ function menuAdmin() {
 
                         <tbody>
 
-                            {viajes && viajes.map((viaje: Viaje) => (
+                            {viajes && viajes.slice(page*rowsPerPage,page*rowsPerPage+rowsPerPage).map((viaje: Viaje) => (
                                 <tr>
                                     <td>{viaje.patente}</td>
                                     <td>{viaje.fecha_hora_inicio ? (viaje.fecha_hora_inicio.slice(0, 10)):("Viaje en espera de inicio")}</td>
@@ -439,6 +458,20 @@ function menuAdmin() {
                             ))}
                         </tbody>
                     </Table>
+                    <TablePagination 
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={viajes!.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage={"Cantidad de viajes a mostrar"}
+                    labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count !== -1 ? count : `más de ${to}`}`}
+                    sx={{
+                        '& .MuiTablePagination-actions': {width:'4vw'}
+                    }}
+                    />
                 </div>  </>) : (<>Cargando</>)}
 
             </div>
@@ -470,8 +503,8 @@ function menuAdmin() {
                     </DialogActions>
                 </ModalDialog>
             </Modal>
+            
             {/*Modal edición viaje */}
-
             <Modal open={modalEdicion} onClose={() => setOpenModalEdit(false)}>
                 <ModalDialog variant="outlined" sx={{ width: { xs: '90%', sm: '500px', md: '700px' } }}>
                     <DialogTitle>

@@ -5,11 +5,11 @@ const router = Router()
 
 //Obtiene todos los viajes
 router.get('/',getViajes)
-
+//Obtiene el viaje en espera del usuario
 router.get('/:id',getViajeIdUsuarioEspera)
-
+//Obtiene el viaje en proceso del usuario
 router.get('/search/:id', getViajeProceso)
-
+//Obtiene los viajes del usuario
 router.get('/id/:id',getViajeIdUsuario)
 
 
@@ -19,8 +19,9 @@ router.post('/', addViajeInicio)
 //Agrega(edita) la informacion de un viaje 
 //router.put('/:patente', addViajeFin)
 
+//Edita los elementos necesarios para dar partida a un viaje {id}
 router.patch('/inicio/:id', parcheInicio)
-
+//Edita los elementos necesarios para finalizar un viaje {id}
 router.patch('/fin/:id', parcheFin)
 
 export default router

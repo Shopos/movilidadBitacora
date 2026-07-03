@@ -42,7 +42,7 @@ function cierreViaje() {
     const [viajeID, setViajeID] = useState<Viaje | null>(null)
     const d = new Date()
     const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-    const [errorKms,setErrorKms] = useState<string|null>(null)
+    const [errorKms, setErrorKms] = useState<string | null>(null)
     /* Si el usuario tiene activo y permitido el acceso a su localizacion, recupera su latitud y longitud final para 
     almacenar estos valores en la BD*/
     useEffect(() => {
@@ -99,12 +99,15 @@ function cierreViaje() {
     Una vez subido estos datos se envia el formulario final a actualizar dicho viaje en BD
     */
     useEffect(() => {
-        if (formFin.estado_viaje === "Terminado") {
-            //se envia update
-            patchFin(viajeID!.id_viaje,formFin)
-            //localStorage.removeItem("idViaje")
-            navigate("/viajesUsuario")
+        const patch = async () => {
+            if (formFin.estado_viaje === "Terminado") {
+                //se envia update
+                await patchFin(viajeID!.id_viaje, formFin)
+                //localStorage.removeItem("idViaje")
+                navigate("/viajesUsuario")
+            }
         }
+        patch()
     }, [formFin])
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -123,6 +126,7 @@ function cierreViaje() {
         }))
     }
 
+    /**Verifica que el kilometraje enviado desde el input no sea menor al kilometraje inicial del vehiculo */
     const handleKMS = (e: ChangeEvent<HTMLInputElement>) => {
         const valueNum = Number(e.currentTarget.value);
         const kmsInicial = viajeID?.kms_inicial || 0;
@@ -166,7 +170,7 @@ function cierreViaje() {
                             min={viajeID?.kms_inicial || 0}
                             value={formFin.kms_fin || 0}
                             onChange={handleKMS}
-                            style={{ borderColor: errorKms ? 'red' : '' }} 
+                            style={{ borderColor: errorKms ? 'red' : '' }}
                         ></input>
                         {errorKms && (
                             <span style={{ color: 'red', fontSize: '12px', display: 'block', marginTop: '4px' }}>

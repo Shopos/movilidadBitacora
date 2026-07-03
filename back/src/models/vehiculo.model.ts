@@ -61,7 +61,7 @@ export async function changeStatus(patente:string,status:string):Promise<boolean
     //@ts-ignore
     return (res.affectedRows > 0)
 }
-
+//Metodo para cambiar el kilometraje de un vehiculo {patente}
 export async function changeKms(patente:string, cantidad:Number):Promise<boolean>{  
     const [res] = await connection.query(
         "UPDATE vehiculos set kms_actual= ? WHERE patente= ?",

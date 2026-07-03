@@ -83,7 +83,7 @@ export async function getAllViajes(): Promise<Viaje[]>{
     )
     return rows
 }
-
+//Metodo que devuelve todos los viajes del usuario segun la id
 export async function getViajeIdUsuario(id:number|number[]): Promise<Viaje[]>{
     const [rows] = await connection.query<Viaje[]>(
         "SELECT * FROM viajes WHERE id_usuario = ?",[id]
@@ -91,21 +91,21 @@ export async function getViajeIdUsuario(id:number|number[]): Promise<Viaje[]>{
     return rows
 }
 
-//Metodo que devuelve los viajes segun el id de un usuario
+//Metodo que devuelve los viajes segun el id de un usuario y que el estado del viaje este En espera
 export async function getViajeIdUsuarioEspera(id:number|number[]): Promise<Viaje[]>{
     const [rows] = await connection.query<Viaje[]>(
         "SELECT * FROM viajes WHERE id_usuario = ? && estado_viaje = ? ",[id,"En espera"]
     )
     return rows
 } 
-
+//Metodo que devuelve los viajes segun el id de un usuario y que el estado del viaje este En proceso
 export async function getViajeProceso(id:number|number[]): Promise<Viaje[]>{
     const [rows] = await connection.query<Viaje[]>(
         "SELECT * FROM viajes WHERE id_usuario = ? && estado_viaje = ? ",[id,"En proceso"]
     )
     return rows
 } 
-
+//Metodo que devuelve los viajes cuyo id_viaje sea igual al consultado
 export async function getViajeId(id:number|number[]): Promise<Viaje[]>{
     const [rows] = await connection.query<Viaje[]>(
         "SELECT * FROM viajes WHERE id_viaje = ? ",[id]
@@ -219,6 +219,7 @@ export async function editViajeFin(patente:string|string[],data:ViajeInputFin): 
 
 }
 
+//Agrega la informacion a un viaje{id} inicialmente
 export async function parcheInicio(id:number,data:ViajeInputFuncionarioInicio): Promise<boolean>{
     const [res] = await connection.query(
         `UPDATE viajes SET fecha_hora_inicio = ?, ultima_modificacion = ?, modificado_por = ?, estado_viaje = ? WHERE id_viaje = ? AND estado_viaje= ? `,
@@ -235,7 +236,7 @@ export async function changeStatusViaje(id:number,status:string): Promise<boolea
     //@ts-ignore
     return (res.affectedRows > 0)
 }
-
+//Agrega la informacion faltante a un viaje{id} para cerrar un viaje
 export async function parcheFin(id:number,data:ViajeInputFuncionarioFin): Promise<boolean>{
     const [res] = await connection.query(
         `UPDATE viajes 
@@ -255,7 +256,7 @@ export async function parcheFin(id:number,data:ViajeInputFuncionarioFin): Promis
     //@ts-ignore
     return (res.affectedRows > 0)
 }
-
+//Agrega un nuevo viaje con los valores inversos de un viaje si este es un viaje de ida
 export async function addViajeRegreso(viajeInicial:Viaje,modificacion:string,kmsfin:number): Promise<ViajeInputInicio>{
     const [res] = await connection.query(
         `INSERT INTO viajes (

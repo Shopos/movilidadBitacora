@@ -17,12 +17,13 @@ import { TablePagination } from "@mui/material"
 import type { Vehiculo, Viaje, User } from "../../tipos/tipoSistema.ts"
 import getVehiculos, { getViajes, getFuncionarios, addViajeInicial } from "../../utils/auxiliar.ts";
 import { useAuth } from "../../context/AuthContext.tsx";
+import { useAlerta } from "../../context/AlertaContext.tsx";
 
 import 'leaflet/dist/leaflet.css';
 import L from "leaflet"
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
 import Routing from "../../componentes/routing.tsx" /*Componente para marcar la ruta entre inicio y destino en mapa*/
-import { Alert, Snackbar } from "@mui/material";
+
 
 type GPS = {
     lat: number,
@@ -33,9 +34,7 @@ interface prop {
     points: GPS[]
 }
 function menuAdmin() {
-    const [snack,setSnack] = useState(false)
-    const [msg,setMSG] = useState("")
-    const [severity,setSeverity] = useState<'success'|'info'|'warning'|'error'>('success')
+    const { showAlerta } = useAlerta()
     const { usuario } = useAuth() //usuario ingresado en el inicio de sesión
     const [viajes, setViajes] = useState<[Viaje]>()
     const [viajeSelected, setViajeSelected] = useState<Viaje | null>(null)
@@ -111,10 +110,7 @@ function menuAdmin() {
                     setViajes(response)
                 }
             } catch (e) {
-                console.error(" Error listando viajes ", e)
-                setSeverity("warning")
-                setMSG("Error al listar viajes, intenta más tarde")
-                setSnack(true)
+                showAlerta("Error listando viajes","error")
             }
         }
         const getListaUsuarios = async () => {
@@ -124,7 +120,7 @@ function menuAdmin() {
                     setListaUsuarios(response)
                 }
             } catch (e) {
-                console.error(" Error listando usuarios ", e)
+                showAlerta("Error listando usuarios","error")
             }
         }
         const getListaVehiculos = async () => {
@@ -135,7 +131,7 @@ function menuAdmin() {
                     setCargando(true)
                 }
             } catch (e) {
-                console.error(" Error listando Vehiculos ", e)
+                showAlerta("Error listando vehículos","error")
             }
         }
         getListaViajes()
@@ -180,9 +176,7 @@ function menuAdmin() {
                 headStyles: { fillColor: [41, 120, 120], textColor: 255 }
             })
             doc.save("Reporte.pdf")
-            setSeverity("success")
-            setMSG("Archivo creado")
-            setSnack(true)
+            showAlerta("Archivo creado, guardando...","success")
         }
         return
     }
@@ -336,9 +330,7 @@ function menuAdmin() {
             addViajeInicial(formInicio)
             setModalNewViaje(false)
             setCargando(false)
-            setSeverity("success")
-            setMSG("Viaje agendado correctamente")
-            setSnack(true)
+            showAlerta("Viaje agendado correctamente","success")
         }
     }, [formInicio])
 
@@ -656,7 +648,7 @@ function menuAdmin() {
                 </ModalDialog>
             </Modal>
 
-            <Snackbar open={snack} autoHideDuration={2500}><Alert severity={severity} variant="filled">{msg}</Alert></Snackbar>
+           
         </>
     )
 }

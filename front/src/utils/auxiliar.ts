@@ -193,9 +193,11 @@ export async function agregarVehiculo(data: Vehiculo) {
       }
       const data = await res.json();
       console.log('Success:', data);
+      return true
     } catch (e) {
       console.error('Error:', e);
       console.log({ msg: "Error al agregar vehiculo" })
+      return false
     }
   }
 }
@@ -220,9 +222,11 @@ export async function agregarUsuario(data: User) {
       }
       const data = await res.json();
       console.log('Success:', data);
+      return true
     } catch (e) {
       console.error('Error:', e);
       console.log({ msg: "Error al agregar usuario" })
+      return false
     }
   }
 }
@@ -298,11 +302,9 @@ export async function editarVehiculo(patente: string, data: Vehiculo) {
       if (!res.ok) {
         throw new Error(`HTTP error! Status: ${res.status}`);
       }
-      const data = await res.json();
-      console.log('Success:', data);
+      return true
     } catch (error) {
-      console.error('Error:', error);
-      console.log({ msg: "Error al editar vehiculo" })
+      return false
     }
   }
 }
@@ -325,9 +327,9 @@ export async function editarUsuario(correo: string, data: User) {
       if (!res.ok) {
         throw new Error(`HTTP error! Status: ${res.status}`);
       }
-      const data = await res.json();
-      console.log('Success:', data);
+      return true
     } catch (e) {
+      return false
       console.error('Error:', e);
       console.log({ msg: "Error al editar usuario" })
     }

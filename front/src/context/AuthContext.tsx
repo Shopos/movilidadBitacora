@@ -47,7 +47,7 @@ export function AuthProvider({children}: {children: ReactNode}){
             localStorage.setItem("token",data.token)
             return {ok:true, usuario: data.usuario}
         }catch(e){
-            return {ok:false, msg:" ERROR AL CONECTAR CON SERVIDOR "}
+            return {ok:false, msg:" Error al conectar con servidor "}
         }
     }
 
@@ -67,7 +67,6 @@ export function AuthProvider({children}: {children: ReactNode}){
      * 
      */
     useEffect(()=>{
-        console.log("intentando restaurar sesion")
         const restaurarSesion = async()=>{
             const tokenSaved = localStorage.getItem("token")
             if(!tokenSaved){
@@ -87,7 +86,6 @@ export function AuthProvider({children}: {children: ReactNode}){
                     setCargando(false)
                     throw new Error( "Token invalido")
                 }
-                console.log("Sesion restaurada")
                 
                 const data = await res.json()
                 setUsuario(data.usuario)
@@ -95,7 +93,6 @@ export function AuthProvider({children}: {children: ReactNode}){
             }catch(e){
                 setCargando(false)
                 console.log({msg: "Error al comprobar token",e})
-                //return localStorage.removeItem("token")
             }finally{
                 setCargando(false)
             }

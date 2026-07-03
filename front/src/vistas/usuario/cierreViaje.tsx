@@ -103,8 +103,8 @@ function cierreViaje() {
             if (formFin.estado_viaje === "Terminado") {
                 //se envia update
                 await patchFin(viajeID!.id_viaje, formFin)
+                navigate("/menuUsuario")
                 //localStorage.removeItem("idViaje")
-                navigate("/viajesUsuario")
             }
         }
         patch()

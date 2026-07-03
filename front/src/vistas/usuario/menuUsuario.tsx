@@ -6,12 +6,14 @@ import type { Viaje } from "../../tipos/tipoSistema.ts"
 import { useAuth } from "../../context/AuthContext.tsx"
 import { getViajeProceso, getViajeUsuarioEspera } from "../../utils/auxiliar.ts"
 import { Card, CardActions, CardContent, IconButton, Typography } from "@mui/joy"
+import { useAlerta } from "../../context/AlertaContext.tsx"
 
 /*Vista del menu del usuario
         >Iniciar viaje para comenzar proceso de documentacion bitacora
         >Ver mis viajes para navegar a vista de viajes del usuario
     */
 function menuUsuario(){
+    const {showAlerta} = useAlerta()
     const navigate = useNavigate()
     const { usuario } = useAuth()
     const verViajes =()=> navigate("/viajesUsuario");
@@ -25,6 +27,7 @@ function menuUsuario(){
                 if(usuario){
                     const response = await getViajeUsuarioEspera(usuario?.id)
                     if (response && Object.keys(response).length > 0) {
+                        showAlerta("Tienes un viaje en espera","info")
                         setViajeEspera(response[0]) //
                         setCargando(true)
                     } else {
@@ -38,13 +41,17 @@ function menuUsuario(){
         }
         getViajeUsuario()
     },[usuario,cargando])
+
+    const sleep = (ms: number):Promise<void>=>new Promise((resolve)=> setTimeout(resolve,ms))
+
     /*Verifica si usuario tiene un viaje iniciado "En proceso", si eso es cierto envia a viajeProceso */
     useEffect(()=>{
         const verificaViajeProceso = async()=>{
             if(usuario){
                 const response = await getViajeProceso(usuario.id)
                 if(response!==null){
-                    console.log(response)
+                    showAlerta("Tienes un viaje en proceso, rederigiendo a la vista de proceso","warning")
+                    await sleep(4000)
                     //show alerta
                     navigate("/viajeProceso")
                 }
@@ -58,7 +65,6 @@ function menuUsuario(){
     y se redirige a inicioViaje */
     const manejarViajeEspera=()=>{
         if(viajeEspera){
-            console.log(viajeEspera.id_viaje)
             
             navigate("/inicioViaje")
         }

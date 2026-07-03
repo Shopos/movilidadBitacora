@@ -12,8 +12,10 @@ import autoTable from "jspdf-autotable";
 import { useAuth } from "../../context/AuthContext.tsx";
 import { getViajeID } from "../../utils/auxiliar.ts";
 import { TablePagination } from "@mui/material";
+import { useAlerta } from "../../context/AlertaContext.tsx";
 
 function viajesUsuario(){
+    const { showAlerta } = useAlerta() 
     const { usuario } = useAuth()
     const [viajesUsuario,setViajes] = useState<Viaje[]|null>(null)
     const [viajeSelected,setViajeSelected] = useState<Viaje|null>(null)
@@ -55,7 +57,8 @@ function viajesUsuario(){
                 styles: {fontSize:10,cellPadding:5},
                 headStyles:{fillColor:[41,120,120],textColor:255}
             })
-            doc.save(`Reporte viajes ${name}.pdf`)
+            showAlerta("Archivo creado correctamente","success")
+            doc.save(`Reporte viajes ${usuario?.nombre}.pdf`)
         }else{
             return
         }
@@ -71,6 +74,7 @@ function viajesUsuario(){
                     setViajes(response)
                 }
             }catch(e){
+                showAlerta("Error listando viajes, intenta más tarde","error")
                 console.error( "Error listando viajes ",e)
             }
         }

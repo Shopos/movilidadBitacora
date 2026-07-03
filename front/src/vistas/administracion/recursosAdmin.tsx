@@ -10,6 +10,7 @@ import type { Vehiculo, User, Mantencion } from '../../tipos/tipoSistema.ts'
 import getVehiculos, { addMantencionVehiculo, agregarVehiculo, editarVehiculo, agregarUsuario, getUsuarios, editarUsuario } from "../../utils/auxiliar.ts"
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import { useAlerta } from '../../context/AlertaContext.tsx'
 
 
 const vehiculoVacio: Vehiculo = {
@@ -37,6 +38,7 @@ const usuarioVacio: User = {
     estado_viaje_usuario:"Disponible"
 }
 function recursosAdmin() {
+    const {showAlerta } = useAlerta()
     const [usuarios, setUsuarios] = useState<[User]>()
     const [vehiculos, setVehiculos] = useState<[Vehiculo]>()
     const [vistaActual, setVistaActual] = useState<boolean>(false)
@@ -68,6 +70,7 @@ function recursosAdmin() {
                 }
             } catch (e) {
                 console.error("error encontrando vehiculos: ", e)
+                showAlerta("Error encontrando vehículos del sistema","error")
             }
         }
         getListaVehiculos()
@@ -83,6 +86,7 @@ function recursosAdmin() {
                 }
             } catch (e) {
                 console.error("error encontrando usuarios", e)
+                showAlerta("Error encontrando usuarios del sistema","error")
             }
         }
         getListaUsuarios()
@@ -120,7 +124,12 @@ function recursosAdmin() {
             setCargando(true)
             const patente = recursoEdit.patente
             const payload = formV
-            await editarVehiculo(patente, payload)
+            const edicion = await editarVehiculo(patente, payload)
+            if(edicion){
+                showAlerta("Vehiculo editado correctamente","success")
+            }else{
+                showAlerta("Hubo un problema al editar, intente más tarde","warning")
+            }
             setFormV(vehiculoVacio)
             setCargando(false)
             setRefresh(!refresh)
@@ -129,7 +138,12 @@ function recursosAdmin() {
             setCargando(true)
             const correo = recursoEdit.correo
             const payload = formU
-            await editarUsuario(correo, payload)
+            const edicion = await editarUsuario(correo, payload)
+            if(edicion){
+                showAlerta("Vehiculo editado correctamente","success")
+            }else{
+                showAlerta("Hubo un problema al editar, intente más tarde","warning")
+            }
             setFormU(usuarioVacio)
             setCargando(false)
             setRefresh(!refresh)
@@ -140,7 +154,12 @@ function recursosAdmin() {
     const handleAgregar = async () => {
         if (!formAddV || cargando) return
         setCargando(true)
-        await agregarVehiculo(formAddV)
+        const res = await agregarVehiculo(formAddV)
+        if(res){
+            showAlerta("Vehículo agregado correctamente","success")
+        }else{
+            showAlerta("Hubo un problema al agregar, intenta más tarde","warning")
+        }
         setFormAddV(vehiculoVacio)
         setCargando(false)
         setRefresh(!refresh)
@@ -149,7 +168,12 @@ function recursosAdmin() {
     const handleAgregarUsuario = async () => {
         if (!formAddU || cargando) return
         setCargando(true)
-        await agregarUsuario(formAddU)
+        const res = await agregarUsuario(formAddU)
+        if(res){
+            showAlerta("Usuario agregado correctamente","success")
+        }else{
+            showAlerta("Hubo un problema al agregar, intenta más tarde","warning")
+        }
         setFormAddU(usuarioVacio)
         setCargando(false)
         setRefresh(!refresh)

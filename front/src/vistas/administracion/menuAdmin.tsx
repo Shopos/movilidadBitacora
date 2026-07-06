@@ -2,7 +2,7 @@ import NavBar from "../../componentes/navBar.tsx"
 import DataViewViaje from "../../componentes/dataViewViaje.tsx";
 import "../../estilos/menuAdmin.css"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Table from '@mui/joy/Table';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditDocumentIcon from '@mui/icons-material/EditDocument';
@@ -33,10 +33,42 @@ type GPS = {
 interface prop {
     points: GPS[]
 }
+
+function dentroPeriodo(fechaConsulta: string | null, periodo: string): boolean {
+    if (!fechaConsulta) {
+        return false
+    }
+    const fecha = new Date(fechaConsulta)
+    const hoy = new Date()
+
+    if (periodo === "Hoy") {
+        return fecha.toDateString() === hoy.toDateString()
+    }
+    if (periodo === "Semana") {
+        const siete = new Date()
+        siete.setDate(hoy.getDate() - 7)
+        siete.setHours(0, 0, 0, 0)
+        return fecha >= siete
+    }
+    if (periodo === "Mes") {
+        const treinta = new Date()
+        treinta.setDate(hoy.getDate() - 30)
+        treinta.setHours(0, 0, 0, 0)
+        return fecha >= treinta
+    }
+    return true //TODOS
+}
+
 function menuAdmin() {
     const { showAlerta } = useAlerta()
     const { usuario } = useAuth() //usuario ingresado en el inicio de sesión
     const [viajes, setViajes] = useState<[Viaje]>()
+
+    const [periodos, setPeriodos] = useState<"Todos" | "Hoy" | "Semana" | "Mes">("Todos")
+    const [busqueda, setBusqueda] = useState("")
+    const [estado, setEstado] = useState<"Terminado" | "En proceso" | "En espera" | "Todos">("Todos")
+
+    const [formEdit, setFormEdit] = useState<Partial<Viaje>>({})
     const [viajeSelected, setViajeSelected] = useState<Viaje | null>(null)
     const [viajeEdit, setViajeEditSelected] = useState<Viaje | null>(null)
     const [modalVista, setOpenModalVista] = useState<boolean>(false)
@@ -74,7 +106,7 @@ function menuAdmin() {
         ultima_modificacion: "", //inicio viaje ->cambiar
         modo: "ida" //modo ida (inicial) -> modo vuelta --->nuevo viaje con datos inversos
     })
-    const viajeVacio:Viaje = {
+    const viajeVacio: Viaje = {
         id_viaje: 0,
         fecha_hora_inicio: "",
         patente: "",
@@ -110,7 +142,7 @@ function menuAdmin() {
                     setViajes(response)
                 }
             } catch (e) {
-                showAlerta("Error listando viajes","error")
+                showAlerta("Error listando viajes", "error")
             }
         }
         const getListaUsuarios = async () => {
@@ -120,7 +152,7 @@ function menuAdmin() {
                     setListaUsuarios(response)
                 }
             } catch (e) {
-                showAlerta("Error listando usuarios","error")
+                showAlerta("Error listando usuarios", "error")
             }
         }
         const getListaVehiculos = async () => {
@@ -131,14 +163,14 @@ function menuAdmin() {
                     setCargando(true)
                 }
             } catch (e) {
-                showAlerta("Error listando vehículos","error")
+                showAlerta("Error listando vehículos", "error")
             }
         }
         getListaViajes()
         getListaUsuarios()
         getListaVehiculos()
     }, [cargando])
-    
+
     const handleModalViajeView = (viaje: Viaje) => {
         //Visualiza la informacion del viaje en un modal, si el viaje esta en proceso muestra la informacion del viaje hasta el momento
         setViajeSelected(viaje)
@@ -159,7 +191,7 @@ function menuAdmin() {
                 viaje.nombre_funcionario,
                 viaje.kms_inicial,
                 (viaje.kms_fin ? viaje.kms_fin : 0),
-                (viaje.fecha_hora_inicio ? (viaje.fecha_hora_inicio.slice(0, 10) + " " + viaje.fecha_hora_inicio.slice(11, 19)):("")),
+                (viaje.fecha_hora_inicio ? (viaje.fecha_hora_inicio.slice(0, 10) + " " + viaje.fecha_hora_inicio.slice(11, 19)) : ("")),
                 viaje.destino,
                 (viaje.fecha_hora_fin ? (viaje.fecha_hora_fin.slice(0, 10) + " " + viaje.fecha_hora_fin.slice(11, 19)) : "-"),
                 (viaje.estado_viaje ? "En ruta" : "Terminado")
@@ -176,7 +208,7 @@ function menuAdmin() {
                 headStyles: { fillColor: [41, 120, 120], textColor: 255 }
             })
             doc.save("Reporte.pdf")
-            showAlerta("Archivo creado, guardando...","success")
+            showAlerta("Archivo creado, guardando...", "success")
         }
         return
     }
@@ -203,7 +235,7 @@ function menuAdmin() {
     const manejarDataFuncionario = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const usuarioSelected = (event.target.value).split(" / ")
         const usuarioFind = listaUsuarios!.find(
-            (usr) => usr.nombre === usuarioSelected[0] && usr.correo === usuarioSelected[1] 
+            (usr) => usr.nombre === usuarioSelected[0] && usr.correo === usuarioSelected[1]
         )
         if (usuarioFind && usuarioFind.id_usuario !== 0) {
             setFormInicio((prevData) => ({
@@ -217,6 +249,7 @@ function menuAdmin() {
     const editarViajeModal = (viaje: Viaje) => {
         //Visualiza y permite editar la informacion de un viaje X, solo si el viaje ha sido terminado previamente
         setViajeEditSelected(viaje)
+        setFormEdit({ ...viaje })
         setOpenModalEdit(true)
         return
     }
@@ -330,7 +363,7 @@ function menuAdmin() {
             addViajeInicial(formInicio)
             setModalNewViaje(false)
             setCargando(false)
-            showAlerta("Viaje agendado correctamente","success")
+            showAlerta("Viaje agendado correctamente", "success")
         }
     }, [formInicio])
 
@@ -342,7 +375,7 @@ function menuAdmin() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
 
-    const handleChangePage= (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number,) => {
+    const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number,) => {
         setPage(newPage);
     };
     const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,) => {
@@ -351,6 +384,27 @@ function menuAdmin() {
     };
     /**-->Terminan los contructores y metodos para paginacion de la tabla de viajes */
 
+
+    const viajeFiltrado = useMemo(() => {
+        if (!viajes) return []
+
+        return viajes.filter((vje: Viaje) => {
+            const tiempo = periodos === "Todos" || dentroPeriodo(vje.fecha_hora_inicio, periodos)
+
+            const texto = busqueda.toLocaleLowerCase().trim()
+            const textoPasado = texto === "" || vje.patente.toLocaleLowerCase().includes(texto) || vje.nombre_funcionario.toLocaleLowerCase().includes(texto)
+
+            const estatus = estado === "Todos" || vje.estado_viaje === estado
+
+            return tiempo && textoPasado && estatus
+        })
+
+    }, [viajes, periodos, busqueda, estado])
+
+    //Manejar el envio de informacion hacia back idViaje, data a cambiar
+    const handleEditViajeData = async() =>{
+
+    }
     /*
     Vista menu administracion
     >Directamente abre la tabla de las bitacoras
@@ -365,43 +419,118 @@ function menuAdmin() {
                 <div className="barraFiltro">
                     <div className="inputBusqueda">
                         <Input
+                            placeholder="Buscar por patente o nombre de funcionario"
+                            value={busqueda}
+                            onChange={(e) => setBusqueda(e.target.value)}
                             startDecorator={<SearchOutlinedIcon />}
-                            endDecorator={<button>buscar</button>}
+                            endDecorator={<button>Buscar</button>}
                             sx={{ width: "100%" }}></Input>
                     </div>
                     <Chip
-                        variant="outlined"
-                        color="neutral"
-                        size="lg"
-                        startDecorator={<TodayOutlinedIcon />}
-                        onClick={() => ("Filtra por día")}
+                        variant={estado === "En espera" ? "outlined" : "plain"}
+                        color={estado === "En espera" ? "primary" : "neutral"}
+                        size="md"
+                        onClick={() => {
+                            setEstado(estado === "En espera" ? "Todos" : "En espera")
+                            setPage(0)
+                        }
+                        }
                         sx={{
-                            padding: "0.5%",
+                            padding: "0.3%",
+                            paddingLeft: "5px",
+                            marginRight: "2px"
+                        }}>
+                        En espera
+                    </Chip>
+                    <Chip
+                        variant={estado === "En proceso" ? "outlined" : "plain"}
+                        color={estado === "En proceso" ? "primary" : "neutral"}
+                        size="md"
+                        onClick={() => {
+                            setEstado(estado === "En proceso" ? "Todos" : "En proceso")
+                            setPage(0)
+                        }
+                        }
+                        sx={{
+                            padding: "0.3%",
+                            paddingLeft: "5px",
+                            marginRight: "2px"
+                        }}>
+                        En curso
+                    </Chip>
+                    <Chip
+                        variant={estado === "Terminado" ? "outlined" : "plain"}
+                        color={estado === "Terminado" ? "primary" : "neutral"}
+                        size="md"
+                        onClick={() => {
+                            setEstado(estado === "Terminado" ? "Todos" : "Terminado")
+                            setPage(0)
+                        }
+                        }
+                        sx={{
+                            padding: "0.3%",
+                            paddingLeft: "5px",
+                            marginRight: "2px"
+                        }}>
+                        Terminado
+                    </Chip>
+                    <Chip
+                        variant={periodos === "Hoy" ? "outlined" : "plain"}
+                        color={periodos === "Hoy" ? "primary" : "neutral"}
+                        size="md"
+                        startDecorator={<TodayOutlinedIcon />}
+                        onClick={() => {
+                            setPeriodos(periodos === "Hoy" ? "Todos" : "Hoy")
+                            setPage(0)
+                        }
+                        }
+                        sx={{
+                            padding: "0.3%",
                             paddingLeft: "5px",
                             marginRight: "2px"
                         }}
                     >Último día</Chip>
                     <Chip
-                        variant="outlined"
-                        color="neutral"
-                        size="lg"
+                        variant={periodos === "Semana" ? "outlined" : "plain"}
+                        color={periodos === "Semana" ? "primary" : "neutral"}
+                        size="md"
                         startDecorator={<DateRangeOutlinedIcon />}
-                        onClick={() => ("Filtra por día")}
+                        onClick={() => {
+                            setPeriodos(periodos === "Semana" ? "Todos" : "Semana")
+                            setPage(0)
+                        }}
                         sx={{
-                            padding: "0.5%",
+                            padding: "0.3%",
                             paddingLeft: "5px",
                             marginRight: "2px"
                         }}
                     >Última semana</Chip>
-                    <button className="buttonExport" onClick={() => setModalNewViaje(true)}>Generar viaje</button>
+                    <Chip
+                        variant={periodos === "Mes" ? "outlined" : "plain"}
+                        color={periodos === "Mes" ? "primary" : "neutral"}
+                        size="md"
+                        startDecorator={<DateRangeOutlinedIcon />}
+                        onClick={() => {
+                            setPeriodos(periodos === "Mes" ? "Todos" : "Mes")
+                            setPage(0)
+                        }
+                        }
+                        sx={{
+                            padding: "0.3%",
+                            paddingLeft: "5px",
+                            marginRight: "2px"
+                        }}
+                    >Último mes</Chip>
+                    <button className="buttonExport" onClick={() => setModalNewViaje(true)}>Agendar viaje</button>
                     <button className="buttonExport" onClick={() => exportarViajesPDF()}>Exportar tabla</button>
                 </div>
                 {cargando ? (<><div className="tablaViajes">
                     <Table hoverRow borderAxis="y" sx={
-                        { '& tr:nth-of-type(odd)':{backgroundColor:'#FBF5DD'},
-                            '& tr:nth-of-type(even)':{backgroundColor:'#E7E1B1'},
+                        {
+                            '& tr:nth-of-type(odd)': { backgroundColor: '#FBF5DD' },
+                            '& tr:nth-of-type(even)': { backgroundColor: '#E7E1B1' },
                             '& td': { textAlign: 'left', paddingLeft: 1.9 },
-                            '& th':{backgroundColor:"#bad8b6"}
+                            '& th': { backgroundColor: "#bad8b6" }
                         }
 
                     }>
@@ -419,12 +548,12 @@ function menuAdmin() {
 
                         <tbody>
 
-                            {viajes && viajes.slice(page*rowsPerPage,page*rowsPerPage+rowsPerPage).map((viaje: Viaje) => (
+                            {viajeFiltrado && viajeFiltrado.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((viaje: Viaje) => (
                                 <tr>
                                     <td>{viaje.patente}</td>
-                                    <td>{viaje.fecha_hora_inicio ? (viaje.fecha_hora_inicio.slice(0, 10)):("Viaje en espera de inicio")}</td>
+                                    <td>{viaje.fecha_hora_inicio ? (viaje.fecha_hora_inicio.slice(0, 10)) : ("Viaje en espera")}</td>
                                     <td>{viaje.nombre_funcionario}</td>
-                                    <td>{viaje.fecha_hora_inicio ? (viaje.fecha_hora_inicio.slice(11, 19)):("")}</td>
+                                    <td>{viaje.fecha_hora_inicio ? (viaje.fecha_hora_inicio.slice(11, 19)) : ("")}</td>
 
                                     <td>{viaje.fecha_hora_fin ? (viaje.fecha_hora_fin.slice(11, 19)) : ("-")}</td>
 
@@ -448,21 +577,27 @@ function menuAdmin() {
                                     </td>
                                 </tr>
                             ))}
+
+                            {viajeFiltrado.length === 0 && (
+                                <tr >
+                                    <td colSpan={7} style={{ textAlign: "center", padding: "5%" }}>No cuentas con viajes para este filtro</td>
+                                </tr>
+                            )}
                         </tbody>
                     </Table>
-                    <TablePagination 
-                    rowsPerPageOptions={[5, 10, 25]}
-                    component="div"
-                    count={viajes!.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                    labelRowsPerPage={"Cantidad de viajes a mostrar"}
-                    labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count !== -1 ? count : `más de ${to}`}`}
-                    sx={{
-                        '& .MuiTablePagination-actions': {width:'4vw'}
-                    }}
+                    <TablePagination
+                        rowsPerPageOptions={[5, 10, 25]}
+                        component="div"
+                        count={viajeFiltrado!.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        labelRowsPerPage={"Cantidad de viajes a mostrar"}
+                        labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count !== -1 ? count : `más de ${to}`}`}
+                        sx={{
+                            '& .MuiTablePagination-actions': { width: '4vw' }
+                        }}
                     />
                 </div>  </>) : (<>Cargando</>)}
 
@@ -495,8 +630,13 @@ function menuAdmin() {
                     </DialogActions>
                 </ModalDialog>
             </Modal>
-            
-            {/*Modal edición viaje */}
+
+            {/*Modal edicion viaje 
+                ->Viaje en espera
+                    -Cambia funcionario, vehiculo, destino y motivo
+                ->Viaje terminado
+                    -Cambia observacion viaje, cantidad combustible
+            */}
             <Modal open={modalEdicion} onClose={() => setOpenModalEdit(false)}>
                 <ModalDialog variant="outlined" sx={{ width: { xs: '90%', sm: '500px', md: '700px' } }}>
                     <DialogTitle>
@@ -504,8 +644,69 @@ function menuAdmin() {
                     </DialogTitle>
                     <Divider />
                     <DialogContent>
-                        {/*Cambiar para aceptar edicion */}
-                        <DataViewViaje viajeSelected={viajeEdit!} modo={1}></DataViewViaje>
+                        {formEdit.estado_viaje === "En espera" && (
+                            <>
+                                <div className="items-Modal">
+                                    <div className="itemInput-Modal">
+                                        <label>Patente</label>
+                                        <select name="Patentes" defaultValue={""} onChange={(e)=>{
+                                            const veh = vehiculos?.find(v=> v.patente === e.target.value)
+                                            setFormEdit({...formEdit, patente:e.target.value, vehiculo:veh?.modelo ?? formEdit.vehiculo,kms_inicial:veh?.kms_actual ?? formEdit.kms_inicial })
+                                        }}>
+                                            {/**Solo se muestran las patentes de vehiculos disponibles */}
+                                            <option>{formEdit?.patente}</option>
+                                            {vehiculos && vehiculos.filter(veh => veh.estado === "DISPONIBLE").map((veh) => (
+                                                <option key={veh.patente} value={veh.patente}>
+                                                    {veh.patente}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="itemInput-Modal">
+                                        <label>Funcionario</label>
+                                        <select name="funcionarios" defaultValue={""} onChange={manejarDataFuncionario}>
+                                            <option value={""}>{formEdit?.nombre_funcionario}</option>
+                                            {listaUsuarios && listaUsuarios.map((usr: User) => (
+                                                <option value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="itemInput-Modal">
+                                        <label>Modelo Vehículo</label>
+                                        <input disabled value={formEdit.vehiculo} placeholder=""></input>
+                                    </div>
+                                    <div className="itemInput-Modal">
+                                        <label>Kilometraje actual</label>
+                                        <input disabled type="number" name="kmsInicio" value={formEdit.kms_inicial}></input>
+                                    </div>
+                                    <div className="itemInput2-Modal">
+                                        <label>Motivo</label>
+                                        <textarea name="motivo" value={formEdit.motivo} onChange={(e)=>{
+                                            setFormEdit({...formEdit, motivo:e.target.value})
+                                        }} placeholder="Explique el objetivo del viaje"></textarea>
+                                    </div>
+                                    <div className="buttonLabel-Modal">
+                                        <button onClick={() => openModalDestino(true)}>Agregar destino del viaje</button>
+                                        {formEdit.destino ? <label>Destino: {formEdit.destino}</label> : <></>}
+                                    </div>
+                                </div>
+                            </>
+                        )
+                        }
+                        {viajeEdit?.estado_viaje === "Terminado" && (
+                            <>
+                                <div className="itemInput2-Modal">
+                                    <label>Observacion del viaje</label>
+                                    <textarea name="motivo" value={formEdit.motivo} onChange={(e)=>setFormEdit({...formEdit,motivo:e.target.value})} placeholder="Explique el objetivo del viaje"></textarea>
+                                </div>
+                                {formEdit.carga_combustible ?
+                                (<div className="itemInput2-Modal">
+                                    <label>Cantidad de combustible</label>
+                                    <textarea name="motivo" value={formEdit.cantidad_carga} onChange={(e)=>setFormEdit({...formEdit,cantidad_carga:Number(e.target.value)})} placeholder="Explique el objetivo del viaje"></textarea>
+                                </div>):(<></>)
+                                }
+                            </>
+                        )}
                     </DialogContent>
                     <DialogActions>
                         <Button variant="solid" color="success" onClick={() => {
@@ -517,6 +718,7 @@ function menuAdmin() {
                         <Button variant="plain" color="danger" onClick={() => {
                             setViajeEditSelected(null)
                             setOpenModalEdit(false)
+                            handleEditViajeData
                         }}>
                             Cancelar
                         </Button>
@@ -585,10 +787,11 @@ function menuAdmin() {
                     </DialogContent>
                     <DialogActions>
                         <Button variant="solid" color="success" onClick={() => handleAgendaViaje()}>Agendar Viaje</Button>
-                        <Button variant="outlined" color="danger" onClick={() =>{ 
+                        <Button variant="outlined" color="danger" onClick={() => {
                             setFormInicio(viajeVacio)
                             setVehiculoSelected(undefined)
-                            handleCierre()}}>Cancelar</Button>
+                            handleCierre()
+                        }}>Cancelar</Button>
                     </DialogActions>
                 </ModalDialog>
             </Modal>
@@ -604,7 +807,7 @@ function menuAdmin() {
                     <DialogContent>
                         <div>
                             <label>Agrega el destino del viaje</label>
-                            <input type="text" name="destino" value={formInicio.destino} onChange={handleChange}></input>
+                            <input type="text" name="destino" value={formInicio.destino || viajeEdit?.destino} onChange={handleChange}></input>
                         </div>
                         <div className="leaflet-container">
                             <MapContainer center={[dataGPS.lat, dataGPS.lng]} zoom={15} scrollWheelZoom={false}>
@@ -648,7 +851,7 @@ function menuAdmin() {
                 </ModalDialog>
             </Modal>
 
-           
+
         </>
     )
 }

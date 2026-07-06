@@ -37,7 +37,7 @@ CREATE TABLE `vehiculos` (
 
 LOCK TABLES `vehiculos` WRITE;
 /*!40000 ALTER TABLE `vehiculos` DISABLE KEYS */;
-INSERT INTO `vehiculos` VALUES ('123','qwe',123000,'DISPONIBLE'),('12pepe','peeplopez',12300,'DISPONIBLE'),('abbb','Nissan',6111,'EN REPARACION'),('abbb2','Tesla',3300,'DISPONIBLE'),('abc123','Toyota',10000,'DISPONIBLE'),('bbbb2','Ford',2000,'DISPONIBLE'),('bc1245','Suzuki',12000,'DISPONIBLE'),('cvfg12','Nissan',5000,'DISPONIBLE'),('dc1243','Maxus',14000,'DISPONIBLE'),('fgk123','Subaru',16000,'DADO DE BAJA');
+INSERT INTO `vehiculos` VALUES ('123','qwe',123000,'DISPONIBLE'),('12pepe','peeplopez',12312,'DISPONIBLE'),('abbb','Nissan',6111,'EN REPARACION'),('abbb2','Tesla',3300,'DISPONIBLE'),('abc123','Toyota',1025,'DISPONIBLE'),('bbbb2','Ford',2100,'EN RUTA'),('bc1245','Suzuki',12015,'DISPONIBLE'),('cvfg12','Nissan',5010,'DISPONIBLE'),('dc1243','Maxus',14000,'DISPONIBLE'),('fgk123','Subaru',16000,'DADO DE BAJA');
 /*!40000 ALTER TABLE `vehiculos` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -50,4 +50,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-26 10:56:03
+-- Dump completed on 2026-07-06 14:32:12

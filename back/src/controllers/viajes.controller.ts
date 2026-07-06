@@ -225,3 +225,65 @@ export async function parcheFin(req: Request, res: Response) {
         res.status(500).json({ error: " Error ingresando datos iniciales " })
     }
 }
+
+export async function editarViaje(req:Request,res:Response){
+    try{
+        const id = Number(req.params.id)
+        const adminName = (req.usuario as any).nombre
+        const ahora = new Date()
+        const ultimaModificacion=`${ahora.getFullYear()}-${String(ahora.getMonth()+1).padStart(2,'0')}-${String(ahora.getDate()).padStart(2,'0')} ${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}}`
+
+        const viajeEncontrado = await viajesModel.getViajeId(id)
+        if(viajeEncontrado[0].estado_viaje === "Terminado"){
+            const {obs_viaje,cantidad_carga} = req.body
+
+            const actualizaTerminado = await viajesModel.editarTerminado(id,
+                {
+                    obs_viaje,
+                    cantidad_carga,
+                    ultimaModificacion,
+                    adminName
+                })
+            if(!actualizaTerminado){
+                return res.status(404).json({error: "Viaje no encontrado"})
+            }
+            res.json({mensaje: "Viaje editado correctamente"})
+        }
+        if(viajeEncontrado[0].estado_viaje==="En espera"){
+            const {patente,vehiculo,kms_inicial,id_usuario,nombre_funcionario,motivo,destino,lat_fin,lng_fin} = req.body
+            
+            if(id_usuario && id_usuario !== viajeEncontrado[0].id_usuario){
+                usuarioModel.changeStatus(Number(viajeEncontrado[0].id_usuario),"Disponible")
+                usuarioModel.changeStatus(Number(id_usuario),"Asignado")
+            }
+
+            if(patente && patente !== viajeEncontrado[0].patente){
+                vehiculoModel.changeStatus(viajeEncontrado[0].patente,"DISPONIBLE")
+                vehiculoModel.changeStatus(patente,"EN RUTA")
+            }
+
+            const actualizaEspera = await viajesModel.editarEspera(id,
+                {
+                    patente:patente ?? viajeEncontrado[0].patente,
+                    vehiculo:vehiculo ?? viajeEncontrado[0].vehiculo,
+                    kms_inicial:kms_inicial || viajeEncontrado[0].kms_inicio,
+                    id_usuario:id_usuario || viajeEncontrado[0].id_usuario,
+                    nombre_funcionario:nombre_funcionario ?? viajeEncontrado[0].nombre_funcionario,
+                    destino:destino ?? viajeEncontrado[0].destino,
+                    motivo:motivo ?? viajeEncontrado[0].motivo,
+                    lat_fin:lat_fin || viajeEncontrado[0].lat_fin,
+                    lng_fin:lng_fin || viajeEncontrado[0].lng_fin,
+                    modificado_por:adminName,
+                    ultima_modificacion:ultimaModificacion
+                })
+            if(!actualizaEspera){
+                return res.status(404).json({error: "Viaje no encontrado"})
+            }
+            res.json({mensaje: "Viaje editado correctamente"})
+        }
+
+    }catch(e){
+        console.error(e)
+        res.status(500).json({error: "Error al editar el viaje"})
+    }
+}

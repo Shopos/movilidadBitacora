@@ -75,7 +75,25 @@ export interface ViajeInputFin{
     kms_fin:number
     estado_viaje:boolean
 }
-
+export interface viajeTerminado{
+    obs_viaje:string,
+    cantidad_carga:number,
+    ultimaModificacion:string,
+    adminName:string
+}
+export interface viajeEspera{
+    vehiculo:string,
+    id_usuario:number,
+    patente:string,
+    kms_inicial:number,
+    destino:string,
+    lat_fin:number,
+    lng_fin:number,
+    motivo:string,
+    nombre_funcionario:string,
+    ultima_modificacion:string,
+    modificado_por:string,
+}
 //Metodo que devuelve todos los viajes
 export async function getAllViajes(): Promise<Viaje[]>{
     const [rows] = await connection.query<Viaje[]>(
@@ -296,6 +314,26 @@ export async function addViajeRegreso(viajeInicial:Viaje,modificacion:string,kms
             0,
             "vuelta"
         ]
+    )
+    //@ts-ignore
+    return res.insertId
+}
+
+export async function editarTerminado(id:number,data:viajeTerminado){
+    const [res] = await connection.query(
+        `UPDATE viajes SET obs_viaje = ?, cantidad_carga=?, ultima_modificacion=?, modificado_por=?
+        WHERE id_viaje = ? `,[data.obs_viaje+" -Administración",data.cantidad_carga,data.ultimaModificacion,data.adminName,id]
+    )
+    //@ts-ignore
+    return res.insertId
+}
+
+export async function editarEspera(id:number, data:viajeEspera){
+    const [res] = await connection.query(
+        `UPDATE viajes SET
+        patente=?,vehiculo=?,kms_inicial=?,id_usuario=?,nombre_funcionario=?,destino=?,motivo=?,lat_fin=?,lng_fin=?,modificado_por=?,ultima_modificacion=?
+        WHERE id_viaje=?`,
+        [data.patente,data.vehiculo,data.kms_inicial,data.id_usuario,data.nombre_funcionario,data.destino,data.motivo,data.lat_fin,data.lng_fin,data.modificado_por,data.ultima_modificacion,id]
     )
     //@ts-ignore
     return res.insertId

@@ -15,7 +15,7 @@ import autoTable from "jspdf-autotable";
 import { TablePagination } from "@mui/material"
 
 import type { Vehiculo, Viaje, User } from "../../tipos/tipoSistema.ts"
-import getVehiculos, { getViajes, getFuncionarios, addViajeInicial } from "../../utils/auxiliar.ts";
+import getVehiculos, { getViajes, getFuncionarios, addViajeInicial,editarViaje } from "../../utils/auxiliar.ts";
 import { useAuth } from "../../context/AuthContext.tsx";
 import { useAlerta } from "../../context/AlertaContext.tsx";
 
@@ -67,6 +67,8 @@ function menuAdmin() {
     const [periodos, setPeriodos] = useState<"Todos" | "Hoy" | "Semana" | "Mes">("Todos")
     const [busqueda, setBusqueda] = useState("")
     const [estado, setEstado] = useState<"Terminado" | "En proceso" | "En espera" | "Todos">("Todos")
+
+    const [modoEdicionMapa,setModoEdicionMapa] = useState<"nuevo"|"edicion">("nuevo")
 
     const [formEdit, setFormEdit] = useState<Partial<Viaje>>({})
     const [viajeSelected, setViajeSelected] = useState<Viaje | null>(null)
@@ -245,6 +247,19 @@ function menuAdmin() {
             }))
         }
     }
+    const manejarDataFuncionarioEdit= (event:React.ChangeEvent<HTMLSelectElement>)=>{
+        const partes = (event.target.value).split(" / ")
+        const usrFind = listaUsuarios!.find(
+            (usr) => usr.nombre === partes[0] && usr.correo === partes[1]
+        )
+        if(usrFind){
+            setFormEdit((prevData)=>({
+                ...prevData,
+                id_usuario:usrFind.id_usuario,
+                nombre_funcionario:usrFind.nombre
+            }))
+        }
+    }
 
     const editarViajeModal = (viaje: Viaje) => {
         //Visualiza y permite editar la informacion de un viaje X, solo si el viaje ha sido terminado previamente
@@ -308,13 +323,17 @@ function menuAdmin() {
         const marker = e.target;
         if (marker != null) {
             const gps = marker.getLatLng();
-            console.log(gps)
+
             // Actualizamos solo el estado del destino
             setDataGPSDestino({ lat: gps.lat, lng: gps.lng });
+            if(modoEdicionMapa === "edicion"){
+                setFormEdit((prev)=>({...prev, lat_fin:gps.lat,lng_fin:gps.lng}))
+            }
         }
     };
 
     useEffect(() => {
+        if(modoEdicionMapa !== "nuevo") return
         const actualiza = {
             ...formInicio,
             lat_inicio: dataGPS.lat,
@@ -389,7 +408,7 @@ function menuAdmin() {
         if (!viajes) return []
 
         return viajes.filter((vje: Viaje) => {
-            const tiempo = periodos === "Todos" || dentroPeriodo(vje.fecha_hora_inicio, periodos)
+            const tiempo = periodos === "Todos" || dentroPeriodo(vje.fecha_hora_inicio, periodos) || dentroPeriodo(vje.estado_viaje==="En espera" ? vje.ultima_modificacion:"",periodos)
 
             const texto = busqueda.toLocaleLowerCase().trim()
             const textoPasado = texto === "" || vje.patente.toLocaleLowerCase().includes(texto) || vje.nombre_funcionario.toLocaleLowerCase().includes(texto)
@@ -403,7 +422,30 @@ function menuAdmin() {
 
     //Manejar el envio de informacion hacia back idViaje, data a cambiar
     const handleEditViajeData = async() =>{
+        if(!viajeEdit)return
+        try{
+            await editarViaje(viajeEdit.id_viaje, formEdit)
+            showAlerta("Viaje actualizado correctamente","success")
+            setOpenModalEdit(false)
+            setViajeEditSelected(null)
+            setCargando(false)
+        }catch(e){
+            showAlerta("Error","error")
+        }
+    }
 
+    const abrirMapaNuevo = () =>{
+        setModoEdicionMapa("nuevo")
+        openModalDestino(true)
+    }
+
+    const abrirMapaEdicion = () =>{
+        setModoEdicionMapa("edicion")
+        setDataGPSDestino({
+            lat: formEdit.lat_fin ?? dataGPS.lat,
+            lng: formEdit.lng_fin ?? dataGPS.lng
+        })
+        openModalDestino(true)
     }
     /*
     Vista menu administracion
@@ -664,7 +706,7 @@ function menuAdmin() {
                                     </div>
                                     <div className="itemInput-Modal">
                                         <label>Funcionario</label>
-                                        <select name="funcionarios" defaultValue={""} onChange={manejarDataFuncionario}>
+                                        <select name="funcionarios" defaultValue={""} onChange={manejarDataFuncionarioEdit}>
                                             <option value={""}>{formEdit?.nombre_funcionario}</option>
                                             {listaUsuarios && listaUsuarios.map((usr: User) => (
                                                 <option value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
@@ -686,7 +728,7 @@ function menuAdmin() {
                                         }} placeholder="Explique el objetivo del viaje"></textarea>
                                     </div>
                                     <div className="buttonLabel-Modal">
-                                        <button onClick={() => openModalDestino(true)}>Agregar destino del viaje</button>
+                                        <button onClick={() => abrirMapaEdicion()}>Cambiar destino del viaje</button>
                                         {formEdit.destino ? <label>Destino: {formEdit.destino}</label> : <></>}
                                     </div>
                                 </div>
@@ -697,7 +739,7 @@ function menuAdmin() {
                             <>
                                 <div className="itemInput2-Modal">
                                     <label>Observacion del viaje</label>
-                                    <textarea name="motivo" value={formEdit.motivo} onChange={(e)=>setFormEdit({...formEdit,motivo:e.target.value})} placeholder="Explique el objetivo del viaje"></textarea>
+                                    <textarea name="motivo" value={formEdit.obs_viaje} onChange={(e)=>setFormEdit({...formEdit,obs_viaje:e.target.value})} placeholder="Explique el objetivo del viaje"></textarea>
                                 </div>
                                 {formEdit.carga_combustible ?
                                 (<div className="itemInput2-Modal">
@@ -710,15 +752,14 @@ function menuAdmin() {
                     </DialogContent>
                     <DialogActions>
                         <Button variant="solid" color="success" onClick={() => {
-                            setViajeEditSelected(null)
-                            setOpenModalEdit(false)
+                            handleEditViajeData()
                         }}>
                             guardar cambios
                         </Button>
                         <Button variant="plain" color="danger" onClick={() => {
                             setViajeEditSelected(null)
+                            setFormEdit({})
                             setOpenModalEdit(false)
-                            handleEditViajeData
                         }}>
                             Cancelar
                         </Button>
@@ -780,7 +821,7 @@ function menuAdmin() {
                                 <textarea name="motivo" value={formInicio.motivo} onChange={handleChange} placeholder="Explique el objetivo del viaje"></textarea>
                             </div>
                             <div className="buttonLabel-Modal">
-                                <button onClick={() => openModalDestino(true)}>Agregar destino del viaje</button>
+                                <button onClick={() => abrirMapaNuevo()}>Agregar destino del viaje</button>
                                 {formInicio.destino ? <label>Destino: {formInicio.destino}</label> : <></>}
                             </div>
                         </div>
@@ -801,13 +842,23 @@ function menuAdmin() {
             <Modal open={modalDestino} onClose={() => openModalDestino(false)}>
                 <ModalDialog variant="soft" size="lg">
                     <DialogTitle>
-                        Mueve el pin al lugar de destino aproximado
+                        {modoEdicionMapa === "edicion" ? "Cambiar el destino del viaje":"Mueve el pin al destino aproximado"}
                     </DialogTitle>
                     <Divider />
                     <DialogContent>
+                        <>
                         <div>
-                            <label>Agrega el destino del viaje</label>
-                            <input type="text" name="destino" value={formInicio.destino || viajeEdit?.destino} onChange={handleChange}></input>
+                            <label>{modoEdicionMapa==="edicion" ? "Nombre del nuevo destino":"Agrega el destino del viaje"}</label>
+                            <input type="text" name="destino" value={modoEdicionMapa==="edicion" ? (formEdit.destino ?? ""):formInicio.destino}
+                             onChange={
+                                (e)=>{
+                                    if(modoEdicionMapa==="edicion"){
+                                        setFormEdit((prev)=>({...prev,destino:e.target.value}))
+                                    }else{
+                                        handleChange(e)
+                                    }
+                                }
+                                }></input>
                         </div>
                         <div className="leaflet-container">
                             <MapContainer center={[dataGPS.lat, dataGPS.lng]} zoom={15} scrollWheelZoom={false}>
@@ -823,7 +874,7 @@ function menuAdmin() {
                                     icon={createCustomIcon("#3b40cf")}
                                 />
                                 <Marker
-                                    position={[dataGPSDestino.lat, dataGPSDestino.lng]}
+                                    position={modoEdicionMapa==="edicion" ? [formEdit.lat_fin ?? dataGPS.lat,formEdit.lng_fin ?? dataGPS.lng]:[dataGPS.lat,dataGPS.lng]}
                                     draggable={true} // El usuario mueve este para determinar el destino
                                     autoPan={true}
                                     eventHandlers={{
@@ -839,6 +890,7 @@ function menuAdmin() {
                                 <Routing point1={dataGPS} point2={dataGPSDestino} />
                             </MapContainer>
                         </div>
+                        </>
                     </DialogContent>
                     <DialogActions>
                         <Button variant="solid" color="success" onClick={() => openModalDestino(false)}>

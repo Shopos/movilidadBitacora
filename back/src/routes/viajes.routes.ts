@@ -1,5 +1,6 @@
 import { Router } from "express"
-import { addViajeInicio, getViajes, getViajeIdUsuario,parcheInicio,parcheFin, getViajeProceso , getViajeIdUsuarioEspera } from "../controllers/viajes.controller"
+import { addViajeInicio, getViajes, getViajeIdUsuario,parcheInicio,parcheFin, getViajeProceso , getViajeIdUsuarioEspera,editarViaje } from "../controllers/viajes.controller"
+import { autenticarJWT, verifyAdmin } from "../middleware/auth.middleware"
 
 const router = Router()
 
@@ -23,5 +24,7 @@ router.post('/', addViajeInicio)
 router.patch('/inicio/:id', parcheInicio)
 //Edita los elementos necesarios para finalizar un viaje {id}
 router.patch('/fin/:id', parcheFin)
+
+router.put('/:id',autenticarJWT,verifyAdmin,editarViaje)
 
 export default router

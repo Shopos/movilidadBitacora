@@ -26,12 +26,15 @@ function inicioSesion(){
             showAlerta(`${resultadoInicio.msg}`,'error')
             return
         }
-        
         setFormData({mail:"",pass:""})
         //Navega dependiendo del resultado de resultadoInicio que almacena el usuario si este obtiene un resultado positivo desde login
         navigate(resultadoInicio.usuario!.cargo === "Administrativo" ? "/menuAdmin" : "/menuUsuario")
-        
     }
+
+    const handleSolicitud = () =>{
+        navigate("/cambioPass")
+    }
+
     const handleChange=(event: React.ChangeEvent<HTMLInputElement>)=>{
         const {name,value} = event.target
         setFormData((prevData)=>({
@@ -67,6 +70,9 @@ function inicioSesion(){
                 </div>
                 <div className="buttonFormulario">
                     <button onClick={()=>handleRedirection()}>Ingresar</button>
+                </div>
+                <div className="linkOlvida">
+                    <label onClick={()=>handleSolicitud()}>¿Olvidaste tu contraseña?</label>
                 </div>
             </div>
         </div>

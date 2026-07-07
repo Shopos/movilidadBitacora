@@ -7,6 +7,7 @@ import ViajeProceso from "./vistas/usuario/viajeProceso.tsx"
 import CierreViaje from "./vistas/usuario/cierreViaje.tsx"
 import ViajesUsuario from "./vistas/usuario/viajesUsuario.tsx"
 import Recursos from "./vistas/administracion/recursosAdmin.tsx"
+import CambioPass from "./vistas/cambioPass.tsx"
 import { AuthProvider } from "./context/AuthContext.tsx"
 import ProtectedRoute from "./componentes/protectedRoute.tsx"
 import { AlertProvider } from "./context/AlertaContext.tsx"
@@ -19,6 +20,7 @@ function App(){
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<InicioSesion />}></Route>
+            <Route path="/cambioPass" element={<CambioPass />}></Route>
             {/**Rutas usuario */}
             <Route path="/inicioViaje" element={<ProtectedRoute rolesPermitidos="Funcionario"><InicioViaje /></ProtectedRoute>} />
             <Route path="/viajeProceso" element={<ProtectedRoute rolesPermitidos="Funcionario"><ViajeProceso /></ProtectedRoute>}  />

@@ -1,0 +1,18 @@
+.buttonFormularioPass{
+    display: flex;
+    flex-direction: row;
+    margin-top: 5%;
+    justify-items: center;
+    justify-content: space-around;
+    align-content: center;
+    width: 100%;
+}
+.buttonFormularioPass button{
+    background-color: var(--buttonPrimary);
+    border: var(--buttonPrimary);
+    color: white;
+    font-weight: bold;
+    padding: 3%;
+    border-radius:25px;
+    cursor: pointer;
+}

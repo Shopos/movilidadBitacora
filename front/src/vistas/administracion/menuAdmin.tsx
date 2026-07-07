@@ -460,6 +460,10 @@ function menuAdmin() {
         <>
             <NavBar type={1} texto="Bitácoras" />
             <div className="cuerpoMenu">
+                <div className="barraButtonsTop">
+                     <button className="buttonExport" onClick={() => setModalNewViaje(true)}>Agendar viaje</button>
+                    <button className="buttonExport" onClick={() => exportarViajesPDF()}>Exportar tabla</button>
+                </div>
                 <div className="barraFiltro">
                     <div className="inputBusqueda">
                         <Input
@@ -565,8 +569,7 @@ function menuAdmin() {
                             marginRight: "2px"
                         }}
                     >Último mes</Chip>
-                    <button className="buttonExport" onClick={() => setModalNewViaje(true)}>Agendar viaje</button>
-                    <button className="buttonExport" onClick={() => exportarViajesPDF()}>Exportar tabla</button>
+                   
                 </div>
                 {cargando ? (<><div className="tablaViajes">
                     <Table hoverRow borderAxis="y" sx={

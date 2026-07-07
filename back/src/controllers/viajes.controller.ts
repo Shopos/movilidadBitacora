@@ -232,7 +232,7 @@ export async function editarViaje(req:Request,res:Response){
         const id = Number(req.params.id)
         const adminName = (req.usuario as any).nombre
         const ahora = new Date()
-        const ultimaModificacion=`${ahora.getFullYear()}-${String(ahora.getMonth()+1).padStart(2,'0')}-${String(ahora.getDate()).padStart(2,'0')} ${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}}`
+        const ultimaModificacion=`${ahora.getFullYear()}-${String(ahora.getMonth()+1).padStart(2,'0')}-${String(ahora.getDate()).padStart(2,'0')} ${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}`
 
         const viajeEncontrado = await viajesModel.getViajeId(id)
         if(viajeEncontrado[0].estado_viaje === "Terminado"){
@@ -254,13 +254,13 @@ export async function editarViaje(req:Request,res:Response){
             const {patente,vehiculo,kms_inicial,id_usuario,nombre_funcionario,motivo,destino,lat_fin,lng_fin} = req.body
             
             if(id_usuario && id_usuario !== viajeEncontrado[0].id_usuario){
-                usuarioModel.changeStatus(Number(viajeEncontrado[0].id_usuario),"Disponible")
-                usuarioModel.changeStatus(Number(id_usuario),"Asignado")
+                await usuarioModel.changeStatus(Number(viajeEncontrado[0].id_usuario),"Disponible")
+                await usuarioModel.changeStatus(Number(id_usuario),"Asignado")
             }
 
             if(patente && patente !== viajeEncontrado[0].patente){
-                vehiculoModel.changeStatus(viajeEncontrado[0].patente,"DISPONIBLE")
-                vehiculoModel.changeStatus(patente,"EN RUTA")
+                await vehiculoModel.changeStatus(viajeEncontrado[0].patente,"DISPONIBLE")
+                await vehiculoModel.changeStatus(patente,"EN RUTA")
             }
 
             const actualizaEspera = await viajesModel.editarEspera(id,

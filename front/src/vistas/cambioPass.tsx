@@ -2,20 +2,33 @@ import { useState } from "react"
 import "../estilos/cambioPass.css"
 import { useNavigate } from "react-router-dom"
 import { useAlerta } from "../context/AlertaContext"
+import { solicitarRecuperarContraseña } from "../utils/auxiliar"
 function cambioPass(){
 
     const [formData,setFormData] = useState("")
+    const [enviado,setEnviado] = useState(false)
     const {showAlerta} = useAlerta()
     const navigate = useNavigate()
     const handleVolver=()=>{
         navigate("/")
     }
 
-    const handleRedirection=()=>{
-        if(formData){
-            //Enviar consulta de usuario ->si existe enviar nueva contraseña
-        }else{
-            showAlerta("Correo invalido","error")
+    const handleRedirection=async()=>{
+        if(!formData || !formData.includes('@')){
+            showAlerta("Ingresa un correo valido","warning")
+            return
+        }
+        setEnviado(true)
+        try{
+            const res = await solicitarRecuperarContraseña(formData)
+            if(res.error){
+                showAlerta(res.error,"error")
+            }else{
+                showAlerta(res.msg || "Solicitud enviada, contacta a Administración para continuar","success")
+                setTimeout(()=>navigate("/"),3500)
+            }
+        }finally{
+            setEnviado(false)
         }
     }
     return(
@@ -39,7 +52,7 @@ function cambioPass(){
                 </div>
                 <div className="buttonFormularioPass">
                     <button onClick={()=>handleVolver()}>Volver</button>
-                    <button onClick={()=>handleRedirection()}>Solicitar</button>
+                    <button onClick={()=>handleRedirection()} disabled={enviado}>{enviado ? "Enviando...":"Solicitar"}</button>
                 </div>
             </div>
             

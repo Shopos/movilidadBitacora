@@ -329,9 +329,9 @@ export async function editarUsuario(correo: string, data: User) {
       }
       return true
     } catch (e) {
-      return false
       console.error('Error:', e);
       console.log({ msg: "Error al editar usuario" })
+      return false
     }
   }
 }
@@ -402,4 +402,54 @@ export async function editarViaje(id: number, data: Partial<Viaje>) {
     console.error("Error: ",e)
     console.log({msg: "Error al editar viaje"})
   }
+}
+
+
+/*********/
+
+export async function solicitarRecuperarContraseña(correo:string){
+  try{
+    const res = await fetch('http://localhost:4000/usuarios/solicitar-reset',{
+      method:'POST',
+      headers:{'Content-type': 'application/json'},
+      body:JSON.stringify({correo})
+    })
+    return await res.json()
+  }catch(e){
+    return {error: 'No se logro solicitar cambio'}
+  }
+}
+export async function getSolicitudes(){
+  const token = localStorage.getItem("token")
+  const url = `http://localhost:4000/usuarios/solicitudes-reset`
+  try{
+    const res = await fetch(url,{
+      headers:{'Authorization': `Bearer ${token}`}
+    })
+    if(!res.ok){
+      throw new Error()
+    }
+    return await res.json()
+  }catch(e){
+    return {error: "No se logro obtener las solicitudes"}
+  }
+
+}
+export async function resolverSolicitudesCambio(id:number,pass:string){
+  const token = localStorage.getItem("token")
+  const url = `http://localhost:4000/usuarios/solicitudes-reset/${id}/resolver`
+
+  const res = await fetch(url,{
+    method:"POST",
+    headers:{
+      'Content-type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body:JSON.stringify({pass})
+  })
+  const json = await res.json()
+  if(!res.ok){
+    throw new Error (json.error || "No se logro resolver la solicitud")
+  }
+  return json
 }

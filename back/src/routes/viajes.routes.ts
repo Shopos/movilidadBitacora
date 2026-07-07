@@ -6,12 +6,13 @@ const router = Router()
 
 //Obtiene todos los viajes
 router.get('/',getViajes)
-//Obtiene el viaje en espera del usuario
-router.get('/:id',getViajeIdUsuarioEspera)
+
 //Obtiene el viaje en proceso del usuario
 router.get('/search/:id', getViajeProceso)
 //Obtiene los viajes del usuario
 router.get('/id/:id',getViajeIdUsuario)
+//Obtiene el viaje en espera del usuario
+router.get('/:id',getViajeIdUsuarioEspera)
 
 
 //Agrega un viaje inicialmente

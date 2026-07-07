@@ -325,7 +325,7 @@ export async function editarTerminado(id:number,data:viajeTerminado){
         WHERE id_viaje = ? `,[data.obs_viaje+" -Administración",data.cantidad_carga,data.ultimaModificacion,data.adminName,id]
     )
     //@ts-ignore
-    return res.insertId
+    return res.affectedRows>0
 }
 
 export async function editarEspera(id:number, data:viajeEspera){
@@ -336,5 +336,5 @@ export async function editarEspera(id:number, data:viajeEspera){
         [data.patente,data.vehiculo,data.kms_inicial,data.id_usuario,data.nombre_funcionario,data.destino,data.motivo,data.lat_fin,data.lng_fin,data.modificado_por,data.ultima_modificacion,id]
     )
     //@ts-ignore
-    return res.insertId
+    return res.affectedRows > 0
 }

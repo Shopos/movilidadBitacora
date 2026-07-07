@@ -8,12 +8,9 @@
     background-color: var(--buttonPrimary);
     align-items: center;
 }
-.imgIconBar{
-    grid-area: 1/1/2/2;
-}
 .imgIconBar img{
-    width: 40px;
-    height: 40px;
+    width: 4vw;
+    height: auto;
     border-radius: 100px;
 }
 .textDiv{
@@ -56,21 +53,17 @@
     background-color: var(--fondoBarra);
 }
 .barraAux{
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-template-rows: 1fr;
+    display: flex;
+    flex-direction: row;
     justify-items: center;
     align-items: center;
     background-color: #bad8b6;
     border-radius: 35px;
-    height: 50%;
     margin-right: 4%;
     padding: 2%;
+    justify-content: space-around;
 }
 @media (min-width: 576px) {
-    .barraAux{
-        
-    }
 }
 .buttonBarra{
     background-color:transparent;

@@ -3,7 +3,7 @@
     flex-direction: column;
 }
 .barraFiltro{
-    margin-top: 5%;
+    margin-top: 2%;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -136,4 +136,11 @@
 .buttonLabel-Modal button:hover{
     cursor: pointer;
     background-color: #0e4669;
+}
+.barraButtonsTop{
+    margin-top: 1%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
 }

@@ -218,6 +218,7 @@ export async function parcheFin(req: Request, res: Response) {
             //Liberar usuario vehiculo
             await vehiculoModel.changeStatus(viaje[0].patente, "DISPONIBLE")
             await usuarioModel.changeStatus(Number(viaje[0].id_usuario), "Disponible")
+            res.status(201).json({mensaje:" Viaje finalizado "})
         }
         
     } catch (e) {

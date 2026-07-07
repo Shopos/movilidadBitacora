@@ -66,3 +66,12 @@
     border-radius:25px;
     cursor: pointer;
 }
+@media(max-width:576px){
+    .campo-formulario{
+        width: 60vw;
+    }
+    .contenido-formulario{
+        width: 80vw;
+        margin-top: 15%;
+    }
+}

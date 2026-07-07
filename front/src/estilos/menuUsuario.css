@@ -33,3 +33,9 @@
     height: 48px;
   }
 }
+.containerCard{
+    display:"flex"; 
+    flex-direction:"row"; 
+    justify-content:"center";
+    margin-bottom:"5vh";
+}

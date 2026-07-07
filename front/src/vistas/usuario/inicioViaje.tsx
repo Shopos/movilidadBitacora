@@ -34,9 +34,9 @@ function inicioViaje() {
     })
     const points: GPS[] = [dataGPS, dataGPSDestino]
     const { usuario } = useAuth()
-
-    const [dia, setDia] = useState("")
-    const [time, setTime] = useState("")
+    const date = new Date()
+    const today  = `${String(date.getFullYear())}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`
+    const nowTime = `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`
 
     /*Funcion para dar colores especificos a los Marker de leaflet y poder diferenciar punto de inicio y destino */
     const createCustomIcon = (color: string) => {
@@ -130,7 +130,7 @@ function inicioViaje() {
         if (formInicio) {
             setFormInicio((prevData) => ({
                 ...prevData!,
-                fecha_hora_inicio: `${dia} ${time}`,
+                fecha_hora_inicio: `${today} ${nowTime}`,
                 ultima_modificacion: formatoFecha(),
                 modificado_por: usuario!.nombre,
                 estado_viaje: "En proceso",
@@ -146,6 +146,7 @@ function inicioViaje() {
         const patch = async () => {
             if (formInicio?.estado_viaje === "En proceso") {
                 //localStorage.setItem("idViaje",String(formInicio.id_viaje))//guardar idViaje para consulta futura
+                //Si formInicio modo==Vuelta fecha hora inicio !< ultima modificacion
                 await patchInicio(formInicio.id_viaje, {
                     fecha_hora_inicio: formInicio.fecha_hora_inicio,
                     ultima_modificacion: formInicio.ultima_modificacion,
@@ -183,13 +184,13 @@ function inicioViaje() {
                     <div>
                         <div className="tituloPaso">
                             <h1>Iniciar un viaje</h1>
-                            <h2>Ingresa los datos necesarios</h2>
+                            <h2>Confirma los datos antes de comenzar</h2>
                         </div>
 
                         <div className="inputsInicio">
                             <div className="itemInput">
                                 <label>Fecha</label>
-                                <input name="dia" type="date" value={dia} onChange={(e) => setDia(e.target.value)}></input>
+                                <input name="dia" type="date" min={today} value={today} disabled></input>
                             </div>
 
                             <div className="itemInput">
@@ -209,7 +210,7 @@ function inicioViaje() {
 
                             <div className="itemInput">
                                 <label>Hora inicio</label>
-                                <input name="time" value={time} onChange={(e) => setTime(e.target.value)} type="time"></input>
+                                <input name="time" value={nowTime} disabled type="time"></input>
                             </div>
 
                             <div className="itemInput">
@@ -232,10 +233,9 @@ function inicioViaje() {
 
 
 
-                        <div>Destino {formInicio.destino}</div>
+                        <div>Destino: {formInicio.destino}</div>
                         <div className="full-width">
                             <>
-
                                 <div className="leaflet-container-preview">
                                     <MapContainer zoom={18}>
                                         <TileLayer

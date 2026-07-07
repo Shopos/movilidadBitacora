@@ -383,6 +383,8 @@ function menuAdmin() {
             setModalNewViaje(false)
             setCargando(false)
             showAlerta("Viaje agendado correctamente", "success")
+            setFormInicio(viajeVacio)
+            setVehiculoSelected(undefined)
         }
     }, [formInicio])
 
@@ -874,7 +876,8 @@ function menuAdmin() {
                                     icon={createCustomIcon("#3b40cf")}
                                 />
                                 <Marker
-                                    position={modoEdicionMapa==="edicion" ? [formEdit.lat_fin ?? dataGPS.lat,formEdit.lng_fin ?? dataGPS.lng]:[dataGPS.lat,dataGPS.lng]}
+                                    position={modoEdicionMapa==="edicion" ? [formEdit.lat_fin ?? dataGPS.lat,formEdit.lng_fin ?? dataGPS.lng]:
+                                        [formInicio.lat_fin ?? dataGPS.lat,formInicio.lng_fin ?? dataGPS.lng]}
                                     draggable={true} // El usuario mueve este para determinar el destino
                                     autoPan={true}
                                     eventHandlers={{

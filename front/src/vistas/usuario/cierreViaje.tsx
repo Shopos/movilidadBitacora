@@ -10,13 +10,14 @@ import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import { isMobile } from "react-device-detect"
 import { useAuth } from "../../context/AuthContext.tsx"
 import { getViajeID, getViajeProceso, patchFin } from "../../utils/auxiliar.ts"
-
+import { useAlerta } from "../../context/AlertaContext.tsx"
 
 function cierreViaje() {
     //inputs de recoleccion y cierre final con dialogo de confirmacion
     //es posible cancelar y volver al estado de viajeProceso si es necesario
     //al finalizar cambia los estados del viaje y vehiculo asociados
     const { usuario } = useAuth()
+    const {showAlerta} = useAlerta()
     const navigate = useNavigate()
     const volverProceso = () => navigate("/viajeProceso")
 
@@ -42,7 +43,9 @@ function cierreViaje() {
     const [viajeID, setViajeID] = useState<Viaje | null>(null)
     const d = new Date()
     const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    const timeNow = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
     const [errorKms, setErrorKms] = useState<string | null>(null)
+    const [errorDate, setErrorDate] = useState<string | null>(null)
     /* Si el usuario tiene activo y permitido el acceso a su localizacion, recupera su latitud y longitud final para 
     almacenar estos valores en la BD*/
     useEffect(() => {
@@ -58,7 +61,6 @@ function cierreViaje() {
                 if (usuario) {
                     const response = await getViajeProceso(usuario.id)
                     if (response && Object.keys(response).length > 0) {
-                        //console.log(response[0].id_viaje)
                         setViajeID(response)
                     } else {
                         setViajeID(null)
@@ -79,8 +81,8 @@ function cierreViaje() {
             setFormFin((prevData) => ({
                 ...prevData,
                 modificado_por: usuario!.nombre,
-                ultima_modificacion: `${date} ${time}`,
-                fecha_hora_fin: `${date} ${time}`,
+                ultima_modificacion: `${date} ${timeNow}`,
+                fecha_hora_fin: `${date} ${timeNow}`,
                 estado_viaje: "Terminado",
                 //lat_fin_real: dataGPS.lat,
                 //lng_fin_real:dataGPS.lng,
@@ -93,7 +95,7 @@ function cierreViaje() {
     const handleSendDataFin = async () => {
         await updateDatoFin()
     }
-
+    const sleep = (ms: number):Promise<void>=>new Promise((resolve)=> setTimeout(resolve,ms))
     /* Metodo para almacenar los datos en BD, esto solo se ejecuta si el valor de estado_viaje pasa a Falso
     esto ocurriendo en el caso de dar terminado el viaje
     Una vez subido estos datos se envia el formulario final a actualizar dicho viaje en BD
@@ -103,6 +105,8 @@ function cierreViaje() {
             if (formFin.estado_viaje === "Terminado") {
                 //se envia update
                 await patchFin(viajeID!.id_viaje, formFin)
+                showAlerta("Viaje cerrado correctamete, regresando al menú principal","success")
+                await sleep(3000)
                 navigate("/menuUsuario")
                 //localStorage.removeItem("idViaje")
             }
@@ -131,11 +135,13 @@ function cierreViaje() {
         const valueNum = Number(e.currentTarget.value);
         const kmsInicial = viajeID?.kms_inicial || 0;
 
-        setFormFin((prev) => ({ ...prev, kms_fin: valueNum }));
 
         if (valueNum < kmsInicial && valueNum !== 0) {
             setErrorKms(`¡Error! Debe ser mayor o igual a ${kmsInicial} kms.`);
+            setFormFin((prev) => ({ ...prev, kms_fin: valueNum }));
         } else {
+
+            setFormFin((prev) => ({ ...prev, kms_fin: valueNum }));
             setErrorKms(null);
         }
     };
@@ -146,13 +152,10 @@ function cierreViaje() {
         >Check por si se realiza carga de combustible -> 
             >1 --> Señala que si se realizo y se pide informacion
             >0 --> Quedan vacios
-
-            
-        >VERIFICAR PREVIO ENVIO DE INFORMACION QUE EL VALOR INGRESADO AL KMS FINAL DEBE SER MAYOR O IGUAL AL KMS INICIAL
-
-
         >Se pide confirmacion para cerrar el proceso-->se guardan los datos finales y viaje queda en estado false indicando que el viaje ya no esta activo
     */
+    console.log(String(viajeID?.fecha_hora_inicio).slice(11, 19))
+    console.log(timeNow)
     return (
         <div>
             <NavBar type={0} texto="" />
@@ -160,7 +163,19 @@ function cierreViaje() {
                 <div className="gridInput">
                     <div className="itemInput">
                         <label>Llegada</label>
-                        <input name="time" type="time" value={time} onChange={(e) => setTime(e.target.value)}></input>
+                        {/**Fecha hora llegada < fecha hora inicio */}
+                        <input
+                            style={{ borderColor: errorKms ? 'red' : '' }}
+                            name="time"
+                            type="time"
+                            value={timeNow}
+                            disabled
+                        >
+                        </input>
+                        {errorDate && (
+                            <span style={{ color: 'red', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+                                {errorDate}</span>
+                        )}
                     </div>
                     <div className="itemInput">
                         <label>Kilometraje final</label>

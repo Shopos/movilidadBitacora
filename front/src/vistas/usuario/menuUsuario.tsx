@@ -76,8 +76,8 @@ function menuUsuario(){
             <NavBar type={0} texto=""/>
             <div className="containerBotones">
             {viajeEspera && viajeEspera.vehiculo!=="" ? 
-             (<div style={{display:"flex", flexDirection:"row", justifyContent:"center",marginBottom:"5vh"}}>
-                <Card variant="outlined" sx={{width:"40vw", display:"flex",flexDirection:"column", backgroundColor:"#E7E1B1"}}>
+             (<div className="containerCard">
+                <Card variant="outlined"  sx={{width:"80vw", display:"flex",flexDirection:"column", backgroundColor:"#E7E1B1"}}>
                     <CardContent>
                         <Typography level="h1">Tienes un viaje en espera</Typography>
                         <Typography level="h3">Viaje a {viajeEspera!.destino}</Typography>

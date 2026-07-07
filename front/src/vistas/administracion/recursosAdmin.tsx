@@ -430,7 +430,6 @@ function recursosAdmin() {
                 </ModalDialog>
             </Modal>
 
-
             {/**Modal agrega mantencion vehiculo */}
             <Modal open={modalMantencion} onClose={() => setOpenModalMantencion(false)}>
                 <ModalDialog variant="outlined" sx={{
@@ -470,7 +469,6 @@ function recursosAdmin() {
                     </DialogActions>
                 </ModalDialog>
             </Modal>
-
 
             {/**Abrir modal vista recurso */}
             <Modal open={modalViewRecurso} onClose={() => openModalViewRecurso(false)}>
@@ -582,6 +580,8 @@ function recursosAdmin() {
                     </DialogActions>
                 </ModalDialog>
             </Modal>
+
+            
         </>
 
     )

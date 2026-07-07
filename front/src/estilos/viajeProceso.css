@@ -38,5 +38,6 @@
 @media (max-width:576px) {
     .leaflet-container{
         width: 80vw;
+        height: 70vh;
     }
 }

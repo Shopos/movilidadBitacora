@@ -1,4 +1,4 @@
-.containerBotones{
+.containerBotones {
     display: flex;
     height: 100vh;
     flex-direction: column;
@@ -9,33 +9,50 @@
     align-self: center;
     justify-content: center;
 }
-.containerBotones button{
+
+.containerBotones button {
     background-color: var(--buttonPrimary);
     width: 50%;
     color: white;
     border: #3A3B61;
     padding: 10px;
     border-radius: 25px;
-    height: 10%; 
+    height: 10%;
     margin-top: 15px;
     align-items: center;
 }
-.containerBotones h2{
-    color:white
+
+.containerBotones h2 {
+    color: white
 }
-.containerBotones button:hover{
+
+.containerBotones button:hover {
     cursor: pointer;
 }
-.spacer{
+
+.spacer {
     height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
+    border-top: 1px solid var(--border);
+
+    @media (max-width: 1024px) {
+        height: 48px;
+    }
 }
-.containerCard{
-    display:"flex"; 
-    flex-direction:"row"; 
-    justify-content:"center";
-    margin-bottom:"5vh";
+
+.containerCard {
+    display: flex;
+    flex-direction: row;
+    justify-Content: center;
+    margin-Bottom: 5vh;
+}
+
+.cardViaje {
+    width: 50vw;
+    display: flex;
+    flex-Direction: column;
+}
+@media (max-width:576px){
+    .cardViaje{
+        width: 70vw;
+    }
 }

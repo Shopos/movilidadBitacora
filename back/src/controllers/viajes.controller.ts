@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import * as viajesModel from "../models/viaje.model"
 import * as vehiculoModel from "../models/vehiculo.model"
 import * as usuarioModel from "../models/usuario.model"
+import { uploadImageComprobante, uploadImageTableroFin, uploadImageTableroInicio } from "../config/multer";
+import { connection } from "../config/database";
 
 /* Controladores para el llamado al modelo de viajes con el fin de manejar correctamente la informacion solicitada y recibida */
 
@@ -288,3 +290,62 @@ export async function editarViaje(req:Request,res:Response){
         res.status(500).json({error: "Error al editar el viaje"})
     }
 }
+
+////////////////
+export const uploadImageInicio = [
+    uploadImageTableroInicio.single('foto'),
+    async(req:Request,res:Response)=>{
+        try{
+            if(!req.file) return res.status(400).json({mensaje:"No se recibio archivo"})
+                const idViaje = Number(req.params.id)
+                const rutaRelativa = `viajes/inicio/${req.file.filename}`
+
+                await connection.query(
+                    `UPDATE viajes SET imagen_tablero_ida = ? WHERE id_viaje = ?`,
+                    [rutaRelativa,idViaje]
+                )
+                res.json({msg: "Imagen subida correctamente"})
+        }catch(e){
+            console.error(e)
+            res.status(500).json({error: 'Error al subir imagen'})
+        }
+    }
+]
+
+export const uploadImageFin = [
+    uploadImageTableroFin.single('foto'),
+    async(req:Request,res:Response)=>{
+        try{
+            if(!req.file) return res.status(400).json({mensaje:"No se recibio archivo"})
+            const idViaje = Number(req.params.id)
+            const rutaRelativa = `viajes/fin/${req.file.filename}`
+
+            await connection.query(
+                `UPDATE viajes SET image_tablero_vuelta = ? WHERE id_viaje = ?`,
+                [rutaRelativa,idViaje]
+            )
+            res.json({msg: "Imagen subida correctamente"})
+        }catch(e){
+            console.error(e)
+            res.status(500).json({error: 'Error al subir imagen'})}
+    }
+]
+
+export const uploadImagenComprobante = [
+    uploadImageComprobante.single('foto'),
+    async(req:Request,res:Response)=>{
+        try{
+            if(!req.file) return res.status(400).json({mensaje:"No se recibio archivo"})
+            const idViaje = Number(req.params.id)
+            const rutaRelativa = `viajes/comprobante/${req.file.filename}`
+
+            await connection.query(
+                `UPDATE viajes SET image_comprobante_ben = ? WHERE id_viaje = ?`,
+                [rutaRelativa,idViaje]
+            )
+            res.json({msg: "Imagen subida correctamente"})
+        }catch(e){
+            console.error(e)
+            res.status(500).json({error: 'Error al subir imagen'})}
+    }
+]

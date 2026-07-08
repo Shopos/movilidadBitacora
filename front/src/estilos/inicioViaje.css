@@ -87,12 +87,12 @@
     margin-left: 10%;
 }
 .buttonFormularioInicio{
-    width: 25%;
-    background-color: #696AE3;
+    width: 50%;
+    background-color: var(--buttonPrimary);
     color:white;
-    border: #696AE3;
+    border: var(--buttonPrimary);
     border-radius: 20px;
-    padding: 1%;
+    padding: 5%;
     margin-left: 2%;
 }
 

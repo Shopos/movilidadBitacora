@@ -11,6 +11,7 @@ import getVehiculos, { addMantencionVehiculo, agregarVehiculo, editarVehiculo, a
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { useAlerta } from '../../context/AlertaContext.tsx'
+import { TablePagination } from '@mui/material'
 
 
 const vehiculoVacio: Vehiculo = {
@@ -28,17 +29,17 @@ const mantencionVacia: Mantencion = {
     ultimo_cambio_aceite: ""
 }
 const usuarioVacio: User = {
-    id_usuario:0,
+    id_usuario: 0,
     cargo: "Funcionario",
     correo: "",
     estado: false,
     nombre: "",
     pass: "",
     tipo_licencia: "",
-    estado_viaje_usuario:"Disponible"
+    estado_viaje_usuario: "Disponible"
 }
 function recursosAdmin() {
-    const {showAlerta } = useAlerta()
+    const { showAlerta } = useAlerta()
     const [usuarios, setUsuarios] = useState<[User]>()
     const [vehiculos, setVehiculos] = useState<[Vehiculo]>()
     const [vistaActual, setVistaActual] = useState<boolean>(false)
@@ -70,7 +71,7 @@ function recursosAdmin() {
                 }
             } catch (e) {
                 console.error("error encontrando vehiculos: ", e)
-                showAlerta("Error encontrando vehículos del sistema","error")
+                showAlerta("Error encontrando vehículos del sistema", "error")
             }
         }
         getListaVehiculos()
@@ -86,7 +87,7 @@ function recursosAdmin() {
                 }
             } catch (e) {
                 console.error("error encontrando usuarios", e)
-                showAlerta("Error encontrando usuarios del sistema","error")
+                showAlerta("Error encontrando usuarios del sistema", "error")
             }
         }
         getListaUsuarios()
@@ -125,10 +126,10 @@ function recursosAdmin() {
             const patente = recursoEdit.patente
             const payload = formV
             const edicion = await editarVehiculo(patente, payload)
-            if(edicion){
-                showAlerta("Vehiculo editado correctamente","success")
-            }else{
-                showAlerta("Hubo un problema al editar, intente más tarde","warning")
+            if (edicion) {
+                showAlerta("Vehiculo editado correctamente", "success")
+            } else {
+                showAlerta("Hubo un problema al editar, intente más tarde", "warning")
             }
             setFormV(vehiculoVacio)
             setCargando(false)
@@ -139,10 +140,10 @@ function recursosAdmin() {
             const correo = recursoEdit.correo
             const payload = formU
             const edicion = await editarUsuario(correo, payload)
-            if(edicion){
-                showAlerta("Vehiculo editado correctamente","success")
-            }else{
-                showAlerta("Hubo un problema al editar, intente más tarde","warning")
+            if (edicion) {
+                showAlerta("Vehiculo editado correctamente", "success")
+            } else {
+                showAlerta("Hubo un problema al editar, intente más tarde", "warning")
             }
             setFormU(usuarioVacio)
             setCargando(false)
@@ -155,10 +156,10 @@ function recursosAdmin() {
         if (!formAddV || cargando) return
         setCargando(true)
         const res = await agregarVehiculo(formAddV)
-        if(res){
-            showAlerta("Vehículo agregado correctamente","success")
-        }else{
-            showAlerta("Hubo un problema al agregar, intenta más tarde","warning")
+        if (res) {
+            showAlerta("Vehículo agregado correctamente", "success")
+        } else {
+            showAlerta("Hubo un problema al agregar, intenta más tarde", "warning")
         }
         setFormAddV(vehiculoVacio)
         setCargando(false)
@@ -169,10 +170,10 @@ function recursosAdmin() {
         if (!formAddU || cargando) return
         setCargando(true)
         const res = await agregarUsuario(formAddU)
-        if(res){
-            showAlerta("Usuario agregado correctamente","success")
-        }else{
-            showAlerta("Hubo un problema al agregar, intenta más tarde","warning")
+        if (res) {
+            showAlerta("Usuario agregado correctamente", "success")
+        } else {
+            showAlerta("Hubo un problema al agregar, intenta más tarde", "warning")
         }
         setFormAddU(usuarioVacio)
         setCargando(false)
@@ -220,17 +221,17 @@ function recursosAdmin() {
             }
         } else {
             //Exportar pdf tabla usuarios
-            const columns = ['Nombre','Correo','Licencia','Cargo','Estado']
-            if(usuarios){
-                const rows = usuarios.map((usr)=>[
+            const columns = ['Nombre', 'Correo', 'Licencia', 'Cargo', 'Estado']
+            if (usuarios) {
+                const rows = usuarios.map((usr) => [
                     usr.nombre,
                     usr.correo,
                     usr.tipo_licencia,
                     usr.cargo,
-                    (usr.estado ? "Activo":"Bloqueado")
+                    (usr.estado ? "Activo" : "Bloqueado")
                 ])
-                doc.text("Reporte de funcionarios - departamento de movilización",20,20)
-                autoTable(doc,{
+                doc.text("Reporte de funcionarios - departamento de movilización", 20, 20)
+                autoTable(doc, {
                     startY: 40,
                     head: [columns],
                     body: rows,
@@ -242,6 +243,17 @@ function recursosAdmin() {
             }
         }
     }
+
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+
+    const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number,) => {
+        setPage(newPage);
+    };
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
 
     /*
         Vista de recursos del departamento
@@ -262,15 +274,17 @@ function recursosAdmin() {
                     <button className="bordeIzquierdoBoton" disabled={!vistaActual} onClick={() => setVistaActual(false)}>Usuarios</button>
                     <button className="bordeDerechaBoton" disabled={vistaActual} onClick={() => setVistaActual(true)}>Vehiculos</button>
                 </div>
-                {vistaActual === false ?
+                {vistaActual === false && usuarios ?
                     (
                         /* Tabla usuarios */
                         <div>
                             <Table hoverRow borderAxis="y" sx={
-                        { '& tr:nth-of-type(odd)':{backgroundColor:'#FBF5DD'},
-                            '& tr:nth-of-type(even)':{backgroundColor:'#E7E1B1'},
-                            '& td': { textAlign: 'left', paddingLeft: 1.9 },
-                            '& th':{backgroundColor:"#bad8b6"}}}>
+                                {
+                                    '& tr:nth-of-type(odd)': { backgroundColor: '#FBF5DD' },
+                                    '& tr:nth-of-type(even)': { backgroundColor: '#E7E1B1' },
+                                    '& td': { textAlign: 'left', paddingLeft: 1.9 },
+                                    '& th': { backgroundColor: "#bad8b6" }
+                                }}>
                                 <thead>
                                     <tr>
                                         <th style={{ width: "20%", overflow: "clip" }} >Correo</th>
@@ -282,7 +296,7 @@ function recursosAdmin() {
                                 </thead>
 
                                 <tbody>
-                                    {usuarios && usuarios!.map((usuario: User) => (
+                                    {usuarios && usuarios.slice(page*rowsPerPage,page*rowsPerPage+rowsPerPage).map((usuario: User) => (
                                         <tr>
                                             <td style={{ overflow: "clip" }}>{usuario.correo}</td>
                                             <td>{usuario.nombre}</td>
@@ -303,16 +317,33 @@ function recursosAdmin() {
                                     ))}
                                 </tbody>
                             </Table>
+
+                            <TablePagination
+                                rowsPerPageOptions={[5, 10]}
+                                component="div"
+                                count={usuarios!.length}
+                                rowsPerPage={rowsPerPage}
+                                page={page}
+                                onPageChange={handleChangePage}
+                                onRowsPerPageChange={handleChangeRowsPerPage}
+                                labelRowsPerPage={"Cantidad de usuarios"}
+                                labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count !== -1 ? count : `más de ${to}`}`}
+                                sx={{
+                                    '& .MuiTablePagination-actions': { width: '5vw' }
+                                }}
+                            />
                         </div>
                     ) :
                     (
                         /* Tabla vehiculos */
                         <div>
                             <Table hoverRow borderAxis="y" sx={
-                        { '& tr:nth-of-type(odd)':{backgroundColor:'#FBF5DD'},
-                            '& tr:nth-of-type(even)':{backgroundColor:'#E7E1B1'},
-                            '& td': { textAlign: 'left', paddingLeft: 1.9 },
-                            '& th':{backgroundColor:"#bad8b6"}}}>
+                                {
+                                    '& tr:nth-of-type(odd)': { backgroundColor: '#FBF5DD' },
+                                    '& tr:nth-of-type(even)': { backgroundColor: '#E7E1B1' },
+                                    '& td': { textAlign: 'left', paddingLeft: 1.9 },
+                                    '& th': { backgroundColor: "#bad8b6" }
+                                }}>
                                 <thead>
                                     <tr>
                                         <th >Patente</th>
@@ -324,7 +355,7 @@ function recursosAdmin() {
                                 </thead>
 
                                 <tbody>
-                                    {vehiculos && vehiculos!.map((vh: Vehiculo) => (
+                                    {vehiculos && vehiculos.slice(page*rowsPerPage,page*rowsPerPage+rowsPerPage).map((vh: Vehiculo) => (
                                         <tr>
                                             <td>{vh.patente}</td>
                                             <td>{vh.modelo}</td>
@@ -344,6 +375,22 @@ function recursosAdmin() {
                                     ))}
                                 </tbody>
                             </Table>
+                            {vehiculos && 
+                            <TablePagination
+                                rowsPerPageOptions={[5, 10]}
+                                component="div"
+                                count={vehiculos!.length}
+                                rowsPerPage={rowsPerPage}
+                                page={page}
+                                onPageChange={handleChangePage}
+                                onRowsPerPageChange={handleChangeRowsPerPage}
+                                labelRowsPerPage={"Cantidad de usuarios"}
+                                labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count !== -1 ? count : `más de ${to}`}`}
+                                sx={{
+                                    '& .MuiTablePagination-actions': { width: '5vw' }
+                                }}
+                            />
+                            }
                         </div>
                     )}
             </div>
@@ -581,7 +628,7 @@ function recursosAdmin() {
                 </ModalDialog>
             </Modal>
 
-            
+
         </>
 
     )

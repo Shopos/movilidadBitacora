@@ -8,6 +8,7 @@ import CierreViaje from "./vistas/usuario/cierreViaje.tsx"
 import ViajesUsuario from "./vistas/usuario/viajesUsuario.tsx"
 import Recursos from "./vistas/administracion/recursosAdmin.tsx"
 import CambioPass from "./vistas/cambioPass.tsx"
+import Solicitudes from "./vistas/administracion/solicitudesAdmin.tsx"
 import { AuthProvider } from "./context/AuthContext.tsx"
 import ProtectedRoute from "./componentes/protectedRoute.tsx"
 import { AlertProvider } from "./context/AlertaContext.tsx"
@@ -31,6 +32,7 @@ function App(){
             {/**Rutas administración */}
             <Route path="/menuAdmin" element={<ProtectedRoute rolesPermitidos="Administrativo"><MenuAdmin /></ProtectedRoute>}></Route>
             <Route path="/recursos" element={<ProtectedRoute rolesPermitidos="Administrativo"><Recursos /></ProtectedRoute>}/>
+            <Route path="/solicitudes" element={<ProtectedRoute rolesPermitidos="Administrativo"><Solicitudes /></ProtectedRoute>}/>
           </Routes>
         </BrowserRouter>
       </AuthProvider>

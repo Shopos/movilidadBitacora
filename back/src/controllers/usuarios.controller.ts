@@ -184,20 +184,20 @@ export async function resolverResetPass(req: Request, res: Response) {
     //Resolver solicitud
     try{
         const idSolicitud = Number(req.params.id_solicitud)
-        const {temporalPass} = req.body
+        const { pass } = req.body
         const autor = (req.usuario as any).nombre
 
-        if(!temporalPass){
+        if(!pass){
             res.status(404).json({error: " Contraseña invalida para su cambio "})
         }
-        const solicitud = await connection.query<any>(
+        const [solicitud] = await connection.query<any>(
             "SELECT * FROM solicitudes_reset WHERE id_solicitud=? AND estado='pendiente'",[idSolicitud]
         )
         if(!solicitud[0]){
             res.status(404).json({error: " Error encontrando solicitud asociada "})
         }
-        const hashPass = await bcrypt.hash(temporalPass,11)
-        await connection.query("UPDATE usuarios SET pass=? WHERE id_usuario=?"),[hashPass,solicitud[0].id_usuario]
+        const hashPass = await bcrypt.hash(pass,11)
+        await connection.query("UPDATE usuarios SET pass=? WHERE id_usuario=?" , [hashPass,solicitud[0].id_usuario])
         await solicitudesModel.resolverSolicitud(idSolicitud,autor)
         res.json({msg:` Contraseña nueva asignada al usuario ${solicitud[0].nombre} `})
     }catch(e){

@@ -12,7 +12,7 @@ function navBar({type,texto}:navBarProps){
     const navigate = useNavigate()
     const irBitacoras = () =>navigate("/menuAdmin")
     const irRecursos =()=> navigate("/recursos")
-    const irSolicitudes =()=>null
+    const irSolicitudes =()=>navigate("/solicitudes")
     const {logOut} = useAuth()
     /*Si usuario(cualquiera) selecciona el icono de usuario, comienza proceso cierre de sesión y se devuelve al home de la app (/) */
     const handleCierreSesion = ()=>{
@@ -40,8 +40,8 @@ function navBar({type,texto}:navBarProps){
                 <div className='imgIconBar'>
                     <img src='./src/assets/icon.jpg'></img>
                 </div>
-                <button className='buttonBarra' onClick={()=>irRecursos()}>Recursos</button>
                 <button className='buttonBarra' onClick={()=>irBitacoras()}>Bitácoras</button>
+                <button className='buttonBarra' onClick={()=>irRecursos()}>Recursos</button>
                 <button className='buttonBarra' onClick={()=>irSolicitudes()}>Solicitudes</button>
                 <button className='buttonBarra' onClick={()=>setOpenModalCierre(true)}>
                     <PersonIcon sx={{color:"black"}} style={{

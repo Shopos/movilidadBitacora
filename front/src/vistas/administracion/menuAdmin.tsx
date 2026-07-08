@@ -193,10 +193,10 @@ function menuAdmin() {
                 viaje.nombre_funcionario,
                 viaje.kms_inicial,
                 (viaje.kms_fin ? viaje.kms_fin : 0),
-                (viaje.fecha_hora_inicio ? (viaje.fecha_hora_inicio.slice(0, 10) + " " + viaje.fecha_hora_inicio.slice(11, 19)) : ("")),
+                (viaje.fecha_hora_inicio ? (viaje.fecha_hora_inicio.slice(0, 10) + " " + viaje.fecha_hora_inicio.slice(11, 19)) : ("No iniciado")),
                 viaje.destino,
-                (viaje.fecha_hora_fin ? (viaje.fecha_hora_fin.slice(0, 10) + " " + viaje.fecha_hora_fin.slice(11, 19)) : "-"),
-                (viaje.estado_viaje ? "En ruta" : "Terminado")
+                (viaje.fecha_hora_fin ? (viaje.fecha_hora_fin.slice(0, 10) + " " + viaje.fecha_hora_fin.slice(11, 19)) : "No terminado"),
+                (viaje.estado_viaje)
             ])
             doc.setFontSize(12)
             doc.text("Reporte de viajes departamento de movilización", 20, 20)
@@ -606,7 +606,7 @@ function menuAdmin() {
 
                                     <td>{viaje.estado_viaje}</td>
                                     <td>
-                                        <div style={{ display: "flex", gap: "10px" }}>
+                                        <div className="buttonsIconTable" style={{ display: "flex", gap: "10px" }}>
                                             <button onClick={() => handleModalViajeView(viaje)}>
                                                 <VisibilityIcon />
                                             </button>

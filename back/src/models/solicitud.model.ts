@@ -29,7 +29,7 @@ export async function crearSolicitud(id_usuario:Number,correo:String,nombre:Stri
 
 export async function getSolicitudes():Promise<SolicitudReset[]>{
     //Devolver todas las solicitudes
-    const [rows] = await connection.query<SolicitudReset[]>("SELECT * FROM solicitudes_reset")
+    const [rows] = await connection.query<SolicitudReset[]>("SELECT * FROM solicitudes_reset WHERE estado='pendiente'")
     return rows
 }
 

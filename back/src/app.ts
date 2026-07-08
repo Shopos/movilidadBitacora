@@ -1,6 +1,7 @@
 import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
+import path from "path"
 import VehiculoRoutes from "./routes/vehiculos.routes"
 import MantencionesRoutes from "./routes/mantenciones.routes"
 import UsuariosRoutes from "./routes/usuarios.routes"
@@ -17,6 +18,10 @@ app.use("/vehiculos",VehiculoRoutes)
 app.use("/mantenciones",MantencionesRoutes)
 app.use("/usuarios", UsuariosRoutes)
 app.use("/viajes", ViajesRoutes)
+
+const UPLOADS_DIR = process.env.UPLOADS_DIR ? path.resolve(process.env.UPLOADS_DIR) : path.join(__dirname,'..','..','uploads')
+app.use('/uploads',express.static(UPLOADS_DIR,{maxAge:'7d'}))
+
 
 const PORT = process.env.PORT || 4000
 

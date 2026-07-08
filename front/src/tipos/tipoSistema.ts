@@ -77,3 +77,14 @@ export type Mantencion = {
     detalle_mantencion:string,
     patente:string
 }
+
+export type Solicitud={
+    id_solicitud:number,
+    id_usuario:Number,
+    correo:string,
+    nombre:string,
+    fecha_solicitada:string,
+    estado:string,
+    resuelta_por:string,
+    fecha_resuelta:string
+}

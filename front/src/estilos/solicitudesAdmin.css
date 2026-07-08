@@ -1,0 +1,10 @@
+.inputPass{
+    display: flex;
+}
+.inputPass input{
+    width: 90%;
+}
+.inputPass button{
+    background-color: transparent;
+    border: 0;
+}

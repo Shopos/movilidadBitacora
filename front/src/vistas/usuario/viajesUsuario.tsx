@@ -237,7 +237,7 @@ function viajesUsuario() {
                                 ))}
                                 {viajeFiltrado.length === 0 && (
                                     <tr>
-                                        <td colSpan={7} style={{ textAlign: "center", padding: "5%" }}>
+                                        <td colSpan={6} style={{ textAlign: "center", padding: "5%" }}>
                                             No hay viajes que coincidan con la búsqueda
                                         </td>
                                     </tr>

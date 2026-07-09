@@ -21,11 +21,11 @@ const buildStorage=(subCarpeta:string)=>{
 }
 
 function fileFilter(_req:Request, file:Express.Multer.File, cb:FileFilterCallback){
-    const permitido = ['image/jpg','image/png','image/webp']
+    const permitido = ['image/jpeg','image/png','image/webp']
     if(permitido.includes(file.mimetype)){
         cb(null,true)
     }else{
-        cb(new Error('Invalid file type. Only JPEG, PNG, GIF, and PDF are allowed.'));
+        cb(new Error('Solo se permiten imágenes JPEG, PNG, WEBP.'));
     }
 }
 
@@ -41,8 +41,8 @@ export function eliminarImagenAnterior(rutaRelativa:string|null|undefined):void{
     })
 }
 
-const LimitSize = {filesize: 5*1024*1024}
+const LimitSize = {fileSize: 5*1024*1024}
 
-export const uploadImageTableroInicio = multer({ storage: buildStorage('viaje/inicio')})
-export const uploadImageComprobante = multer({storage: buildStorage('viaje/comprobante')})
-export const uploadImageTableroFin = multer({storage: buildStorage('viaje/fin')})
+export const uploadImageTableroInicio = multer({ storage: buildStorage('viajes/inicio'), limits:LimitSize, fileFilter})
+export const uploadImageComprobante = multer({storage: buildStorage('viajes/comprobante'),limits:LimitSize, fileFilter})
+export const uploadImageTableroFin = multer({storage: buildStorage('viajes/fin'), limits:LimitSize, fileFilter})

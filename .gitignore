@@ -23,3 +23,5 @@ dist-ssr
 *.sln
 *.sw?
 *.env
+back/uploads
+back/back/uploads/viajes/inicio

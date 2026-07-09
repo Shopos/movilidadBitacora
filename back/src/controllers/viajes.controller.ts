@@ -292,7 +292,7 @@ export async function editarViaje(req:Request,res:Response){
 }
 
 ////////////////
-export const uploadImageInicio = [
+export const uploadImagenInicio = [
     uploadImageTableroInicio.single('foto'),
     async(req:Request,res:Response)=>{
         try{
@@ -312,7 +312,7 @@ export const uploadImageInicio = [
     }
 ]
 
-export const uploadImageFin = [
+export const uploadImagenFin = [
     uploadImageTableroFin.single('foto'),
     async(req:Request,res:Response)=>{
         try{
@@ -321,7 +321,7 @@ export const uploadImageFin = [
             const rutaRelativa = `viajes/fin/${req.file.filename}`
 
             await connection.query(
-                `UPDATE viajes SET image_tablero_vuelta = ? WHERE id_viaje = ?`,
+                `UPDATE viajes SET imagen_tablero_vuelta = ? WHERE id_viaje = ?`,
                 [rutaRelativa,idViaje]
             )
             res.json({msg: "Imagen subida correctamente"})
@@ -340,7 +340,7 @@ export const uploadImagenComprobante = [
             const rutaRelativa = `viajes/comprobante/${req.file.filename}`
 
             await connection.query(
-                `UPDATE viajes SET image_comprobante_ben = ? WHERE id_viaje = ?`,
+                `UPDATE viajes SET imagen_comprobante_ben = ? WHERE id_viaje = ?`,
                 [rutaRelativa,idViaje]
             )
             res.json({msg: "Imagen subida correctamente"})

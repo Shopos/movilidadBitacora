@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { addViajeInicio, getViajes, getViajeIdUsuario,parcheInicio,parcheFin, getViajeProceso , getViajeIdUsuarioEspera,editarViaje, uploadImageInicio, uploadImageFin, uploadImagenComprobante } from "../controllers/viajes.controller"
+import { addViajeInicio, getViajes, getViajeIdUsuario,parcheInicio,parcheFin, getViajeProceso , getViajeIdUsuarioEspera,editarViaje, uploadImagenInicio, uploadImagenFin, uploadImagenComprobante } from "../controllers/viajes.controller"
 import { autenticarJWT, verifyAdmin } from "../middleware/auth.middleware"
 
 const router = Router()
@@ -26,8 +26,8 @@ router.patch('/inicio/:id', parcheInicio)
 //Edita los elementos necesarios para finalizar un viaje {id}
 router.patch('/fin/:id', parcheFin)
 
-router.patch('/:id/foto-inicio',autenticarJWT,...uploadImageInicio)
-router.patch('/:id/foto-fin',autenticarJWT,...uploadImageFin)
+router.patch('/:id/foto-inicio',autenticarJWT,...uploadImagenInicio)
+router.patch('/:id/foto-fin',autenticarJWT,...uploadImagenFin)
 router.patch('/:id/foto-comprobante',autenticarJWT,...uploadImagenComprobante)
 
 router.put('/:id',autenticarJWT,verifyAdmin,editarViaje)

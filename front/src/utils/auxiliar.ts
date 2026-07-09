@@ -454,3 +454,29 @@ export async function resolverSolicitudesCambio(id:number,pass:string){
   }
   return json
 }
+
+export async function resolverSubidaImagen(
+  id:number,
+  tipo:"foto-inicio"|"foto-fin"|"foto-comprobante",
+  archivo:File):Promise<{msg:string,ruta?:string}|null>{
+
+    const token = localStorage.getItem("token")
+    const form = new FormData()
+    form.append('foto',archivo)
+    const url = `http://localhost:4000/viajes/${id}/${tipo}`
+    try{
+      const res = await fetch(url,{
+        method:"PATCH",
+        headers: {'Authorization': `Bearer ${token}`},
+        body: form
+      })
+      const json = await res.json()
+      if(!res.ok){
+        throw new Error (json.error || "No se logro subir imagen")
+      }
+      return json
+    }catch(e){
+      console.error('error subiendo imagen',e)
+      return null
+    }
+}

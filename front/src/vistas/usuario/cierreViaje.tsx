@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect, type ChangeEvent } from "react"
 import NavBar from "../../componentes/navBar.tsx"
+import ImageUploader from "../../componentes/imageUploader.tsx"
 import "../../estilos/cierreViaje.css"
 import type { Viaje, ViajeInputFin } from "../../tipos/tipoSistema.ts"
 
@@ -23,6 +24,7 @@ function cierreViaje() {
 
     const [openModal, setOpenModal] = useState<boolean>(false)
     const [modalFoto, setOpenModalFoto] = useState<boolean>(false)
+    const [modalFoto2, setOpenModalFoto2] = useState<boolean>(false)
     const [formFin, setFormFin] = useState<ViajeInputFin>({
         cantidad_combustible: 0,
         carga_combustible: false,
@@ -67,7 +69,6 @@ function cierreViaje() {
                     }
                 }
             } catch (e) {
-                console.error(" Error listando viaje usuario ")
                 setViajeID(null)
             }
         }
@@ -154,8 +155,6 @@ function cierreViaje() {
             >0 --> Quedan vacios
         >Se pide confirmacion para cerrar el proceso-->se guardan los datos finales y viaje queda en estado false indicando que el viaje ya no esta activo
     */
-    console.log(String(viajeID?.fecha_hora_inicio).slice(11, 19))
-    console.log(timeNow)
     return (
         <div>
             <NavBar type={0} texto="" />
@@ -192,6 +191,9 @@ function cierreViaje() {
                                 {errorKms}
                             </span>
                         )}
+                    </div>
+                    <div>
+                        <button onClick={()=>setOpenModalFoto2(true)}>Imagen tablero fin</button>
                     </div>
                 </div>
                 <div className="argumento">
@@ -268,19 +270,47 @@ function cierreViaje() {
                     <Divider />
                     <DialogContent>
                         <div>Acceso a cámara</div>
-                        <div>
-                            <p>Puedes subir una existente aquí</p>
-                            <input type="file" accept="image/*" name="comprobante"></input>
-                        </div>
+                        {viajeID && (
+                            <ImageUploader
+                                idViaje={viajeID.id_viaje}
+                                tipo="foto-comprobante"
+                                label="Captura de comprobante combustible"
+                                //capture="environment"
+                            />
+                        )}
                     </DialogContent>
                     <DialogActions>
                         <Button variant="solid" color="success" onClick={() => setOpenModalFoto(false)}>
-                            Capturar
+                            Continuar
                         </Button>
                         <Button variant="plain" color="danger" onClick={() => setOpenModalFoto(false)}>
                             Cancelar
                         </Button>
                     </DialogActions>
+                </ModalDialog>
+            </Modal>
+            <Modal open={modalFoto2} onClose={() => setOpenModalFoto2(false)}>
+                <ModalDialog variant="outlined" role="alertdialog">
+                    <DialogTitle>
+                        <CameraAltIcon />
+                        Comenzar captura de datos por cámara
+                    </DialogTitle>
+                    <Divider />
+                    <DialogContent>
+                        Asegura de aceptar los permisos para acceder a tu cámara y poder capturar la imagen
+                    </DialogContent>
+                    <Divider />
+                    <DialogContent>
+                        <div>Acceso a cámara</div>
+                        {viajeID && (
+                            <ImageUploader
+                                idViaje={viajeID.id_viaje}
+                                tipo="foto-comprobante"
+                                label="Captura de comprobante combustible"
+                                //capture="environment"
+                            />
+                        )}
+                    </DialogContent>
                 </ModalDialog>
             </Modal>
 

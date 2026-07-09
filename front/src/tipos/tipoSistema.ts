@@ -44,6 +44,9 @@ export type Viaje = {
     ultima_modificacion:string,
     modificado_por:string,
     modo:string
+    imagen_tablero_ida:string,
+    imagen_tablero_vuelta:string,
+    imagen_comprobante_ben:string
 }
 
 export type ViajeInputFin = {

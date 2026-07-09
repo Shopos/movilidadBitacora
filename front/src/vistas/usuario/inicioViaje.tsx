@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom"
 import NavBar from "../../componentes/navBar.tsx"
+import ImageUploader from "../../componentes/imageUploader.tsx";
 import "../../estilos/inicioViaje.css"
 import React, { useEffect, useState } from "react";
 import { Modal, ModalDialog, DialogTitle, Divider, DialogContent, DialogActions, Button } from "@mui/joy"
@@ -285,7 +286,14 @@ function inicioViaje() {
                     <DialogContent>
                         <div>seccion cámara</div>
                         <label style={{ color: "black" }}>Sube la captura si es necesario</label>
-                        <input type="file" accept="image/*"></input>
+                        {formInicio && (
+                            <ImageUploader 
+                                idViaje={formInicio.id_viaje}
+                                tipo="foto-inicio"
+                                //capture="environment"
+                                label="captura imagen inicio tablero"
+                            />
+                        )}
                     </DialogContent>
                     <DialogActions>
                         <Button variant="solid" color="success" onClick={() => openModalCamara(false)}>

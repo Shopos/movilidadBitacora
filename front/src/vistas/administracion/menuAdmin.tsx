@@ -106,7 +106,10 @@ function menuAdmin() {
         lng_fin_real: 0,
         modificado_por: "", //inicio viaje -> cambiar
         ultima_modificacion: "", //inicio viaje ->cambiar
-        modo: "ida" //modo ida (inicial) -> modo vuelta --->nuevo viaje con datos inversos
+        modo: "ida", //modo ida (inicial) -> modo vuelta --->nuevo viaje con datos inversos
+        imagen_comprobante_ben:"",
+        imagen_tablero_ida:"",
+        imagen_tablero_vuelta:""
     })
     const viajeVacio: Viaje = {
         id_viaje: 0,
@@ -132,7 +135,10 @@ function menuAdmin() {
         lng_fin_real: 0,
         modificado_por: "", //inicio viaje -> cambiar
         ultima_modificacion: "", //inicio viaje ->cambiar
-        modo: "ida" //modo ida (inicial) -> modo vuelta --->nuevo viaje con datos inversos
+        modo: "ida", //modo ida (inicial) -> modo vuelta --->nuevo viaje con datos inversos
+        imagen_comprobante_ben:"",
+        imagen_tablero_ida:"",
+        imagen_tablero_vuelta:""
     }
 
     /* Metodo para obtener la lista de viajes, usuarios y vehiculos */
@@ -449,6 +455,8 @@ function menuAdmin() {
         })
         openModalDestino(true)
     }
+
+
     /*
     Vista menu administracion
     >Directamente abre la tabla de las bitacoras

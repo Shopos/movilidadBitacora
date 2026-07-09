@@ -25,7 +25,8 @@ export default async function getVehiculos() {
 }
 export async function getFuncionarios() {
   try {
-    const response = await fetch('http://localhost:4000/usuarios')
+    const token = localStorage.getItem("token")
+    const response = await fetch('http://localhost:4000/usuarios',{headers:{'Authorization':`Bearer ${token}`}})
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }

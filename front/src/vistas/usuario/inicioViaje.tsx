@@ -11,7 +11,8 @@ import L from "leaflet"
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
 import { isMobile } from "react-device-detect"
 import { useAuth } from "../../context/AuthContext.tsx";
-import { getViajeUsuarioEspera, patchInicio } from "../../utils/auxiliar.ts";
+import { getViajeUsuarioEspera, patchInicio, resolverSubidaImagen } from "../../utils/auxiliar.ts";
+import { useAlerta } from "../../context/AlertaContext.tsx";
 
 
 type GPS = {
@@ -24,6 +25,10 @@ interface prop {
 }
 
 function inicioViaje() {
+    const {showAlerta} = useAlerta()
+    const [archivo,setArchivo] = useState<File|null>(null)
+    const [previewInicio,setPreviewInicio] = useState<string|null>(null)
+
     const [modalCamara, openModalCamara] = useState<boolean>(false)
     const [cargando, setCargando] = useState<boolean>(false)
     const [formInicio, setFormInicio] = useState<Viaje | null>()
@@ -157,7 +162,7 @@ function inicioViaje() {
             }
         }
         patch()
-    })
+    },[formInicio?.estado_viaje])
 
 
 
@@ -166,7 +171,18 @@ function inicioViaje() {
     const continuarProceso = async () => {
         //Almacenar en localStorage id_viaje
         //Hacer patch al viaje y cambiar estado del vehiculo y usuario a en ruta, como tambien al viaje
-        await updateData().then()
+        if(formInicio && archivo){
+            await resolverSubidaImagen(formInicio.id_viaje,'foto-inicio',archivo)
+
+            if(previewInicio){
+                URL.revokeObjectURL(previewInicio)
+            }
+            await updateData().then()
+        }else{
+            showAlerta("Debes incluir la foto de tablero antes de continuar","warning")
+        }
+
+       
     }
 
 
@@ -227,10 +243,28 @@ function inicioViaje() {
                         </div>
 
 
-                        {isMobile ? (
+                        {isMobile && !previewInicio &&(
                             <div className="full-width">
                                 <button className="buttonFormularioInicio" onClick={() => openModalCamara(true)}>Agregar imagen tablero</button>
-                            </div>) : (<></>)}
+                            </div>)}
+                        {previewInicio && (
+                            <div>
+                                <img
+                                    src={previewInicio}
+                                    alt="tablero-inicio"
+                                    style={{width:"50vh",objectFit:'cover'}}
+                                ></img>
+                                <div style={{display:"flex",flexDirection:"row",justifyContent:"center"}}>
+                                    <p style={{fontSize:'0.8rem',color:'#555'}}>Foto tablero lista</p>
+                                    <button style={{fontSize:"0.75rem",color:"#e53935",background:'none',border:'none',cursor:'pointer'}} onClick={()=>{
+                                        URL.revokeObjectURL(previewInicio)
+                                        setPreviewInicio(null)
+                                        setArchivo(null)
+                                    }}>Quitar</button>
+                                </div>
+                            </div>
+                            
+                        )}
 
 
 
@@ -284,14 +318,19 @@ function inicioViaje() {
                     </DialogTitle>
                     <Divider />
                     <DialogContent>
-                        <div>seccion cámara</div>
-                        <label style={{ color: "black" }}>Sube la captura si es necesario</label>
                         {formInicio && (
                             <ImageUploader 
-                                idViaje={formInicio.id_viaje}
-                                tipo="foto-inicio"
                                 //capture="environment"
-                                label="captura imagen inicio tablero"
+                                label="Agrega la imagen del tablero, ubicando el medidor de kilometraje"
+                                onArchivoReady={(archivoInicio,url)=>{
+                                    if(previewInicio){
+                                        URL.revokeObjectURL(previewInicio)
+                                    }
+                                    setArchivo(archivoInicio)
+                                    setPreviewInicio(url)
+                                    openModalCamara(false)
+                                }}
+                                onCancelar={()=>openModalCamara(false)}
                             />
                         )}
                     </DialogContent>

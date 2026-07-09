@@ -25,3 +25,5 @@ dist-ssr
 *.env
 back/uploads
 back/back/uploads/viajes/inicio
+back/back/uploads/viajes/comprobante
+back/back/uploads/viajes/fin

@@ -9,13 +9,17 @@ interface GPS {
   lng: number;
   alt?: number; 
 }
-
+interface RouteData{
+  distance:number;
+  duration:number;
+}
 interface RoutingProps {
   point1: GPS;
   point2: GPS;
+  setRouteInfo?:(info:RouteData) =>void
 }
 /*Muestra la ruta entre dos puntos --> start dentro del plan siendo el punto inicial y end siendo el punto destino */
-function Routing({ point1, point2 }: RoutingProps) {
+function Routing({ point1, point2, setRouteInfo }: RoutingProps) {
   const map = useMap();
 
   useEffect(() => {
@@ -34,13 +38,26 @@ function Routing({ point1, point2 }: RoutingProps) {
       routeWhileDragging: false,
       show: false,
       addWaypoints: true,
-    }).addTo(map);
+      
+    })
+    .on('routesfound',(e)=>{
+      const routes = e.routes
+      const summary = routes[0].summary
+
+      const distanceKms= parseFloat(( summary.totalDistance / 1000).toFixed(1))
+      const timesMinutes = Math.round(summary.totalTime / 60)
+
+      if(setRouteInfo){
+        setRouteInfo({distance:distanceKms,duration:timesMinutes})
+      }
+    })
+    .addTo(map);
     return () => {
       if (map && routingControl) {
         map.removeControl(routingControl);
       }
     };
-  }, [map, point1.lat, point1.lng, point2.lat, point2.lng]); 
+  }, [map, point1.lat, point1.lng, point2.lat, point2.lng,setRouteInfo]); 
 
   return null;
 }

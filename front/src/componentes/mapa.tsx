@@ -1,7 +1,7 @@
 import 'leaflet/dist/leaflet.css';
 import L from "leaflet"
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet';
-import {useEffect} from 'react';
+import {useEffect,useState} from 'react';
 import Routing from "./routing.tsx" /*Componente para marcar la ruta entre inicio y destino en mapa*/
 import "../estilos/mapa.css"
 type GPS = {
@@ -26,6 +26,7 @@ la funcion FitBounds centra la vista del mapa para ajustarse al medio de los dos
 function mapaProp({puntoD, puntoI,interaction}:propsComponent) {
     /*Funcion para dar colores especificos a los Marker de leaflet y poder diferenciar punto de inicio y destino */
     const points = [puntoI,puntoD]
+    const [routeInfo, setRouteInfo] = useState({ distance: 0, duration: 0 });
     const createCustomIcon = (color: string) => {
         return L.divIcon({
             className: 'custom-div-icon',
@@ -63,6 +64,10 @@ function mapaProp({puntoD, puntoI,interaction}:propsComponent) {
 
     return (
         <div className="leaflet-container-mapa">
+            <div style={{display:"flex", flexDirection:"column"}}>
+                <label>Duración: {routeInfo.duration} minutos aproximados</label>
+                <label>Distancia: {routeInfo.distance} kilometros aproximados</label>
+            </div>
             <MapContainer center={[puntoD.lat, puntoD.lng]} zoom={18}
             dragging={interaction}
             zoomControl={interaction}
@@ -89,7 +94,7 @@ function mapaProp({puntoD, puntoI,interaction}:propsComponent) {
                 >
                 </Marker>
                 <FitBounds points={points}></FitBounds>
-                <Routing point1={puntoI} point2={puntoD} />
+                <Routing point1={puntoI} point2={puntoD} setRouteInfo={setRouteInfo}/>
             </MapContainer>
         </div>
     )

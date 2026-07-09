@@ -27,7 +27,6 @@ function dataViewViaje({ viajeSelected, modo }: prop) {
     const [modalMapa, openModalMapa] = useState<boolean>(false)
     const [modalTablero, setModalTablero] = useState<boolean>(false)
     const [modalComprobante, setModalComprobante] = useState<boolean>(false)
-
     console.log(viajeSelected.imagen_tablero_ida)
     return (
 

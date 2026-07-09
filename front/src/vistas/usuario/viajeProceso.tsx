@@ -52,6 +52,7 @@ function viajeProceso() {
     const [viaje, setViaje] = useState<Viaje | null>(null)
     const { usuario } = useAuth()
     const [cargando,setCargando] = useState(false)
+     const [routeInfo, setRouteInfo] = useState({ distance: 0, duration: 0 });
     const createCustomIcon = (color: string) => {
         return L.divIcon({
             className: 'custom-div-icon',
@@ -107,6 +108,8 @@ function viajeProceso() {
                         <div className="grupoIconMsg">
                             <h2>Viaje en proceso</h2>
                             <p>Destino: {viaje.destino}</p>
+                            <p>Distancia aproximada: {routeInfo.distance} kilometros</p>
+                            <p>Duración: {routeInfo.duration} minutos aproximados</p>
                         </div>
                         <div className="mapaProceso">
                             <MapContainer center={punto1} zoom={18}>
@@ -131,7 +134,7 @@ function viajeProceso() {
 
                                 <FitBounds points={points}></FitBounds>
 
-                                <Routing point1={punto1!} point2={punto2!} />
+                                <Routing point1={punto1!} point2={punto2!} setRouteInfo={setRouteInfo}/>
 
                             </MapContainer>
                         </div>

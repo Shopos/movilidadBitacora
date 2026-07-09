@@ -10,7 +10,7 @@ import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import { isMobile } from "react-device-detect"
 import { useAuth } from "../../context/AuthContext.tsx"
-import { getViajeID, getViajeProceso, patchFin } from "../../utils/auxiliar.ts"
+import { getViajeProceso, patchFin, resolverSubidaImagen } from "../../utils/auxiliar.ts"
 import { useAlerta } from "../../context/AlertaContext.tsx"
 
 function cierreViaje() {
@@ -21,6 +21,12 @@ function cierreViaje() {
     const {showAlerta} = useAlerta()
     const navigate = useNavigate()
     const volverProceso = () => navigate("/viajeProceso")
+
+
+    const [archivo,setArchivo] = useState<File|null>(null)
+    const [archivoComprobante,setArchivoComprobante] = useState<File|null>(null)
+    const [previewFin,setPreviewFin] = useState<string|null>(null)
+    const [previewComprobante,setPreviewComprobante] = useState<string|null>(null)
 
     const [openModal, setOpenModal] = useState<boolean>(false)
     const [modalFoto, setOpenModalFoto] = useState<boolean>(false)
@@ -77,7 +83,6 @@ function cierreViaje() {
 
     /*Metodo para actualizar los datos antes del envio de estos a la BD */
     const updateDatoFin = async () => {
-
         if (formFin) {
             setFormFin((prevData) => ({
                 ...prevData,
@@ -94,7 +99,31 @@ function cierreViaje() {
 
 
     const handleSendDataFin = async () => {
-        await updateDatoFin()
+        const subida: Promise<unknown>[]=[]
+        if(archivo && viajeID){
+            subida.push(
+                resolverSubidaImagen(viajeID.id_viaje,'foto-fin',archivo).then(()=>{
+                    if(previewFin){
+                        URL.revokeObjectURL(previewFin)
+                    }
+                })
+            )
+        }
+        if(archivoComprobante && viajeID){
+            subida.push(
+                resolverSubidaImagen(viajeID.id_viaje,'foto-comprobante',archivoComprobante).then(()=>{
+                    if(previewComprobante){
+                        URL.revokeObjectURL(previewComprobante)
+                    }
+                })
+            )
+        }
+        if(archivo && subida.length > 0){
+            await Promise.all(subida)
+            await updateDatoFin()
+        }else{
+            showAlerta("Debes incluir a lo menos la foto del tablero","warning")
+        }
     }
     const sleep = (ms: number):Promise<void>=>new Promise((resolve)=> setTimeout(resolve,ms))
     /* Metodo para almacenar los datos en BD, esto solo se ejecuta si el valor de estado_viaje pasa a Falso
@@ -192,10 +221,25 @@ function cierreViaje() {
                             </span>
                         )}
                     </div>
-                    <div>
-                        <button onClick={()=>setOpenModalFoto2(true)}>Imagen tablero fin</button>
-                    </div>
+                    
                 </div>
+                {!previewFin && (
+                        <div style={{display:"flex",flexDirection:"row",justifyContent:"center"}}>
+                            <button style={{marginTop:"15%",backgroundColor:"#306D29", color:"white", borderRadius:"20px", border:"#306D29",height:"4vh",width:"100%"}} onClick={()=>setOpenModalFoto2(true)}>Subir imagen tablero</button>
+                        </div>)}
+                    {previewFin && (
+                        <div>
+                            <img src={previewFin} alt="tablero-fin" style={{width:"50vh",objectFit:'cover'}}></img>
+                            <div style={{display:"flex",flexDirection:"row",justifyContent:"center"}}>
+                                <p style={{fontSize:'0.8rem',color:'#555'}}>Foto tablero lista</p>
+                                <button style={{fontSize:"0.75rem",color:"#e53935",background:'none',border:'none',cursor:'pointer'}}   onClick={()=>{
+                                        URL.revokeObjectURL(previewFin)
+                                        setPreviewFin(null)
+                                        setArchivo(null)
+                                    }}>Quitar</button>
+                            </div>
+                        </div>
+                    )}
                 <div className="argumento">
                     <label>Comentarios</label>
                     <textarea placeholder="En el viaje ocurrio..." name="obs_viaje" value={formFin.obs_viaje} onChange={handleChange}></textarea>
@@ -217,14 +261,27 @@ function cierreViaje() {
                     }
                 </div>
 
-                {formFin.carga_combustible ? (
+                {formFin.carga_combustible && !previewComprobante && (
                     <>
-                        <div className="displayModal">
+                        <div style={{display:"flex",flexDirection:"column",justifyContent:"center"}}>
                             <p>Comprobante</p>
-                            <button onClick={() => setOpenModalFoto(true)}>sube tu Comprobante aquí</button>
+                            <button style={{marginTop:"15%",backgroundColor:"#306D29", color:"white", borderRadius:"20px", border:"#306D29",height:"4vh",width:"100%"}} onClick={() => setOpenModalFoto(true)}>sube tu Comprobante aquí</button>
                         </div>
                     </>
-                ) : (<></>)}
+                )}
+                {previewComprobante && (
+                    <div>
+                        <img style={{width:"50vh",objectFit:'cover'}} src={previewComprobante} alt="comprobante"></img>
+                        <div style={{display:"flex",flexDirection:"row",justifyContent:"center"}}>
+                            <p style={{fontSize:'0.8rem',color:'#555'}}>Foto tablero lista</p>
+                                    <button style={{fontSize:"0.75rem",color:"#e53935",background:'none',border:'none',cursor:'pointer'}} onClick={()=>{
+                                        URL.revokeObjectURL(previewComprobante)
+                                        setPreviewComprobante(null)
+                                        setArchivoComprobante(null)
+                                    }}>Quitar</button>
+                        </div>
+                    </div>
+                )}
 
             </div>
             <div className="gridButton">
@@ -269,13 +326,19 @@ function cierreViaje() {
                     </DialogContent>
                     <Divider />
                     <DialogContent>
-                        <div>Acceso a cámara</div>
                         {viajeID && (
                             <ImageUploader
-                                idViaje={viajeID.id_viaje}
-                                tipo="foto-comprobante"
                                 label="Captura de comprobante combustible"
                                 //capture="environment"
+                                onArchivoReady={(file,url) =>{
+                                    if(previewComprobante){
+                                        URL.revokeObjectURL(previewComprobante)
+                                    }
+                                    setArchivoComprobante(file)
+                                    setPreviewComprobante(url)
+                                    setOpenModalFoto(false)
+                                }}
+                                onCancelar={()=>setOpenModalFoto(false)}
                             />
                         )}
                     </DialogContent>
@@ -301,13 +364,19 @@ function cierreViaje() {
                     </DialogContent>
                     <Divider />
                     <DialogContent>
-                        <div>Acceso a cámara</div>
                         {viajeID && (
                             <ImageUploader
-                                idViaje={viajeID.id_viaje}
-                                tipo="foto-comprobante"
-                                label="Captura de comprobante combustible"
+                                label="Captura de tablero vehículo"
                                 //capture="environment"
+                                onArchivoReady={(file,url)=>{
+                                    if(previewFin){
+                                        URL.revokeObjectURL(previewFin)
+                                    }
+                                    setArchivo(file)
+                                    setPreviewFin(url)
+                                    setOpenModalFoto2(false)
+                                }}
+                                onCancelar={()=>setOpenModalFoto2(false)}
                             />
                         )}
                     </DialogContent>

@@ -10,7 +10,7 @@ export interface SolicitudReset extends RowDataPacket{
     resuelta_por:string,
     fecha_resuelta:string
 }
-
+//Crea una solicitud y evita la duplicidad de solicitudes presentadas por un mismo id de usuario solicitante
 export async function crearSolicitud(id_usuario:Number,correo:String,nombre:String):Promise<boolean>{
     //marcar solicitudes anteriores y evitar duplicados
     await connection.query(
@@ -26,13 +26,13 @@ export async function crearSolicitud(id_usuario:Number,correo:String,nombre:Stri
     //@ts-ignore
     return rows.insertId
 }
-
+//Obtiene las solicitudes pendientes
 export async function getSolicitudes():Promise<SolicitudReset[]>{
     //Devolver todas las solicitudes
     const [rows] = await connection.query<SolicitudReset[]>("SELECT * FROM solicitudes_reset WHERE estado='pendiente'")
     return rows
 }
-
+//Actualiza el estado de una solicitud, marcando quien realizo la modificacion
 export async function resolverSolicitud(id:Number,resueltoPor:string):Promise<boolean> {
     const [rows] = await connection.query(
         `UPDATE solicitudes_reset

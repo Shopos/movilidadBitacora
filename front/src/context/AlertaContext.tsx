@@ -8,7 +8,9 @@ export type AlertContextType = {
 }
 
 const AlertContext = createContext<AlertContextType|undefined>(undefined)
-
+/**Metodo para mostrar alerta o notificaciones al usurio
+ * Este componente puede ser reutilizado siempre y cuando los componentes que lo necesiten esten dentro del mismo
+ */
 export const AlertProvider=({children}:{children:ReactNode})=>{
     const [alerta,setAlerta] = useState({
         open:false,

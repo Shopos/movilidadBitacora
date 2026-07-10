@@ -13,6 +13,10 @@ function cambioPass(){
         navigate("/")
     }
 
+    /*Maneja la solicitud y la redireccion del usuario
+        Permite enviar una solicitud si el ingreso es correcto @
+        
+    */
     const handleRedirection=async()=>{
         if(!formData || !formData.includes('@')){
             showAlerta("Ingresa un correo valido","warning")
@@ -31,6 +35,8 @@ function cambioPass(){
             setEnviado(false)
         }
     }
+    //Vista para la solicitud de cambio de contraseñas, si un usuario registrado cuenta con una cuenta ACTIVA puede solicitar un cambio de contraseña 
+    //Estas solicitudes se almacenan en BD y se muestran en la vista de Administracion
     return(
         <>
         <header className="headerInicio">

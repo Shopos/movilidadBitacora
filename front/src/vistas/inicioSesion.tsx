@@ -31,10 +31,11 @@ function inicioSesion(){
         navigate(resultadoInicio.usuario!.cargo === "Administrativo" ? "/menuAdmin" : "/menuUsuario")
     }
 
+    //Redirecciona a la vista de solicitud cambio contraseña
     const handleSolicitud = () =>{
         navigate("/cambioPass")
     }
-
+    //Metodo para manejar el cambio de informacion ingresada en los inputs
     const handleChange=(event: React.ChangeEvent<HTMLInputElement>)=>{
         const {name,value} = event.target
         setFormData((prevData)=>({

@@ -1,5 +1,6 @@
 import type { Mantencion, Vehiculo, User, Viaje, ViajeInputFin, ViajeInputInicio } from "../tipos/tipoSistema";
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 /* Clase auxiliar para manejar la solicitud de informacion hacia el backend del proyecto */
 
 
@@ -8,10 +9,16 @@ import type { Mantencion, Vehiculo, User, Viaje, ViajeInputFin, ViajeInputInicio
  * considerando "/{algo}" se obtendra la informacion necesaria solo si existe dicha ruta en el apartado backend
  * 
  * Considerando "/{algo}:[algo]" se obtendra la informacion mas precisa solo si existe dicha ruta 
+ * 
+ * En los casos donde las solicitudes requieran cambios directos o solicitudes importantes debe considerarse la autorizacion entregada
+ * por el token JWT y donde se comprueba el rango del usuario que solicita
+ * 
+ * Estas solicitudes pueden consultarse a mayor escala dentro de back/{rutaConsultar}
+ * ej: back/vehiculos/... mostraria la consulta en especifico dependiendo del metodo que solicita la funcion
  *  **/
 export default async function getVehiculos() {
   try {
-    const response = await fetch('http://localhost:4000/vehiculos');
+    const response = await fetch(`${API}/vehiculos`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -26,7 +33,7 @@ export default async function getVehiculos() {
 export async function getFuncionarios() {
   try {
     const token = localStorage.getItem("token")
-    const response = await fetch('http://localhost:4000/usuarios',{headers:{'Authorization':`Bearer ${token}`}})
+    const response = await fetch(`${API}/usuarios`,{headers:{'Authorization':`Bearer ${token}`}})
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
@@ -42,7 +49,7 @@ export async function getFuncionarios() {
 export async function getUsuarios() {
   try {
     const token = localStorage.getItem("token")
-    const response = await fetch('http://localhost:4000/usuarios',{headers:{'Authorization': `Bearer ${token}`}})
+    const response = await fetch(`${API}/usuarios`,{headers:{'Authorization': `Bearer ${token}`}})
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
@@ -56,7 +63,7 @@ export async function getUsuarios() {
 
 export async function getViajes() {
   try {
-    const response = await fetch('http://localhost:4000/viajes')
+    const response = await fetch(`${API}/viajes`)
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
@@ -69,7 +76,7 @@ export async function getViajes() {
 
 export async function getNameFuncionario(id: number) {
   try {
-    const response = await fetch(`http://localhost:4000/usuarios/id/${id}`)
+    const response = await fetch(`${API}/usuarios/id/${id}`)
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`)
     }
@@ -83,7 +90,7 @@ export async function getNameFuncionario(id: number) {
 export async function getMantencionesVehiculo(patente: string) {
 
   try {
-    const response = await fetch(`http://localhost:4000/mantenciones/${patente}`)
+    const response = await fetch(`${API}/mantenciones/${patente}`)
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`)
     }
@@ -96,7 +103,7 @@ export async function getMantencionesVehiculo(patente: string) {
 export async function getViajeUsuarioEspera(id: number) {
   try {
     if (id) {
-      const response = await fetch(`http://localhost:4000/viajes/${id}`)
+      const response = await fetch(`${API}/viajes/${id}`)
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`)
       }
@@ -111,7 +118,7 @@ export async function getViajeUsuarioEspera(id: number) {
 export async function getViajeID(id: number) {
   try {
     if (id) {
-      const response = await fetch(`http://localhost:4000/viajes/id/${id}`)
+      const response = await fetch(`${API}/viajes/id/${id}`)
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`)
       }
@@ -126,7 +133,7 @@ export async function getViajeID(id: number) {
 export async function getViajeProceso(id: number) {
   try {
     if (id) {
-      const response = await fetch(`http://localhost:4000/viajes/search/${id}`)
+      const response = await fetch(`${API}/viajes/search/${id}`)
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`)
       }
@@ -151,7 +158,7 @@ export async function getViajeProceso(id: number) {
  *  **/
 export async function addMantencionVehiculo(data: Mantencion) {
   if (data) {
-    const url = `http://localhost:4000/mantenciones`
+    const url = `${API}/mantenciones`
     const payload = data
     try {
       const res = await fetch(url, {
@@ -176,7 +183,7 @@ export async function addMantencionVehiculo(data: Mantencion) {
 
 export async function agregarVehiculo(data: Vehiculo) {
   if (data) {
-    const url = `http://localhost:4000/vehiculos`
+    const url = `${API}/vehiculos`
     const payload = data
     console.log(data)
     try {
@@ -207,7 +214,7 @@ export async function agregarVehiculo(data: Vehiculo) {
 
 export async function agregarUsuario(data: User) {
   if (data) {
-    const url = `http://localhost:4000/usuarios`
+    const url = `${API}/usuarios`
     const payload = data
     const key = localStorage.getItem("token")
     try {
@@ -235,7 +242,7 @@ export async function agregarUsuario(data: User) {
 
 export async function addViajeInicial(data: Viaje) {
   if (data) {
-    const url = `http://localhost:4000/viajes`
+    const url = `${API}/viajes`
     const payload = data
     try {
       const res = await fetch(url, {
@@ -259,7 +266,7 @@ export async function addViajeInicial(data: Viaje) {
 
 export async function addDataViajeFin(patente: string, data: ViajeInputFin) {
   if (data && patente) {
-    const url = `http://localhost:4000/viajes/${patente}`
+    const url = `${API}/viajes/${patente}`
     const payload = data
     try {
       const res = await fetch(url, {
@@ -291,7 +298,7 @@ export async function addDataViajeFin(patente: string, data: ViajeInputFin) {
 export async function editarVehiculo(patente: string, data: Vehiculo) {
   if (data) {
     const patenteBuscada = patente
-    const url = `http://localhost:4000/vehiculos/${patenteBuscada}`
+    const url = `${API}/vehiculos/${patenteBuscada}`
     const payload = data
     try {
       const res = await fetch(url, {
@@ -314,7 +321,7 @@ export async function editarVehiculo(patente: string, data: Vehiculo) {
 
 export async function editarUsuario(correo: string, data: User) {
   if (data) {
-    const url = `http://localhost:4000/usuarios/${correo}`
+    const url = `${API}/usuarios/${correo}`
     const payload = data
     const key = localStorage.getItem("token")
     try {
@@ -340,7 +347,7 @@ export async function editarUsuario(correo: string, data: User) {
 
 export async function patchInicio(id: number, data: ViajeInputInicio) {
   if (data) {
-    const url = `http://localhost:4000/viajes/inicio/${id}`
+    const url = `${API}/viajes/inicio/${id}`
     const payload = data
     try {
       const res = await fetch(url, {
@@ -362,7 +369,7 @@ export async function patchInicio(id: number, data: ViajeInputInicio) {
 export async function patchFin(id: number, data: ViajeInputFin) {
   if (data) {
     console.log("Agregando info final")
-    const url = `http://localhost:4000/viajes/fin/${id}`
+    const url = `${API}/viajes/fin/${id}`
     const payload = data
     try {
       const res = await fetch(url, {
@@ -383,7 +390,7 @@ export async function patchFin(id: number, data: ViajeInputFin) {
 
 export async function editarViaje(id: number, data: Partial<Viaje>) {
   const token = localStorage.getItem("token")
-  const url = `http://localhost:4000/viajes/${id}`
+  const url = `${API}/viajes/${id}`
   try {
     const res = await fetch(url, {
       method: "PUT",
@@ -411,7 +418,7 @@ export async function editarViaje(id: number, data: Partial<Viaje>) {
 
 export async function solicitarRecuperarContraseña(correo:string){
   try{
-    const res = await fetch('http://localhost:4000/usuarios/solicitar-reset',{
+    const res = await fetch(`${API}/usuarios/solicitar-reset`,{
       method:'POST',
       headers:{'Content-type': 'application/json'},
       body:JSON.stringify({correo})
@@ -423,7 +430,7 @@ export async function solicitarRecuperarContraseña(correo:string){
 }
 export async function getSolicitudes(){
   const token = localStorage.getItem("token")
-  const url = `http://localhost:4000/usuarios/solicitudes-reset`
+  const url = `${API}/usuarios/solicitudes-reset`
   try{
     const res = await fetch(url,{
       headers:{'Authorization': `Bearer ${token}`}
@@ -439,7 +446,7 @@ export async function getSolicitudes(){
 }
 export async function resolverSolicitudesCambio(id:number,pass:string){
   const token = localStorage.getItem("token")
-  const url = `http://localhost:4000/usuarios/solicitudes-reset/${id}/resolver`
+  const url = `${API}/usuarios/solicitudes-reset/${id}/resolver`
 
   const res = await fetch(url,{
     method:"POST",
@@ -464,7 +471,7 @@ export async function resolverSubidaImagen(
     const token = localStorage.getItem("token")
     const form = new FormData()
     form.append('foto',archivo)
-    const url = `http://localhost:4000/viajes/${id}/${tipo}`
+    const url = `${API}/viajes/${id}/${tipo}`
     try{
       const res = await fetch(url,{
         method:"PATCH",
@@ -480,4 +487,23 @@ export async function resolverSubidaImagen(
       console.error('error subiendo imagen',e)
       return null
     }
+}
+
+export async function borrarViajeEspera(idViaje:number){
+  const token = localStorage.getItem("token")
+  const url = `${API}/viajes/${idViaje}`
+  try{
+    const res = await fetch(url,{
+      method:"DELETE",
+      headers:{'Authorization':`Bearer ${token}`}
+    })
+    const json = await res.json()
+    if(!res.ok){
+      throw new Error (json.error || "No se logro eliminar viaje en espera")
+    }
+    return json
+  }catch(e){
+    console.log("error borrando viaje en espera")
+    return null
+  }
 }

@@ -228,7 +228,13 @@ export async function parcheFin(req: Request, res: Response) {
         res.status(500).json({ error: " Error ingresando datos iniciales " })
     }
 }
-
+/**Metodo para editar un viaje
+ * 
+ * Hace diferenciacion dependiendo del estado del viaje a editar
+ * Si estado es Terminado --> Permite cambiar observaciones, cantidad de carga
+ * Si es En espera --> Permite modificar los datos que sean necesarios pero dentro del marco de los datos a ingresar al inicio de un viaje
+ *                      Si cuenta con usuario y vehiculo y existe un cambio de estos, realiza las modificaciones necesarias y los cambios de estado pertinentes
+ */
 export async function editarViaje(req:Request,res:Response){
     try{
         const id = Number(req.params.id)
@@ -290,8 +296,37 @@ export async function editarViaje(req:Request,res:Response){
         res.status(500).json({error: "Error al editar el viaje"})
     }
 }
+/**Metodo para eliminar un viaje
+ * 
+ * Solo se permite eliminar un viaje en espera, destruyendo el viaje y sus datos; Libera a usuario y vehiculo asociado a dicho viaje
+ * 
+ */
+export async function deleteViajeEspera(req:Request,res:Response){
+    try{
+        const id = Number(req.params.id)
+        const viajeEncontrado = await viajesModel.getViajeId(id)
+        if(viajeEncontrado[0].estado_viaje==="En espera"){
+            //limpiar estado funcionario y vehiculo
+            await vehiculoModel.changeStatus(viajeEncontrado[0].patente,"DISPONIBLE")
+            await usuarioModel.changeStatus(Number(viajeEncontrado[0].id_usuario),"Disponible")
+            //borrar viaje
+            await connection.query(
+                `DELETE FROM viajes WHERE id_viaje = ?`,[id]
+            )
+            res.json({msg:"Viaje eliminado"})
+        }
+    }catch(e){
+        console.error(e)
+        res.status(500).json({error:" ERROR AL ELIMINAR VIAJE EN ESPERA "})
+    }
+}
 
 ////////////////
+/**
+ * Metodo para la subida de una imagen al inicio de un viaje
+ * La tramitacion del archivo se encarga multer.ts en la funcion asociada uploadImageTableroInicio -> crea la ruta y almacena imagen
+ * una vez terminada se almacena la ruta relativa del archivo y se almacena en DB
+ */
 export const uploadImagenInicio = [
     uploadImageTableroInicio.single('foto'),
     async(req:Request,res:Response)=>{
@@ -311,7 +346,11 @@ export const uploadImagenInicio = [
         }
     }
 ]
-
+/**
+ * Metodo para la subida de una imagen al final de un viaje
+ * La tramitacion del archivo se encarga multer.ts en la funcion asociada uploadImageTableroFin -> crea la ruta y almacena imagen
+ * una vez terminada se almacena la ruta relativa del archivo y se almacena en DB
+ */
 export const uploadImagenFin = [
     uploadImageTableroFin.single('foto'),
     async(req:Request,res:Response)=>{
@@ -330,7 +369,11 @@ export const uploadImagenFin = [
             res.status(500).json({error: 'Error al subir imagen'})}
     }
 ]
-
+/**
+ * Metodo para la subida de una imagen al final  de un viaje
+ * La tramitacion del archivo se encarga multer.ts en la funcion asociada uploadImageComprobante -> crea la ruta y almacena imagen
+ * una vez terminada se almacena la ruta relativa del archivo y se almacena en DB
+ */
 export const uploadImagenComprobante = [
     uploadImageComprobante.single('foto'),
     async(req:Request,res:Response)=>{
@@ -349,3 +392,4 @@ export const uploadImagenComprobante = [
             res.status(500).json({error: 'Error al subir imagen'})}
     }
 ]
+

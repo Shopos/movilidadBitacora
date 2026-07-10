@@ -77,7 +77,7 @@ function viajeProceso() {
             }
         },[viaje])
 
-    /**Busca el viaje en proceso del usuario, si este existe se almacena */
+    /**Busca el viaje en proceso del usuario, si este existe se almacena para mostrar*/
     useEffect(() => {
         const searchViaje = async () => {
             try {

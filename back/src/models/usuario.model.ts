@@ -38,7 +38,7 @@ export async function getUsuarioCorreo(correo:string|string[]): Promise<Usuario[
     )
     return rows
 }
-
+//Metodo que devuelve el id de un usuario cuyo correo y nombre sean iguales al solicitado
 export async function getIdUsuario(correo:string, nombre:string):Promise<Usuario[]>{
     const [rows] = await connection.query<Usuario[]>(
         "SELECT id_usuario FROM usuarios WHERE correo=? AND nombre=?",[correo,nombre]
@@ -79,7 +79,7 @@ export async function editUsuario(correo:string|string[],data:UsuarioEdit):Promi
     //@ts-ignore
     return(resultado.affectedRows>0)
 }
-//Status viaje usuario
+//Cambia el estado viaje del usuario
 export async function changeStatus(id:number, status:string):Promise<boolean>{
     const [res] = await connection.query(
         "UPDATE usuarios SET estado_viaje_usuario=? WHERE id_usuario=?", [status,id]

@@ -54,3 +54,18 @@
      cursor: pointer;
     background-color: #2C2C2C;
 }
+.divMapaDestino{
+    display:flex;
+    flex-direction:column; 
+    margin-top:5px;
+    align-items: center;
+}
+.divMapaDestino button{
+    width: 40%;
+    background-color: var(--buttonPrimary);
+    border: var(--buttonPrimary);
+    border-radius: 20px;
+    padding: 1%;
+    color: white;
+    cursor: pointer;
+}

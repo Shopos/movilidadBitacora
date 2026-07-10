@@ -23,6 +23,8 @@ function solicitudesAdmin() {
     const [errorPass, setErrorPass] = useState({
         msg: "", est: false
     })
+
+    //Metodo para obtener las solicitudes pendientes
     useEffect(() => {
         const getSolicitudesPendientes = async () => {
             try {
@@ -38,6 +40,10 @@ function solicitudesAdmin() {
         getSolicitudesPendientes()
     }, [cargando])
 
+    //Metodo para manejar la modificacion de las contraseñas
+    //Comprueba que se ingrese informacion a los inputs
+    //Compara que las contraseñas ingresadas sean iguales
+    //Si se cumple, se permite resolver el cambio de contraseña al usuario solicitante
     const handleModifyPass = async () => {
         if (!pass || !pass2) {
             setErrorPass({ msg: "Los campos son obligatorios", est: true })
@@ -123,6 +129,7 @@ function solicitudesAdmin() {
                 ) : (<>No cuentas con solicitudes por solucionar</>)}
 
             </div>
+            {/**Modal para el tratamiento del cambio de contraseñas --> se debe confirmar que ambas contraseñas sean iguales */}
             <Modal open={modalSol} onClose={() => setModalSol(false)}>
                 <ModalDialog>
                     <DialogTitle>Ingresa la nueva contraseña</DialogTitle>

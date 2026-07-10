@@ -90,10 +90,11 @@ function dataViewViaje({ viajeSelected, modo }: prop) {
                 )
                 : (<></>)
             }
+            {/*Modal para la vista del mapa del viaje a mostrar */}
             <Modal open={modalMapa} onClose={() => openModalMapa(false)} >
                 <ModalDialog variant="outlined" size="lg" >
                     <DialogTitle>
-                        Viaje
+                        Viaje destino {viajeSelected.destino}
                     </DialogTitle>
                     <Divider />
                     <DialogContent sx={{ minWidth: "90%" }}>

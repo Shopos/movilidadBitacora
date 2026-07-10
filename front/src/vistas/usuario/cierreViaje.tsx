@@ -8,7 +8,6 @@ import type { Viaje, ViajeInputFin } from "../../tipos/tipoSistema.ts"
 import { Modal, ModalDialog, DialogTitle, Divider, DialogContent, DialogActions, Button } from "@mui/joy"
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
-import { isMobile } from "react-device-detect"
 import { useAuth } from "../../context/AuthContext.tsx"
 import { getViajeProceso, patchFin, resolverSubidaImagen } from "../../utils/auxiliar.ts"
 import { useAlerta } from "../../context/AlertaContext.tsx"
@@ -62,7 +61,7 @@ function cierreViaje() {
         })
     }, [])
 
-
+    /**Metodo para obtener el viaje en proceso del usuario */
     useEffect(() => {
         const getID = async () => {
             try {
@@ -97,7 +96,12 @@ function cierreViaje() {
 
     }
 
-
+/**Manejo de subida de informacion al finalizar un viaje
+ * Al manejar imagenes se da prioridad a la subida de imagen del tablero -> archivo
+ *  -si no existe dicha imagen, la subida de informacion no es posible de continuar
+ *  -si se sube una imagen, se resuelve una promesa, si la cantidad de promesas es mayor a 0 (se cumple una minimo)
+ *      se actualiza completamente la informacion final a subir
+ */
     const handleSendDataFin = async () => {
         const subida: Promise<unknown>[]=[]
         if(archivo && viajeID){
@@ -289,7 +293,7 @@ function cierreViaje() {
                 <button className="botonPasoFin2" onClick={() => setOpenModal(true)}>Finalizar viaje</button>
             </div>
 
-
+            {/*Dialog para confirmar el envio final del viaje*/}
             <Modal open={openModal} onClose={() => setOpenModal(false)}>
                 <ModalDialog variant="outlined" role="alertdialog">
                     <DialogTitle>
@@ -313,7 +317,8 @@ function cierreViaje() {
                 </ModalDialog>
             </Modal>
 
-
+            {/*Metodo para la subida de imagenes -> se debe limpiar el comentario de la propiedad capture para utilizar la camara de dispositivos mobiles
+            si se mantiene comentada obliga a usar el sistema de archivos del dispositivo*/}
             <Modal open={modalFoto} onClose={() => setOpenModalFoto(false)}>
                 <ModalDialog variant="outlined" role="alertdialog">
                     <DialogTitle>
@@ -352,6 +357,8 @@ function cierreViaje() {
                     </DialogActions>
                 </ModalDialog>
             </Modal>
+
+            {/**Lo mismo que el metodo anterior pero centrada a la captura del tablero */}
             <Modal open={modalFoto2} onClose={() => setOpenModalFoto2(false)}>
                 <ModalDialog variant="outlined" role="alertdialog">
                     <DialogTitle>

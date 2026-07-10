@@ -137,11 +137,11 @@ export async function login(req: Request, res: Response) {
         res.status(500).json({ error: " Error al iniciar sesión " })
     }
 }
-
+/** Metodo que devuelve al usuario con las credenciales actuales del mismo*/
 export async function perfil(req: Request, res: Response) {
     res.json({ usuario: req.usuario })
 }
-
+/**Metodo apra ingresar una solicitud de un usuario cuyo correo sea valido */
 export async function solicitarReset(req: Request, res: Response) {
     try{//Tomar correo
         const mail = req.body.correo
@@ -164,9 +164,8 @@ export async function solicitarReset(req: Request, res: Response) {
         console.log(e)
         res.status(500).json({error:" Error al solicitar cambio contraseña "})
     }
-    //notificar usuario}
 }
-
+/**Metodo que devuelve las solicitudes */
 export async function getSolicitudes(req: Request, res: Response) {
     //Devolver tabla con solicitudes
     try {
@@ -177,7 +176,7 @@ export async function getSolicitudes(req: Request, res: Response) {
         res.status(500).json({ error: " Error al listar solicitudes " })
     }
 }
-
+/**Metodo para resolver el cambio de contraseñas de una solicitud, asignando una contraseña al usuario y resolviendo dicha solicitud */
 export async function resolverResetPass(req: Request, res: Response) {
     //Recibir pass temporal
     //Asignar a usuario

@@ -15,7 +15,7 @@ import { TablePagination } from "@mui/material";
 import { useAlerta } from "../../context/AlertaContext.tsx";
 import DateRangeOutlinedIcon from "@mui/icons-material/DateRangeOutlined";
 
-
+//Funcion para el filtrado de viajes por fecha, se considera por dia, semana y mes
 function dentroPeriodo(fechaString: string | null, periodo: string): boolean {
     if (!fechaString) {
         return false
@@ -109,7 +109,11 @@ function viajesUsuario() {
         getViajesUsuario()
     }, [])
 
-    /**Constructores y metodos para la paginacion de la tabla de viajes del usuario */
+    /**Constructores y metodos para la paginacion de la tabla de viajes del usuario 
+     * 
+     * handleChangePage -->Manejar el cambio de pagina, como se subdivide el listado en paginas, esta funcion determina la pagina a mostrar
+     * handleChangeRowsPerPage -->Maneja la cantidad de filas a mostrar dependiendo de la cantidad de filas a mostrar por la tabla
+    */
     const [page, setPage] = useState(0)
     const [rowsPerPage, setRowsPerPage] = useState(5)
 
@@ -121,7 +125,7 @@ function viajesUsuario() {
         setRowsPerPage(parseInt(event.target.value, 10))
         setPage(0)
     }
-
+    //Funcion para filtrar la lista de {viajes} dependiendo del periodo elegido por los Chips en la vista
     const viajeFiltrado = useMemo(() => {
         if (!viajesUsuario) return []
 
@@ -260,10 +264,10 @@ function viajesUsuario() {
                 }
                 <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-around" }}>
                     <button className="botonPaso" onClick={() => volverMenu()}>Volver</button>
-
                     {viajesUsuario ? (<button className="botonPaso" onClick={() => exportarPDF()}>Exportar Tabla a PDF</button>) : (<></>)}
                 </div>
 
+                {/**Modal para mostrar la informacion de un viaje seleccionado en la lista de viajes del usuario */}
                 <Modal open={openModalViaje} onClose={() => setOpenModalViaje(false)}>
                     <ModalDialog variant="outlined" role="alertdialog">
                         <DialogTitle>
@@ -274,11 +278,8 @@ function viajesUsuario() {
                             {viajeSelected ? (<DataViewViaje viajeSelected={viajeSelected} modo={0} />) : "ERROR"}
                         </DialogContent>
                         <DialogActions>
-                            <Button variant="solid" color="success" onClick={() => setOpenModalViaje(false)}>
-                                Finalizar viaje
-                            </Button>
-                            <Button variant="plain" color="danger" onClick={() => setOpenModalViaje(false)}>
-                                Cancelar
+                            <Button variant="soft" color="neutral" onClick={() => setOpenModalViaje(false)}>
+                                Volver
                             </Button>
                         </DialogActions>
                     </ModalDialog>

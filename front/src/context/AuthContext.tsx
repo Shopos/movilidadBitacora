@@ -104,7 +104,7 @@ export function AuthProvider({children}: {children: ReactNode}){
         <AuthContext.Provider value={{usuario,token,cargando, autenticado: !!usuario, login, logOut}}>{children}</AuthContext.Provider>
     )
 }
-
+//verifica que este la funcio useAuth debe estar siendo llamado dentro de un componente que contenga a AuthContext
 export function useAuth(){
     const context = useContext(AuthContext)
     if(!context) throw new Error("useAuth debe estar dentro de un AuthProvider")

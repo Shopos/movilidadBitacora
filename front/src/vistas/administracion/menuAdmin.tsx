@@ -1,6 +1,7 @@
 import NavBar from "../../componentes/navBar.tsx"
 import DataViewViaje from "../../componentes/dataViewViaje.tsx";
 import "../../estilos/menuAdmin.css"
+import GeocodeBuscador from "../../componentes/geocodeBuscador.tsx";
 
 import { useState, useEffect, useMemo } from "react";
 import Table from '@mui/joy/Table';
@@ -15,7 +16,7 @@ import autoTable from "jspdf-autotable";
 import { TablePagination } from "@mui/material"
 
 import type { Vehiculo, Viaje, User } from "../../tipos/tipoSistema.ts"
-import getVehiculos, { getViajes, getFuncionarios, addViajeInicial,editarViaje } from "../../utils/auxiliar.ts";
+import getVehiculos, { getViajes, getFuncionarios, addViajeInicial, editarViaje, borrarViajeEspera } from "../../utils/auxiliar.ts";
 import { useAuth } from "../../context/AuthContext.tsx";
 import { useAlerta } from "../../context/AlertaContext.tsx";
 
@@ -68,7 +69,7 @@ function menuAdmin() {
     const [busqueda, setBusqueda] = useState("")
     const [estado, setEstado] = useState<"Terminado" | "En proceso" | "En espera" | "Todos">("Todos")
 
-    const [modoEdicionMapa,setModoEdicionMapa] = useState<"nuevo"|"edicion">("nuevo")
+    const [modoEdicionMapa, setModoEdicionMapa] = useState<"nuevo" | "edicion">("nuevo")
 
     const [formEdit, setFormEdit] = useState<Partial<Viaje>>({})
     const [viajeSelected, setViajeSelected] = useState<Viaje | null>(null)
@@ -107,9 +108,9 @@ function menuAdmin() {
         modificado_por: "", //inicio viaje -> cambiar
         ultima_modificacion: "", //inicio viaje ->cambiar
         modo: "ida", //modo ida (inicial) -> modo vuelta --->nuevo viaje con datos inversos
-        imagen_comprobante_ben:"",
-        imagen_tablero_ida:"",
-        imagen_tablero_vuelta:""
+        imagen_comprobante_ben: "",
+        imagen_tablero_ida: "",
+        imagen_tablero_vuelta: ""
     })
     const viajeVacio: Viaje = {
         id_viaje: 0,
@@ -136,9 +137,9 @@ function menuAdmin() {
         modificado_por: "", //inicio viaje -> cambiar
         ultima_modificacion: "", //inicio viaje ->cambiar
         modo: "ida", //modo ida (inicial) -> modo vuelta --->nuevo viaje con datos inversos
-        imagen_comprobante_ben:"",
-        imagen_tablero_ida:"",
-        imagen_tablero_vuelta:""
+        imagen_comprobante_ben: "",
+        imagen_tablero_ida: "",
+        imagen_tablero_vuelta: ""
     }
 
     /* Metodo para obtener la lista de viajes, usuarios y vehiculos */
@@ -253,20 +254,22 @@ function menuAdmin() {
             }))
         }
     }
-    const manejarDataFuncionarioEdit= (event:React.ChangeEvent<HTMLSelectElement>)=>{
+
+    //Maneja el cambio de informacion del funcionario a editar en un viaje
+    const manejarDataFuncionarioEdit = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const partes = (event.target.value).split(" / ")
         const usrFind = listaUsuarios!.find(
             (usr) => usr.nombre === partes[0] && usr.correo === partes[1]
         )
-        if(usrFind){
-            setFormEdit((prevData)=>({
+        if (usrFind) {
+            setFormEdit((prevData) => ({
                 ...prevData,
-                id_usuario:usrFind.id_usuario,
-                nombre_funcionario:usrFind.nombre
+                id_usuario: usrFind.id_usuario,
+                nombre_funcionario: usrFind.nombre
             }))
         }
     }
-
+    //Maneja el modal de edicion, poblando de informacion al modal de edicion y al viaje seleccionado para edicion
     const editarViajeModal = (viaje: Viaje) => {
         //Visualiza y permite editar la informacion de un viaje X, solo si el viaje ha sido terminado previamente
         setViajeEditSelected(viaje)
@@ -325,6 +328,7 @@ function menuAdmin() {
             iconAnchor: [0, 12]
         })
     }
+
     const manejarMovimientoDestino = (e: any) => {
         const marker = e.target;
         if (marker != null) {
@@ -332,14 +336,15 @@ function menuAdmin() {
 
             // Actualizamos solo el estado del destino
             setDataGPSDestino({ lat: gps.lat, lng: gps.lng });
-            if(modoEdicionMapa === "edicion"){
-                setFormEdit((prev)=>({...prev, lat_fin:gps.lat,lng_fin:gps.lng}))
+            if (modoEdicionMapa === "edicion") {
+                setFormEdit((prev) => ({ ...prev, lat_fin: gps.lat, lng_fin: gps.lng }))
             }
         }
     };
 
+    //Metodo para la actualizacion de latitud longitud en formulario inicio
     useEffect(() => {
-        if(modoEdicionMapa !== "nuevo") return
+        if (modoEdicionMapa !== "nuevo") return
         const actualiza = {
             ...formInicio,
             lat_inicio: dataGPS.lat,
@@ -411,12 +416,13 @@ function menuAdmin() {
     };
     /**-->Terminan los contructores y metodos para paginacion de la tabla de viajes */
 
-
+    //Funcion para filtrar los {viajes} considerando tiempo{hoy,semana,mes} texto{patente|nombre usuario} estado{En espera|En proceso|Terminado}
+    //Estos filtros son llamados por los chips presentes en la cabecera de la tabla
     const viajeFiltrado = useMemo(() => {
         if (!viajes) return []
 
         return viajes.filter((vje: Viaje) => {
-            const tiempo = periodos === "Todos" || dentroPeriodo(vje.fecha_hora_inicio, periodos) || dentroPeriodo(vje.estado_viaje==="En espera" ? vje.ultima_modificacion:"",periodos)
+            const tiempo = periodos === "Todos" || dentroPeriodo(vje.fecha_hora_inicio, periodos) || dentroPeriodo(vje.estado_viaje === "En espera" ? vje.ultima_modificacion : "", periodos)
 
             const texto = busqueda.toLocaleLowerCase().trim()
             const textoPasado = texto === "" || vje.patente.toLocaleLowerCase().includes(texto) || vje.nombre_funcionario.toLocaleLowerCase().includes(texto)
@@ -429,25 +435,25 @@ function menuAdmin() {
     }, [viajes, periodos, busqueda, estado])
 
     //Manejar el envio de informacion hacia back idViaje, data a cambiar
-    const handleEditViajeData = async() =>{
-        if(!viajeEdit)return
-        try{
+    const handleEditViajeData = async () => {
+        if (!viajeEdit) return
+        try {
             await editarViaje(viajeEdit.id_viaje, formEdit)
-            showAlerta("Viaje actualizado correctamente","success")
+            showAlerta("Viaje actualizado correctamente", "success")
             setOpenModalEdit(false)
             setViajeEditSelected(null)
             setCargando(false)
-        }catch(e){
-            showAlerta("Error","error")
+        } catch (e) {
+            showAlerta("Error", "error")
         }
     }
-
-    const abrirMapaNuevo = () =>{
+    //Manejo para abrir el mapa en modo nuevo
+    const abrirMapaNuevo = () => {
         setModoEdicionMapa("nuevo")
         openModalDestino(true)
     }
-
-    const abrirMapaEdicion = () =>{
+    //Manejo para el mapa en modo edicion
+    const abrirMapaEdicion = () => {
         setModoEdicionMapa("edicion")
         setDataGPSDestino({
             lat: formEdit.lat_fin ?? dataGPS.lat,
@@ -456,6 +462,43 @@ function menuAdmin() {
         openModalDestino(true)
     }
 
+    //Metodo para borrar un viaje, solo si esta en modo espera
+    //-->Elimina el viaje y libera a usuario y vehiculo asociado a dicho viaje
+    const handleBorrarViaje = async () => {
+        if (!viajeEdit) return
+        try {
+            await borrarViajeEspera(viajeEdit.id_viaje)
+            showAlerta("Viaje borrado", "info")
+            setOpenModalEdit(false)
+            setViajeEditSelected(null)
+            setCargando(false)
+        } catch (e) {
+            showAlerta("Error", "error")
+        }
+    }
+    //Maneja el cambio de informacion detectado por el buscador de locaciones dentro del mapa que ingresa el destino
+    //Si esta en modo edicion, cambia las variables de latitud longitud final y el destino 
+    //Caso contrario, almacena los datos en el formulario de inicio
+    const manejarResultadoBusqueda = (lat: number, lng: number, destino: string) => {
+        setDataGPSDestino({ lat, lng })
+        if (modoEdicionMapa === "edicion") {
+            setFormEdit((prev) => ({
+                ...prev,
+                lat_fin: lat,
+                lng_fin: lng,
+                destino: destino
+            }))
+        } else {
+            setFormInicio((prev) => ({
+                ...prev,
+                lat_fin: lat,
+                lng_fin: lng,
+                lat_inicio: dataGPS.lat,
+                lng_inicio: dataGPS.lng,
+                destino: destino
+            }))
+        }
+    }
 
     /*
     Vista menu administracion
@@ -469,7 +512,7 @@ function menuAdmin() {
             <NavBar type={1} texto="Bitácoras" />
             <div className="cuerpoMenu">
                 <div className="barraButtonsTop">
-                     <button className="buttonExport" onClick={() => setModalNewViaje(true)}>Agendar viaje</button>
+                    <button className="buttonExport" onClick={() => setModalNewViaje(true)}>Agendar viaje</button>
                     <button className="buttonExport" onClick={() => exportarViajesPDF()}>Exportar tabla</button>
                 </div>
                 <div className="barraFiltro">
@@ -577,7 +620,7 @@ function menuAdmin() {
                             marginRight: "2px"
                         }}
                     >Último mes</Chip>
-                   
+
                 </div>
                 {cargando ? (<><div className="tablaViajes">
                     <Table hoverRow borderAxis="y" sx={
@@ -704,9 +747,9 @@ function menuAdmin() {
                                 <div className="items-Modal">
                                     <div className="itemInput-Modal">
                                         <label>Patente</label>
-                                        <select name="Patentes" defaultValue={""} onChange={(e)=>{
-                                            const veh = vehiculos?.find(v=> v.patente === e.target.value)
-                                            setFormEdit({...formEdit, patente:e.target.value, vehiculo:veh?.modelo ?? formEdit.vehiculo,kms_inicial:veh?.kms_actual ?? formEdit.kms_inicial })
+                                        <select name="Patentes" defaultValue={""} onChange={(e) => {
+                                            const veh = vehiculos?.find(v => v.patente === e.target.value)
+                                            setFormEdit({ ...formEdit, patente: e.target.value, vehiculo: veh?.modelo ?? formEdit.vehiculo, kms_inicial: veh?.kms_actual ?? formEdit.kms_inicial })
                                         }}>
                                             {/**Solo se muestran las patentes de vehiculos disponibles */}
                                             <option>{formEdit?.patente}</option>
@@ -736,8 +779,8 @@ function menuAdmin() {
                                     </div>
                                     <div className="itemInput2-Modal">
                                         <label>Motivo</label>
-                                        <textarea name="motivo" value={formEdit.motivo} onChange={(e)=>{
-                                            setFormEdit({...formEdit, motivo:e.target.value})
+                                        <textarea name="motivo" value={formEdit.motivo} onChange={(e) => {
+                                            setFormEdit({ ...formEdit, motivo: e.target.value })
                                         }} placeholder="Explique el objetivo del viaje"></textarea>
                                     </div>
                                     <div className="buttonLabel-Modal">
@@ -752,30 +795,36 @@ function menuAdmin() {
                             <>
                                 <div className="itemInput2-Modal">
                                     <label>Observacion del viaje</label>
-                                    <textarea name="motivo" value={formEdit.obs_viaje} onChange={(e)=>setFormEdit({...formEdit,obs_viaje:e.target.value})} placeholder="Explique el objetivo del viaje"></textarea>
+                                    <textarea name="motivo" value={formEdit.obs_viaje} onChange={(e) => setFormEdit({ ...formEdit, obs_viaje: e.target.value })} placeholder="Explique el objetivo del viaje"></textarea>
                                 </div>
                                 {formEdit.carga_combustible ?
-                                (<div className="itemInput2-Modal">
-                                    <label>Cantidad de combustible</label>
-                                    <textarea name="motivo" value={formEdit.cantidad_carga} onChange={(e)=>setFormEdit({...formEdit,cantidad_carga:Number(e.target.value)})} placeholder="Explique el objetivo del viaje"></textarea>
-                                </div>):(<></>)
+                                    (<div className="itemInput2-Modal">
+                                        <label>Cantidad de combustible</label>
+                                        <textarea name="motivo" value={formEdit.cantidad_carga} onChange={(e) => setFormEdit({ ...formEdit, cantidad_carga: Number(e.target.value) })} placeholder="Explique el objetivo del viaje"></textarea>
+                                    </div>) : (<></>)
                                 }
                             </>
                         )}
                     </DialogContent>
                     <DialogActions>
+                       
                         <Button variant="solid" color="success" onClick={() => {
                             handleEditViajeData()
                         }}>
                             guardar cambios
                         </Button>
-                        <Button variant="plain" color="danger" onClick={() => {
+                        <Button  variant="plain"  onClick={() => {
                             setViajeEditSelected(null)
                             setFormEdit({})
                             setOpenModalEdit(false)
                         }}>
                             Cancelar
                         </Button>
+                         {viajeEdit?.estado_viaje === "En espera" && (
+                            <Button sx={{marginRight:'auto'}} variant="plain" color="danger" onClick={() => {
+                                handleBorrarViaje()
+                            }}>Eliminar viaje</Button>
+                        )}
                     </DialogActions>
                 </ModalDialog>
             </Modal>
@@ -833,9 +882,9 @@ function menuAdmin() {
                                 <label>Motivo</label>
                                 <textarea name="motivo" value={formInicio.motivo} onChange={handleChange} placeholder="Explique el objetivo del viaje"></textarea>
                             </div>
-                            <div className="buttonLabel-Modal">
+                            <div className="divMapaDestino">
+                                {formInicio.destino && <p>Destino: {formInicio.destino}</p>}
                                 <button onClick={() => abrirMapaNuevo()}>Agregar destino del viaje</button>
-                                {formInicio.destino ? <label>Destino: {formInicio.destino}</label> : <></>}
                             </div>
                         </div>
                     </DialogContent>
@@ -855,55 +904,56 @@ function menuAdmin() {
             <Modal open={modalDestino} onClose={() => openModalDestino(false)}>
                 <ModalDialog variant="soft" size="lg">
                     <DialogTitle>
-                        {modoEdicionMapa === "edicion" ? "Cambiar el destino del viaje":"Mueve el pin al destino aproximado"}
+                        {modoEdicionMapa === "edicion" ? "Cambiar el destino del viaje" : "Mueve el pin al destino aproximado"}
                     </DialogTitle>
                     <Divider />
                     <DialogContent>
                         <>
-                        <div>
-                            <label>{modoEdicionMapa==="edicion" ? "Nombre del nuevo destino":"Agrega el destino del viaje"}</label>
-                            <input type="text" name="destino" value={modoEdicionMapa==="edicion" ? (formEdit.destino ?? ""):formInicio.destino}
-                             onChange={
-                                (e)=>{
-                                    if(modoEdicionMapa==="edicion"){
-                                        setFormEdit((prev)=>({...prev,destino:e.target.value}))
-                                    }else{
-                                        handleChange(e)
-                                    }
-                                }
-                                }></input>
-                        </div>
-                        <div className="leaflet-container">
-                            <MapContainer center={[dataGPS.lat, dataGPS.lng]} zoom={15} scrollWheelZoom={false}>
-                                <TileLayer
-                                    url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>'
-                                    subdomains="abcd"
-                                    maxZoom={20}
-                                />
-                                <Marker
-                                    position={[dataGPS.lat, dataGPS.lng]}
-                                    draggable={false} // Queda estatico con la posicion actual del usuario
-                                    icon={createCustomIcon("#3b40cf")}
-                                />
-                                <Marker
-                                    position={modoEdicionMapa==="edicion" ? [formEdit.lat_fin ?? dataGPS.lat,formEdit.lng_fin ?? dataGPS.lng]:
-                                        [formInicio.lat_fin ?? dataGPS.lat,formInicio.lng_fin ?? dataGPS.lng]}
-                                    draggable={true} // El usuario mueve este para determinar el destino
-                                    autoPan={true}
-                                    eventHandlers={{
-                                        dragend: manejarMovimientoDestino // Captura la nueva posición al soltarlo
-                                    }}
-                                    riseOnHover={true}
-                                    icon={createCustomIcon('#57A450')}
-                                >
+                            <div>
+                                <label>{modoEdicionMapa === "edicion" ? "Nombre del nuevo destino" : "Agrega el destino del viaje"}</label>
+                                <input style={{ display: "flex", width: "50vw", fontSize: "0.8rem" }} type="text" name="destino" value={modoEdicionMapa === "edicion" ? (formEdit.destino ?? "") : formInicio.destino}
+                                    onChange={
+                                        (e) => {
+                                            if (modoEdicionMapa === "edicion") {
+                                                setFormEdit((prev) => ({ ...prev, destino: e.target.value }))
+                                            } else {
+                                                handleChange(e)
+                                            }
+                                        }
+                                    }></input>
+                            </div>
+                            <div className="leaflet-container">
+                                <MapContainer center={[dataGPS.lat, dataGPS.lng]} zoom={15} scrollWheelZoom={false}>
+                                    <TileLayer
+                                        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>'
+                                        subdomains="abcd"
+                                        maxZoom={20}
+                                    />
+                                    <GeocodeBuscador onResult={manejarResultadoBusqueda} />
+                                    <Marker
+                                        position={[dataGPS.lat, dataGPS.lng]}
+                                        draggable={false} // Queda estatico con la posicion actual del usuario
+                                        icon={createCustomIcon("#3b40cf")}
+                                    />
+                                    <Marker
+                                        position={modoEdicionMapa === "edicion" ? [formEdit.lat_fin ?? dataGPS.lat, formEdit.lng_fin ?? dataGPS.lng] :
+                                            [formInicio.lat_fin ?? dataGPS.lat, formInicio.lng_fin ?? dataGPS.lng]}
+                                        draggable={true} // El usuario mueve este para determinar el destino
+                                        autoPan={true}
+                                        eventHandlers={{
+                                            dragend: manejarMovimientoDestino // Captura la nueva posición al soltarlo
+                                        }}
+                                        riseOnHover={true}
+                                        icon={createCustomIcon('#57A450')}
+                                    >
 
-                                </Marker>
+                                    </Marker>
 
-                                <FitBounds points={points}></FitBounds>
-                                <Routing point1={dataGPS} point2={dataGPSDestino} />
-                            </MapContainer>
-                        </div>
+                                    <FitBounds points={points}></FitBounds>
+                                    <Routing point1={dataGPS} point2={dataGPSDestino} />
+                                </MapContainer>
+                            </div>
                         </>
                     </DialogContent>
                     <DialogActions>

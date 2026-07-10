@@ -9,6 +9,10 @@ interface Props{
     capture?:'environment'|'user'|'',
     rutaActual?:string
 }
+
+/**Componente para la subida de imagenes
+ * -->Sirve para la seleccion de las mismas, esta devuelve el archivo elegido al componente padre para su tramitacion
+ */
 function imageUploader({onArchivoReady,onCancelar,label,capture,rutaActual} :Props){
 
     const inputRef = useRef<HTMLInputElement>(null)

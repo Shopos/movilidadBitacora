@@ -318,7 +318,7 @@ export async function addViajeRegreso(viajeInicial:Viaje,modificacion:string,kms
     //@ts-ignore
     return res.insertId
 }
-
+//Modifica la informacion de un viaje{id} terminado
 export async function editarTerminado(id:number,data:viajeTerminado){
     const [res] = await connection.query(
         `UPDATE viajes SET obs_viaje = ?, cantidad_carga=?, ultima_modificacion=?, modificado_por=?
@@ -327,7 +327,7 @@ export async function editarTerminado(id:number,data:viajeTerminado){
     //@ts-ignore
     return res.affectedRows>0
 }
-
+//Modifica los datos de un viaje que esta en modo espera
 export async function editarEspera(id:number, data:viajeEspera){
     const [res] = await connection.query(
         `UPDATE viajes SET

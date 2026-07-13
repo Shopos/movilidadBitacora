@@ -28,7 +28,14 @@ function inicioSesion(){
         }
         setFormData({mail:"",pass:""})
         //Navega dependiendo del resultado de resultadoInicio que almacena el usuario si este obtiene un resultado positivo desde login
-        navigate(resultadoInicio.usuario!.cargo === "Administrativo" ? "/menuAdmin" : "/menuUsuario")
+        switch(resultadoInicio.usuario!.cargo){
+            case "Administrativo":
+                return navigate("/menuAdmin")
+            case "Funcionario":
+                return navigate("/menuUsuario")
+            case "Departamento":
+                return navigate("/menuDepto")
+        }
     }
 
     //Redirecciona a la vista de solicitud cambio contraseña

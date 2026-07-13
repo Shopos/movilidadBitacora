@@ -4,7 +4,7 @@ import type { ReactNode } from "react"
 
 type ProtectedRouteProp = {
     children:ReactNode,
-    rolesPermitidos? : ("Administrativo"|"Funcionario")
+    rolesPermitidos? : ("Administrativo"|"Funcionario"|"Departamento")
 }
 
 /**Componente para proteger rutas-componentes del sistema
@@ -22,8 +22,14 @@ function ProtectedRoute({children,rolesPermitidos}: ProtectedRouteProp) {
         return <Navigate to="/" replace />
     }
     if(rolesPermitidos && usuario && !rolesPermitidos.includes(usuario.cargo)){
-        const destino = usuario.cargo === "Administrativo" ? "/menuAdmin" : "/menuUsuario"
-        return <Navigate to={destino} replace />
+        switch(usuario.cargo){
+            case "Administrativo":
+                return <Navigate to={"/menuAdmin"} replace />
+            case "Funcionario":
+                return <Navigate to={"/menuUsuario"} replace />
+            case "Departamento":
+                return <Navigate to={"/menuDepto"} replace />
+        }
     }
     return <>{children}</>
 }

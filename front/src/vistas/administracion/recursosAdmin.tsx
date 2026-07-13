@@ -437,6 +437,7 @@ function recursosAdmin() {
                                         <option disabled value={""}>Elige el cargo del usuario a agregar</option>
                                         <option>Funcionario</option>
                                         <option>Administrativo</option>
+                                        <option>Departamento</option>
                                     </select>
                                     <label>Tipo de licencia</label>
                                     <select defaultValue={""} onChange={(e) => setFormAddU({ ...formAddU, tipo_licencia: (e.target.value) })}>

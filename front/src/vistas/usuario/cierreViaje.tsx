@@ -140,9 +140,10 @@ function cierreViaje() {
                 //se envia update
                 await patchFin(viajeID!.id_viaje, formFin)
                 showAlerta("Viaje cerrado correctamete, regresando al menú principal","success")
+                localStorage.removeItem("idViaje")
                 await sleep(3000)
+                
                 navigate("/menuUsuario")
-                //localStorage.removeItem("idViaje")
             }
         }
         patch()

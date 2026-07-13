@@ -91,3 +91,23 @@ export type Solicitud={
     resuelta_por:string,
     fecha_resuelta:string
 }
+
+export type SolicitudInicio={
+    id_solicitante:number,
+    motivo:string,
+    vehiculo_solicitado:string,
+    solicitante:string
+}
+
+export type SolicitudViaje={
+    id_solicitud:number,
+    id_solicitante:number,
+    motivo:string,
+    vehiculo_solicitado:string,
+    solicitante:string,
+    fecha_solicitada:string,
+    fecha_resuelta:string,
+    resuelta_por:string,
+    estado:"resuelta"|"rechazada"|"pendiente",
+    estado_texto:string
+}   

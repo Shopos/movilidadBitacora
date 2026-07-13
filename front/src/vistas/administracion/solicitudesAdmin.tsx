@@ -1,28 +1,123 @@
 import { useEffect, useState } from "react"
 import NavBar from "../../componentes/navBar"
-import { getSolicitudes, resolverSolicitudesCambio } from "../../utils/auxiliar"
+import getVehiculos, { getSolicitudes, resolverSolicitudesCambio, getSolicitudesViajes, getFuncionarios, patchSolicitudRechazo, addViajeInicial, pathSolicitudAprobada } from "../../utils/auxiliar"
 import { useAlerta } from "../../context/AlertaContext"
 import Table from "@mui/joy/Table"
 import { Modal, ModalDialog, DialogTitle, Divider, DialogContent, DialogActions, Button } from "@mui/joy"
-import type { Solicitud } from "../../tipos/tipoSistema"
+import { type User, type Vehiculo, type Solicitud, type SolicitudViaje, type Viaje } from "../../tipos/tipoSistema"
 import "../../estilos/solicitudesAdmin.css"
+
+import 'leaflet/dist/leaflet.css';
+import L from "leaflet"
+import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
+import Routing from "../../componentes/routing.tsx" /*Componente para marcar la ruta entre inicio y destino en mapa*/
+import GeocodeBuscador from "../../componentes/geocodeBuscador.tsx";
 
 import ManageAccountsSharpIcon from '@mui/icons-material/ManageAccountsSharp';
 import VisibilitySharpIcon from '@mui/icons-material/VisibilitySharp';
 import VisibilityOffSharpIcon from '@mui/icons-material/VisibilityOffSharp';
+import { useAuth } from "../../context/AuthContext.tsx"
+
+
+type GPS = {
+    lat: number,
+    lng: number
+}
+
+interface prop {
+    points: GPS[]
+}
 function solicitudesAdmin() {
     const { showAlerta } = useAlerta()
     const [solicitudesPendientes, setSolicitudesPendientes] = useState([])
     const [modalSol, setModalSol] = useState(false)
+    const [modalViaje, setModalViaje] = useState(false)
+    const [modalConfirmar, setModalConfirmar] = useState(false)
+    const [modo, setModo] = useState(false)
+    const [motivo, setMotivo] = useState("")
     const [cargando, setCargando] = useState(false)
     const [pass, setPass] = useState("")
-    const [showPass,setShowPass] = useState(false)
+    const [showPass, setShowPass] = useState(false)
     const [pass2, setPass2] = useState("")
-    const [showPass2,setShowPass2] = useState(false)
-    const [solicitudSelected,setSolicitudSelected] = useState<Solicitud|null>()
+    const [showPass2, setShowPass2] = useState(false)
+    const [solicitudSelected, setSolicitudSelected] = useState<Solicitud | null>()
+    const [vistaActual, setVistaActual] = useState(false)
+    const [solicitudesViaje, setSolicitudesViaje] = useState<SolicitudViaje[]>([])
+    const [solicitudViajeSelected, setSolicitudViajeSelected] = useState<SolicitudViaje | null>(null)
     const [errorPass, setErrorPass] = useState({
         msg: "", est: false
     })
+    const [dataGPS, setDataGPS] = useState<GPS>({
+        lat: -34.639739, lng: -71.365916
+    })
+
+    const [dataGPSDestino, setDataGPSDestino] = useState<GPS>({
+        lat: -34.639739, lng: -71.365916
+    })
+    const [formInicio, setFormInicio] = useState<Viaje>({
+        id_viaje: 0,
+        fecha_hora_inicio: "",
+        patente: "",
+        motivo: "",
+        vehiculo: "",
+        kms_inicial: 0,
+        fecha_hora_fin: "",
+        kms_fin: 0,
+        nombre_funcionario: "",
+        carga_combustible: false,
+        cantidad_carga: 0,
+        obs_viaje: "",
+        lat_inicio: 0,
+        lng_inicio: 0,
+        lat_fin: 0,
+        lng_fin: 0,
+        destino: "",
+        estado_viaje: "Terminado", //inicio viaje -> cambiar
+        id_usuario: 0, //inicio viaje -> cambiar
+        lat_fin_real: 0,
+        lng_fin_real: 0,
+        modificado_por: "", //inicio viaje -> cambiar
+        ultima_modificacion: "", //inicio viaje ->cambiar
+        modo: "ida", //modo ida (inicial) -> modo vuelta --->nuevo viaje con datos inversos
+        imagen_comprobante_ben: "",
+        imagen_tablero_ida: "",
+        imagen_tablero_vuelta: ""
+    })
+    const viajeVacio: Viaje = {
+        id_viaje: 0,
+        fecha_hora_inicio: "",
+        patente: "",
+        motivo: "",
+        vehiculo: "",
+        kms_inicial: 0,
+        fecha_hora_fin: "",
+        kms_fin: 0,
+        nombre_funcionario: "",
+        carga_combustible: false,
+        cantidad_carga: 0,
+        obs_viaje: "",
+        lat_inicio: 0,
+        lng_inicio: 0,
+        lat_fin: 0,
+        lng_fin: 0,
+        destino: "",
+        estado_viaje: "Terminado", //inicio viaje -> cambiar
+        id_usuario: 0, //inicio viaje -> cambiar
+        lat_fin_real: 0,
+        lng_fin_real: 0,
+        modificado_por: "", //inicio viaje -> cambiar
+        ultima_modificacion: "", //inicio viaje ->cambiar
+        modo: "ida", //modo ida (inicial) -> modo vuelta --->nuevo viaje con datos inversos
+        imagen_comprobante_ben: "",
+        imagen_tablero_ida: "",
+        imagen_tablero_vuelta: ""
+    }
+    const points: GPS[] = [dataGPS, dataGPSDestino]
+    const [funcionarios, setFuncionarios] = useState<[User]>()
+    const [vehiculos, setVehiculos] = useState<[Vehiculo]>()
+    const [vehiculo, setVehiculo] = useState<Vehiculo>()
+    const [modalDestino, openModalDestino] = useState(false)
+    const { usuario } = useAuth()
 
     //Metodo para obtener las solicitudes pendientes
     useEffect(() => {
@@ -33,12 +128,52 @@ function solicitudesAdmin() {
                     setSolicitudesPendientes(response)
                     setCargando(true)
                 }
+                const responseViajes = await getSolicitudesViajes()
+                if (responseViajes) {
+                    setSolicitudesViaje(responseViajes)
+                    setCargando(true)
+                }
+
             } catch (e) {
                 showAlerta("Error listando solicitudes, intenta más tarde", "error")
             }
         }
+        const getListaUsuarios = async () => {
+            try {
+                const response = await getFuncionarios()
+                if (response) {
+                    setFuncionarios(response)
+                }
+            } catch (e) {
+                showAlerta("Error listando usuarios", "error")
+            }
+        }
+        const getListaVehiculos = async () => {
+            try {
+                const response = await getVehiculos()
+                if (response) {
+                    setVehiculos(response)
+                    setCargando(true)
+                }
+            } catch (e) {
+                showAlerta("Error listando vehículos", "error")
+            }
+        }
         getSolicitudesPendientes()
+        getListaUsuarios()
+        getListaVehiculos()
     }, [cargando])
+
+    useEffect(() => {
+        const actualiza = {
+            ...formInicio,
+            lat_inicio: dataGPS.lat,
+            lng_inicio: dataGPS.lng,
+            lat_fin: dataGPSDestino.lat,
+            lng_fin: dataGPSDestino.lng
+        }
+        setFormInicio(actualiza)
+    }, [dataGPSDestino])
 
     //Metodo para manejar la modificacion de las contraseñas
     //Comprueba que se ingrese informacion a los inputs
@@ -54,15 +189,15 @@ function solicitudesAdmin() {
             return
         }
         setErrorPass({ msg: "", est: false })
-        try{
-            if(solicitudSelected){
-                await resolverSolicitudesCambio(solicitudSelected?.id_solicitud,pass)
+        try {
+            if (solicitudSelected) {
+                await resolverSolicitudesCambio(solicitudSelected?.id_solicitud, pass)
                 showAlerta("Contraseña modificada correctamente, avisa a usuario")
                 handleCloseModal()
                 setCargando(false)
             }
-        }catch(e){
-            showAlerta("Error al cambiar contraseña","error")
+        } catch (e) {
+            showAlerta("Error al cambiar contraseña", "error")
         }
     }
     const handleCloseModal = () => {
@@ -71,16 +206,169 @@ function solicitudesAdmin() {
         setPass2("")
         setSolicitudSelected(null)
     }
-    const openModalSol = (solicitud:Solicitud) =>{
+    const openModalSol = (solicitud: Solicitud) => {
         setSolicitudSelected(solicitud)
         setModalSol(true)
     }
+
+    const rechazarSolicitud = () => {
+        setModo(false)
+        setModalConfirmar(true)
+    }
+    const aprobarSolicitud = () => {
+        setModo(true)
+        setModalConfirmar(true)
+    }
+    const formatoFecha = () => {
+        const d = new Date()
+        const year = d.getFullYear()
+        const month = String(d.getMonth() + 1).padStart(2, '0')
+        const day = String(d.getDate()).padStart(2, '0')
+        const hour = String(d.getHours()).padStart(2, '0')
+        const min = String(d.getMinutes()).padStart(2, '0')
+
+        const formato = `${year}-${month}-${day} ${hour}:${min}`
+        return formato
+    }
+
+
+    useEffect(() => {
+        const sendData = async () => {
+            if (formInicio.estado_viaje === "En espera" && solicitudViajeSelected) {
+                await addViajeInicial(formInicio)
+                await pathSolicitudAprobada(solicitudViajeSelected?.id_solicitud,"Viaje Agendado")
+                setModalConfirmar(false)
+                setModalViaje(false)
+                setMotivo("")
+                setFormInicio(viajeVacio)
+                setCargando(false)
+            }
+        }
+        sendData()
+    },[formInicio])
+
+    const handleAprobarSolicitud = async () => {
+        console.log(formInicio)
+        setFormInicio((prev) => ({
+            ...prev,
+            fecha_hora_inicio: "",
+            ultima_modificacion: formatoFecha(),
+            modificado_por: usuario!.nombre,
+            estado_viaje: "En espera",
+            modo: "ida"
+        }))
+    }
+    const handleRechazarSolicitud = async () => {
+        if (solicitudViajeSelected) {
+            await patchSolicitudRechazo(solicitudViajeSelected.id_solicitud, motivo)
+            setModalViaje(false)
+            setModalConfirmar(false)
+            setMotivo("")
+            setCargando(false)
+        }
+    }
+    const manejarMovimientoDestino = (e: any) => {
+        const marker = e.target;
+        if (marker != null) {
+            const gps = marker.getLatLng();
+
+            // Actualizamos solo el estado del destino
+            setDataGPSDestino({ lat: gps.lat, lng: gps.lng });
+        }
+    };
+
+    /** Si se selecciona un vehiculo desde un modal, reemplaza con los datos de dicho vehiculo en el formulario */
+    const manejarDataVehiculo = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const patenteselected = event.target.value
+
+        const vehiculoEncontrado = vehiculos!.find(
+            (vehiculo) => vehiculo.patente === patenteselected
+        )
+        if (vehiculoEncontrado) {
+            setVehiculo(vehiculoEncontrado || null)
+        }
+        setFormInicio((prevData) => ({
+            ...prevData,
+            patente: patenteselected,
+            vehiculo: vehiculoEncontrado ? vehiculoEncontrado.modelo : "",
+            kms_inicial: vehiculoEncontrado ? vehiculoEncontrado.kms_actual : 0
+        }))
+    }
+
+    const manejarDataFuncionario = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const usuarioSelected = (event.target.value).split(" / ")
+        const usuarioFind = funcionarios!.find(
+            (usr) => usr.nombre === usuarioSelected[0] && usr.correo === usuarioSelected[1]
+        )
+        if (usuarioFind && usuarioFind.id_usuario !== 0) {
+            setFormInicio((prevData) => ({
+                ...prevData,
+                id_usuario: usuarioFind ? usuarioFind.id_usuario : 0,
+                nombre_funcionario: usuarioFind ? usuarioFind.nombre : ""
+            }))
+        }
+    }
+    function FitBounds({ points }: prop) {
+        const map = useMap()
+
+        useEffect(() => {
+            const bound = points.map(p => [p.lat, p.lng] as [number, number])
+            if (points.length > 0) {
+                map.fitBounds(bound, {
+                    padding: [50, 50],
+                    maxZoom: 15,
+                })
+            }
+        }, [map, points])
+        return null
+    }
+
+    const manejarResultadoBusqueda = (lat: number, lng: number, destino: string) => {
+        setDataGPSDestino({ lat, lng })
+        setFormInicio((prev) => ({
+            ...prev,
+            lat_fin: lat,
+            lng_fin: lng,
+            lat_inicio: dataGPS.lat,
+            lng_inicio: dataGPS.lng,
+            destino: destino
+        }))
+    }
+    const createCustomIcon = (color: string) => {
+        return L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="
+                background-color: ${color};
+                width: 24px;
+                height: 24px;
+                border-radius: 50% 50% 50% 0;
+                transform: rotate(-45deg);
+                position: absolute;
+                left: -12px;
+                top: -12px;
+                border: 2px solid white;
+                "></div>`,
+            iconAnchor: [0, 12]
+        })
+    }
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = event.target
+        setFormInicio((prevData) => ({
+            ...prevData,
+            [name]: value
+        }))
+    }
+
 
     return (
         <>
             <NavBar type={1} texto={"Solicitudes"}></NavBar>
             <div>
-                {solicitudesPendientes ? (
+                <div className='buttonsTablaH'>
+                    <button className="bordeIzquierdoBoton" disabled={!vistaActual} onClick={() => setVistaActual(false)}>Solicitudes usuarios</button>
+                    <button className="bordeDerechaBoton" disabled={vistaActual} onClick={() => setVistaActual(true)}>Solicitudes viajes</button>
+                </div>
+                {solicitudesPendientes && !vistaActual && (
                     <>
                         <Table hoverRow borderAxis='y' sx={{
                             '& tr:nth-of-type(odd)': { backgroundColor: '#FBF5DD' },
@@ -100,9 +388,9 @@ function solicitudesAdmin() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {solicitudesPendientes && solicitudesPendientes.map((sol: Solicitud) => (
+                                {solicitudesPendientes && solicitudesPendientes.map((sol: Solicitud, index) => (
                                     <tr>
-                                        <td>{sol.id_solicitud}</td>
+                                        <td>{index.valueOf() + 1}</td>
                                         <td>{sol.correo}</td>
                                         <td>{sol.nombre}</td>
                                         <td>{String(sol.fecha_solicitada).slice(0, 10) + " " + String(sol.fecha_solicitada).slice(11, 19)}</td>
@@ -116,7 +404,7 @@ function solicitudesAdmin() {
                                         </td>
                                     </tr>
                                 ))}
-                                {solicitudesPendientes.length === 0 &&(
+                                {solicitudesPendientes.length === 0 && (
                                     <tr>
                                         <td colSpan={6} style={{ textAlign: "center", padding: "5%" }}>
                                             No hay solicitudes pendientes por solucionar
@@ -126,7 +414,56 @@ function solicitudesAdmin() {
                             </tbody>
                         </Table>
                     </>
-                ) : (<>No cuentas con solicitudes por solucionar</>)}
+                )}
+                {vistaActual && solicitudesViaje && (
+                    <>
+                        <Table hoverRow borderAxis='y' sx={{
+                            '& tr:nth-of-type(odd)': { backgroundColor: '#FBF5DD' },
+                            '& tr:nth-of-type(even)': { backgroundColor: '#E7E1B1' },
+                            '& td': { textAlign: 'left', paddingLeft: 1.9 },
+                            '& th': { backgroundColor: "#bad8b6" },
+                            marginTop: "1vh"
+                        }}>
+                            <thead>
+                                <tr>
+                                    <th style={{ width: "5%" }}>N°</th>
+                                    <th>Solicitante</th>
+                                    <th>Fecha solicitada</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {solicitudesViaje && solicitudesViaje.map((sol: SolicitudViaje, index) => (
+                                    <tr>
+                                        <td>{index + 1}</td>
+                                        <td>{sol.solicitante}</td>
+                                        <td>{String(sol.fecha_solicitada).slice(0, 10) + " " + String(sol.fecha_solicitada).slice(11, 19)}</td>
+                                        <td>{sol.estado}</td>
+                                        <td>
+                                            <div className="buttonsIconTable" style={{ display: "flex", gap: "10px" }}>
+                                                <button style={{ width: "4.5vh" }} onClick={() => {
+                                                    setSolicitudViajeSelected(sol)
+                                                    setModalViaje(true)
+                                                }}>
+                                                    <VisibilitySharpIcon />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {solicitudesViaje.length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} style={{ textAlign: "center", padding: "5%" }}>
+                                            No hay solicitudes pendientes por solucionar
+                                        </td>
+                                    </tr>
+                                )}
+
+                            </tbody>
+                        </Table>
+                    </>
+                )}
 
             </div>
             {/**Modal para el tratamiento del cambio de contraseñas --> se debe confirmar que ambas contraseñas sean iguales */}
@@ -137,17 +474,17 @@ function solicitudesAdmin() {
                     <DialogContent>
                         <label>Nueva contraseña</label>
                         <div className="inputPass">
-                            <input value={pass} onChange={(e) => setPass(e.currentTarget.value)} type={showPass ? "text":"password"}></input>
-                            <button onClick={()=>setShowPass(!showPass)}>
-                                {showPass ? <VisibilityOffSharpIcon fontSize="small"/>:<VisibilitySharpIcon fontSize="small"/>}
+                            <input value={pass} onChange={(e) => setPass(e.currentTarget.value)} type={showPass ? "text" : "password"}></input>
+                            <button onClick={() => setShowPass(!showPass)}>
+                                {showPass ? <VisibilityOffSharpIcon fontSize="small" /> : <VisibilitySharpIcon fontSize="small" />}
                             </button>
                         </div>
-                        
+
                         <label>Confirmar la contraseña</label>
                         <div className="inputPass">
-                            <input value={pass2} onChange={(e) => setPass2(e.currentTarget.value)} type={showPass2 ? "text":"password"}></input>
-                            <button onClick={()=>setShowPass2(!showPass2)}>
-                                {showPass2 ? <VisibilityOffSharpIcon fontSize="small"/>:<VisibilitySharpIcon fontSize="small" />}
+                            <input value={pass2} onChange={(e) => setPass2(e.currentTarget.value)} type={showPass2 ? "text" : "password"}></input>
+                            <button onClick={() => setShowPass2(!showPass2)}>
+                                {showPass2 ? <VisibilityOffSharpIcon fontSize="small" /> : <VisibilitySharpIcon fontSize="small" />}
                             </button>
                         </div>
                         {errorPass.est && (
@@ -161,6 +498,178 @@ function solicitudesAdmin() {
                     <DialogActions>
                         <Button onClick={handleModifyPass}>Modificar</Button>
                         <Button onClick={handleCloseModal}>Cancelar</Button>
+                    </DialogActions>
+                </ModalDialog>
+            </Modal>
+
+            {/**Modal para revision de solicitud y tramitacion de la misma -->aprobada abre modal agregar viaje y deja en espera dicho viaje, rechaza limpia solicitud */}
+            <Modal open={modalViaje} onClose={() => setModalViaje(false)}>
+                <ModalDialog>
+                    <DialogTitle>Solicitud de {solicitudViajeSelected?.solicitante}</DialogTitle>
+                    <Divider />
+                    <DialogContent>
+                        {solicitudViajeSelected &&
+                            <><label style={{ fontWeight: "bold" }}>Estado</label><span>{solicitudViajeSelected.estado}</span></>
+                        }
+                        <label style={{ fontWeight: "bold" }}>Vehiculo solicitado</label>
+                        <span>{solicitudViajeSelected?.vehiculo_solicitado}</span>
+
+                        <label style={{ fontWeight: "bold" }}>Motivo</label>
+                        <span>{solicitudViajeSelected?.motivo}</span>
+                        {solicitudViajeSelected && solicitudViajeSelected.estado !== "pendiente" &&
+                            <>
+                                {solicitudViajeSelected.estado === "rechazada" && (<>
+                                    <label style={{ fontWeight: "bold" }}>Rechazada por:</label> <span>{solicitudViajeSelected.estado_texto}</span>
+                                </>)}
+                                <label style={{ fontWeight: "bold" }}>Fecha resuelta</label><span>{solicitudViajeSelected.fecha_resuelta}</span>
+                                <label style={{ fontWeight: "bold" }}>Resuelto por</label> <span>{solicitudViajeSelected.resuelta_por}</span>
+                            </>
+                        }
+                    </DialogContent>
+                    <DialogActions>
+                        {solicitudViajeSelected?.estado === "pendiente" && (
+                            <>
+                                <Button color="success" onClick={() => aprobarSolicitud()}>Aprobar viaje</Button>
+                                <Button color="danger" onClick={() => rechazarSolicitud()}>Rechazar</Button>
+                            </>
+                        )}
+                        <Button color="neutral" onClick={() => setModalViaje(false)}>Volver</Button>
+                    </DialogActions>
+                </ModalDialog>
+            </Modal>
+
+            {/**Modal para resolver solicitud viaje ---Si rechazada explica el motivo del porque */}
+
+            <Modal open={modalConfirmar} onClose={() => setModalConfirmar(false)}>
+                <ModalDialog>
+                    <DialogTitle>{modo ? "Aprobar viaje" : "Rechazar viaje"}</DialogTitle>
+                    <Divider />
+                    <DialogContent>
+                        {modo ?
+                            (<>
+                                Agendar viaje aprobado
+                                <div className="items-Modal">
+
+                                    <div className="itemInput-Modal">
+                                        <label>Patente</label>
+                                        <select name="Patentes" defaultValue={""} onChange={manejarDataVehiculo}>
+                                            <option value={""} disabled>Selecciona una patente disponible</option>
+                                            {/**Solo se muestran las patentes de vehiculos disponibles */}
+                                            {vehiculos && vehiculos.filter(veh => veh.estado === "DISPONIBLE").map((veh) => (
+                                                <option key={veh.patente} value={veh.patente}>
+                                                    {veh.patente}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="itemInput-Modal">
+                                        <label>Funcionario</label>
+                                        <select name="funcionarios" defaultValue={""} onChange={manejarDataFuncionario}>
+                                            <option value={""} disabled>Designa un funcionario</option>
+                                            {funcionarios && funcionarios.map((usr: User) => (
+                                                <option value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="itemInput-Modal">
+                                        <label>Modelo Vehículo</label>
+                                        <input disabled value={formInicio.vehiculo} placeholder=""></input>
+                                    </div>
+                                    <div className="itemInput-Modal">
+                                        <label>Kilometraje actual</label>
+                                        <input disabled type="number" name="kmsInicio" value={vehiculo?.kms_actual}></input>
+                                    </div>
+                                    <div className="itemInput2-Modal">
+                                        <label>Motivo</label>
+                                        <textarea name="motivo" value={solicitudViajeSelected?.motivo} placeholder="Explique el objetivo del viaje"></textarea>
+                                    </div>
+                                    <div className="divMapaDestino">
+                                        {formInicio.destino && <p>Destino: {formInicio.destino}</p>}
+                                        <button onClick={() => openModalDestino(true)}>Agregar destino del viaje</button>
+                                    </div>
+                                </div>
+                            </>) :
+                            (<>
+                                Rechazar solicitud de viaje
+                                <div className="itemInput2-Modal">
+                                    <label>Motivo del rechazo </label>
+                                    <textarea style={{ width: "25vw", maxWidth: "25vw" }} value={motivo} onChange={(e) => setMotivo(String(e.currentTarget.value))}></textarea>
+                                </div>
+                            </>)}
+
+                    </DialogContent>
+                    <DialogActions>
+                        <Button color="success" onClick={() => {
+                            modo ?
+                                handleAprobarSolicitud()
+                                :
+                                handleRechazarSolicitud()
+
+                        }}>Confirmar</Button>
+                        <Button color="neutral" onClick={() => { setModalConfirmar(false) }}>Cancelar</Button>
+                    </DialogActions>
+                </ModalDialog>
+            </Modal>
+
+            {/*Modal para la seleccion de destino del viaje */}
+            <Modal open={modalDestino} onClose={() => openModalDestino(false)}>
+                <ModalDialog variant="soft" size="lg">
+                    <DialogTitle>
+                        "Mueve el pin al destino aproximado"
+                    </DialogTitle>
+                    <Divider />
+                    <DialogContent>
+                        <>
+                            <div>
+                                <label>"Agrega el destino del viaje"</label>
+                                <input style={{ display: "flex", width: "50vw", fontSize: "0.8rem" }} type="text" name="destino" value={formInicio.destino}
+                                    onChange={
+                                        (e) => {
+                                            handleChange(e)
+                                        }
+                                    }
+                                ></input>
+                            </div>
+                            <div className="leaflet-container">
+                                <MapContainer center={[dataGPS.lat, dataGPS.lng]} zoom={15} scrollWheelZoom={false}>
+                                    <TileLayer
+                                        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>'
+                                        subdomains="abcd"
+                                        maxZoom={20}
+                                    />
+                                    <GeocodeBuscador onResult={manejarResultadoBusqueda} />
+                                    <Marker
+                                        position={[dataGPS.lat, dataGPS.lng]}
+                                        draggable={false} // Queda estatico con la posicion actual del usuario
+                                        icon={createCustomIcon("#3b40cf")}
+                                    />
+                                    <Marker
+                                        position={[formInicio.lat_fin ?? dataGPS.lat, formInicio.lng_fin ?? dataGPS.lng]}
+                                        draggable={true} // El usuario mueve este para determinar el destino
+                                        autoPan={true}
+                                        eventHandlers={{
+                                            dragend: manejarMovimientoDestino // Captura la nueva posición al soltarlo
+                                        }}
+                                        riseOnHover={true}
+                                        icon={createCustomIcon('#57A450')}
+                                    >
+
+                                    </Marker>
+
+                                    <FitBounds points={points}></FitBounds>
+                                    <Routing point1={dataGPS} point2={dataGPSDestino} />
+                                </MapContainer>
+                            </div>
+                        </>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button variant="solid" color="success" onClick={() => openModalDestino(false)}>
+                            Agregar destino
+                        </Button>
+                        <Button variant="plain" color="danger" onClick={() => openModalDestino(false)}>
+                            Cancelar
+                        </Button>
                     </DialogActions>
                 </ModalDialog>
             </Modal>

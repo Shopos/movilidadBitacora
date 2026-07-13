@@ -1,4 +1,4 @@
-import type { Mantencion, Vehiculo, User, Viaje, ViajeInputFin, ViajeInputInicio } from "../tipos/tipoSistema";
+import type { Mantencion, Vehiculo, User, Viaje, ViajeInputFin, ViajeInputInicio, SolicitudInicio } from "../tipos/tipoSistema";
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 /* Clase auxiliar para manejar la solicitud de informacion hacia el backend del proyecto */
@@ -33,12 +33,12 @@ export default async function getVehiculos() {
 export async function getFuncionarios() {
   try {
     const token = localStorage.getItem("token")
-    const response = await fetch(`${API}/usuarios`,{headers:{'Authorization':`Bearer ${token}`}})
+    const response = await fetch(`${API}/usuarios`, { headers: { 'Authorization': `Bearer ${token}` } })
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
     const filter = await response.json()
-    const funcionarios = filter.filter((usr: User) => usr.cargo === "Funcionario" && usr.estado_viaje_usuario === "Disponible" && usr.estado)
+    const funcionarios = filter.filter((usr: User) => usr.cargo === "Funcionario" && (usr.estado_viaje_usuario !== "En ruta") && usr.estado)
     return funcionarios
   } catch (e) {
     console.error('Error encontrando usuarios funcionarios:', e);
@@ -46,10 +46,31 @@ export async function getFuncionarios() {
   }
 }
 
+export async function getSolicitudesViajes() {
+  try {
+    const url = `${API}/solicitudes/`
+    const token = localStorage.getItem("token")
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    const res = await response.json()
+    return res
+  } catch (e) {
+    console.error("Error encontrando solicitudes", e)
+    return null
+  }
+}
+
 export async function getUsuarios() {
   try {
     const token = localStorage.getItem("token")
-    const response = await fetch(`${API}/usuarios`,{headers:{'Authorization': `Bearer ${token}`}})
+    const response = await fetch(`${API}/usuarios`, { headers: { 'Authorization': `Bearer ${token}` } })
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
@@ -264,6 +285,7 @@ export async function addViajeInicial(data: Viaje) {
   }
 }
 
+
 export async function addDataViajeFin(patente: string, data: ViajeInputFin) {
   if (data && patente) {
     const url = `${API}/viajes/${patente}`
@@ -388,6 +410,49 @@ export async function patchFin(id: number, data: ViajeInputFin) {
   }
 }
 
+export async function patchSolicitudRechazo(id:number,data:string){
+  if(data){
+    const url = `${API}/solicitudes/${id}/rechazo`
+    const token=localStorage.getItem("token")
+    try{
+      const res = await fetch(url,{
+        method: 'PATCH',
+        headers:{
+          'Content-type':'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({motivo:data})
+      })
+      const json = await res.json()
+      return json
+    }catch(e){
+      console.log({ msg: "Error al parchar solicitud rechazo",e })
+    }
+  }
+}
+
+export async function pathSolicitudAprobada(id:number,data:string){
+  if(data && id){
+    const url = `${API}/solicitudes/${id}/aprobado`
+    const token = localStorage.getItem("token")
+    try{
+      const res = await fetch(url,{
+        method:'PATCH',
+        headers:{
+          'Content-type':'application/json',
+          'Authorization':`Bearer ${token}`
+        },
+        body: JSON.stringify({motivo:data})
+      })
+      const json = await res.json()
+      return json
+    }catch(e){
+      console.log({msg: "Error al parchar solicitud aprobada",e})
+    }
+  }
+}
+
+
 export async function editarViaje(id: number, data: Partial<Viaje>) {
   const token = localStorage.getItem("token")
   const url = `${API}/viajes/${id}`
@@ -401,108 +466,135 @@ export async function editarViaje(id: number, data: Partial<Viaje>) {
       body: JSON.stringify(data),
     })
     const json = await res.json()
-    
-  if (!res.ok) {
-    throw new Error(json.error || 'Error al editar viaje')
-  }
-  
-  return json
-  }catch(e){
-    console.error("Error: ",e)
-    console.log({msg: "Error al editar viaje"})
+
+    if (!res.ok) {
+      throw new Error(json.error || 'Error al editar viaje')
+    }
+
+    return json
+  } catch (e) {
+    console.error("Error: ", e)
+    console.log({ msg: "Error al editar viaje" })
   }
 }
 
 
 /*********/
 
-export async function solicitarRecuperarContraseña(correo:string){
-  try{
-    const res = await fetch(`${API}/usuarios/solicitar-reset`,{
-      method:'POST',
-      headers:{'Content-type': 'application/json'},
-      body:JSON.stringify({correo})
+export async function solicitarRecuperarContraseña(correo: string) {
+  try {
+    const res = await fetch(`${API}/usuarios/solicitar-reset`, {
+      method: 'POST',
+      headers: { 'Content-type': 'application/json' },
+      body: JSON.stringify({ correo })
     })
     return await res.json()
-  }catch(e){
-    return {error: 'No se logro solicitar cambio'}
+  } catch (e) {
+    return { error: 'No se logro solicitar cambio' }
   }
 }
-export async function getSolicitudes(){
+export async function getSolicitudes() {
   const token = localStorage.getItem("token")
   const url = `${API}/usuarios/solicitudes-reset`
-  try{
-    const res = await fetch(url,{
-      headers:{'Authorization': `Bearer ${token}`}
+  try {
+    const res = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${token}` }
     })
-    if(!res.ok){
+    if (!res.ok) {
       throw new Error()
     }
     return await res.json()
-  }catch(e){
-    return {error: "No se logro obtener las solicitudes"}
+  } catch (e) {
+    return { error: "No se logro obtener las solicitudes" }
   }
 
 }
-export async function resolverSolicitudesCambio(id:number,pass:string){
+export async function resolverSolicitudesCambio(id: number, pass: string) {
   const token = localStorage.getItem("token")
   const url = `${API}/usuarios/solicitudes-reset/${id}/resolver`
 
-  const res = await fetch(url,{
-    method:"POST",
-    headers:{
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
       'Content-type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
-    body:JSON.stringify({pass})
+    body: JSON.stringify({ pass })
   })
   const json = await res.json()
-  if(!res.ok){
-    throw new Error (json.error || "No se logro resolver la solicitud")
+  if (!res.ok) {
+    throw new Error(json.error || "No se logro resolver la solicitud")
   }
   return json
 }
 
-export async function resolverSubidaImagen(
-  id:number,
-  tipo:"foto-inicio"|"foto-fin"|"foto-comprobante",
-  archivo:File):Promise<{msg:string,ruta?:string}|null>{
 
-    const token = localStorage.getItem("token")
-    const form = new FormData()
-    form.append('foto',archivo)
-    const url = `${API}/viajes/${id}/${tipo}`
-    try{
-      const res = await fetch(url,{
-        method:"PATCH",
-        headers: {'Authorization': `Bearer ${token}`},
-        body: form
-      })
-      const json = await res.json()
-      if(!res.ok){
-        throw new Error (json.error || "No se logro subir imagen")
-      }
-      return json
-    }catch(e){
-      console.error('error subiendo imagen',e)
-      return null
-    }
-}
-
-export async function borrarViajeEspera(idViaje:number){
+export async function solicitarViaje(data: SolicitudInicio) {
+  const payload = data
   const token = localStorage.getItem("token")
-  const url = `${API}/viajes/${idViaje}`
-  try{
-    const res = await fetch(url,{
-      method:"DELETE",
-      headers:{'Authorization':`Bearer ${token}`}
+  const url = `${API}/solicitudes/`
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
     })
     const json = await res.json()
-    if(!res.ok){
-      throw new Error (json.error || "No se logro eliminar viaje en espera")
+    if (!res.ok) {
+      throw new Error(json.error || " No se logro agregar solicitud ")
     }
     return json
-  }catch(e){
+  } catch (e) {
+    console.log("Error al agregar solicitud")
+    return null
+  }
+}
+
+
+
+export async function resolverSubidaImagen(
+  id: number,
+  tipo: "foto-inicio" | "foto-fin" | "foto-comprobante",
+  archivo: File): Promise<{ msg: string, ruta?: string } | null> {
+
+  const token = localStorage.getItem("token")
+  const form = new FormData()
+  form.append('foto', archivo)
+  const url = `${API}/viajes/${id}/${tipo}`
+  try {
+    const res = await fetch(url, {
+      method: "PATCH",
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: form
+    })
+    const json = await res.json()
+    if (!res.ok) {
+      throw new Error(json.error || "No se logro subir imagen")
+    }
+    return json
+  } catch (e) {
+    console.error('error subiendo imagen', e)
+    return null
+  }
+}
+
+export async function borrarViajeEspera(idViaje: number) {
+  const token = localStorage.getItem("token")
+  const url = `${API}/viajes/${idViaje}`
+  try {
+    const res = await fetch(url, {
+      method: "DELETE",
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    const json = await res.json()
+    if (!res.ok) {
+      throw new Error(json.error || "No se logro eliminar viaje en espera")
+    }
+    return json
+  } catch (e) {
     console.log("error borrando viaje en espera")
     return null
   }

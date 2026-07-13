@@ -389,14 +389,16 @@ function menuAdmin() {
         formInicio y al mismo tiempo el estado_viaje de formInicio es "En espera", hace envio de la informacion inicial a DB, guarda
         esta misma informacion en localStorage y envia a la vista de viaje en proceso */
     useEffect(() => {
+        const sendData=async()=>{
         if (formInicio.estado_viaje === "En espera") {
-            addViajeInicial(formInicio)
+            await addViajeInicial(formInicio)
             setModalNewViaje(false)
             setCargando(false)
             showAlerta("Viaje agendado correctamente", "success")
             setFormInicio(viajeVacio)
             setVehiculoSelected(undefined)
-        }
+        }}
+        sendData()
     }, [formInicio])
 
     const handleCierre = () => {

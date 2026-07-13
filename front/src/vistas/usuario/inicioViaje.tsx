@@ -84,9 +84,12 @@ function inicioViaje() {
         const getViajeEspera = async () => {
             try {
                 if (usuario) {
+                    const idViaje = localStorage.getItem("idViaje")
                     const response = await getViajeUsuarioEspera(usuario.id)
-                    if (response && Object.keys(response).length > 0) {
-                        setFormInicio(response[0])
+                    const viaje = response.find((vje:Viaje) => vje.id_viaje === Number(idViaje) )
+                    
+                    if (viaje && response){
+                        setFormInicio(viaje)
                         setCargando(true)
                     } else {
                         setFormInicio(null)

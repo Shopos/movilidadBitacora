@@ -7,7 +7,6 @@ import { useAuth } from "../../context/AuthContext.tsx"
 import { getViajeProceso, getViajeUsuarioEspera } from "../../utils/auxiliar.ts"
 import { Card, CardActions, CardContent, IconButton, Typography } from "@mui/joy"
 import { useAlerta } from "../../context/AlertaContext.tsx"
-
 /*Vista del menu del usuario
         >Iniciar viaje para comenzar proceso de documentacion bitacora
         >Ver mis viajes para navegar a vista de viajes del usuario
@@ -17,7 +16,7 @@ function menuUsuario(){
     const navigate = useNavigate()
     const { usuario } = useAuth()
     const verViajes =()=> navigate("/viajesUsuario");
-    const [viajeEspera,setViajeEspera] = useState<Viaje|null>(null)
+    const [viajeEspera,setViajeEspera] = useState<Viaje[]>([])
     const [cargando,setCargando] = useState(false)
 
     /* Verificar si existe un viaje en espera para dicho usuario, si existe mostrar tarjeta con boton para redirigir a iniciarViaje */
@@ -28,15 +27,15 @@ function menuUsuario(){
                     const response = await getViajeUsuarioEspera(usuario?.id)
                     if (response && Object.keys(response).length > 0) {
                         showAlerta("Tienes un viaje en espera","info")
-                        setViajeEspera(response[0]) //
+                        setViajeEspera(response) //
                         setCargando(true)
                     } else {
-                        setViajeEspera(null)
+                        setViajeEspera([])
                     }
                 }
             }catch(e){
                 console.error(" Error listando viaje usuario ")
-                setViajeEspera(null)
+                setViajeEspera([])
             }
         }
         getViajeUsuario()
@@ -63,9 +62,9 @@ function menuUsuario(){
 
     /* Al accionar boton de Card para comenzar viaje se almacena en localStorage id_viaje para futuras consultas
     y se redirige a inicioViaje */
-    const manejarViajeEspera=()=>{
-        if(viajeEspera){
-            
+    const manejarViajeEspera=(id:number)=>{
+        if(id){
+            localStorage.setItem("idViaje",String(id))
             navigate("/inicioViaje")
         }
     }
@@ -75,23 +74,28 @@ function menuUsuario(){
         <div>
             <NavBar type={0} texto=""/>
             <div className="containerBotones">
-            {viajeEspera && viajeEspera.vehiculo!=="" ? 
-             (<div className="containerCard">
-                <Card variant="outlined" className="cardViaje" sx={{backgroundColor:"#E7E1B1"}}>
+            {viajeEspera && viajeEspera.length>0 ?
+             (<div style={{width:"100%", maxWidth:"50vw", height:"50vh", overflow:"auto",boxSizing:"border-box"}}>
+                {[...viajeEspera].sort((a,b)=>{return Number(b.modo==="vuelta")-Number(a.modo==="vuelta")}).map((vje)=>(
+                    <div className="containerCard">
+                <Card variant="outlined" className="cardViaje" sx={vje.modo==="vuelta" ? {backgroundColor:"#ffca59"}:{ backgroundColor:"#E7E1B1"}}>
                     <CardContent>
                         <Typography level="h1">Tienes un viaje en espera</Typography>
-                        <Typography level="h3">Viaje a {viajeEspera!.destino}</Typography>
-                        <Typography level="body-md">Vehiculo: {viajeEspera!.vehiculo}</Typography>
-                        <Typography level="body-md">Patente: {viajeEspera!.patente}</Typography>
+                        <Typography level="h3">Viaje a {vje.destino}</Typography>
+                        <Typography level="body-md">Vehiculo: {vje!.vehiculo}</Typography>
+                        <Typography level="body-md">Patente: {vje!.patente}</Typography>
                     </CardContent>
                     <CardActions sx={{
                         display:"flex",
                         flexDirection:"row",
                         justifyContent:"flex-end"
                     }}>
-                        <IconButton variant="solid" color="primary" onClick={()=>manejarViajeEspera()}>Comenzar viaje</IconButton>
+                        <IconButton variant="solid" color="primary" onClick={()=>manejarViajeEspera(vje.id_viaje)}>Comenzar viaje</IconButton>
                     </CardActions>
                 </Card>
+             </div>
+                ))}
+             
              </div>): 
              (<>No tienes viajes de momento</>)}
                 <button onClick={()=>verViajes()}>

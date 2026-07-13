@@ -6,6 +6,7 @@ import VehiculoRoutes from "./routes/vehiculos.routes"
 import MantencionesRoutes from "./routes/mantenciones.routes"
 import UsuariosRoutes from "./routes/usuarios.routes"
 import ViajesRoutes from "./routes/viajes.routes"
+import SolicitudesRoutes from "./routes/solicitudes.route"
 import { MulterError } from "multer"
 dotenv.config()
 const app = express()
@@ -18,6 +19,7 @@ app.use("/vehiculos",VehiculoRoutes)
 app.use("/mantenciones",MantencionesRoutes)
 app.use("/usuarios", UsuariosRoutes)
 app.use("/viajes", ViajesRoutes)
+app.use("/solicitudes",SolicitudesRoutes)
 
 const UPLOADS_DIR = process.env.UPLOADS_DIR ? path.resolve(process.env.UPLOADS_DIR) : path.join(__dirname,'..','..','uploads')
 app.use('/uploads',express.static(UPLOADS_DIR,{maxAge:'7d'}))

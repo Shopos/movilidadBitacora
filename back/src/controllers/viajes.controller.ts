@@ -82,7 +82,8 @@ export async function addViajeInicio(req: Request, res: Response) {
             ultima_modificacion,
             modificado_por,
             kms_fin,
-            modo
+            modo,
+            hora_recomendada
         } = req.body
         if (patente === " " && nombre_funcionario === "" && !estado_viaje) {
             return res.status(400).json({ error: " Los campos patente, nombre funcionario no pueden estar vacios " })
@@ -103,7 +104,8 @@ export async function addViajeInicio(req: Request, res: Response) {
             ultima_modificacion,
             modificado_por,
             kms_fin,
-            modo
+            modo,
+            hora_recomendada
         })
         await vehiculoModel.changeStatus(patente, "EN RUTA")
         await usuarioModel.changeStatus(id_usuario, "Asignado")
@@ -259,7 +261,7 @@ export async function editarViaje(req:Request,res:Response){
             res.json({mensaje: "Viaje editado correctamente"})
         }
         if(viajeEncontrado[0].estado_viaje==="En espera"){
-            const {patente,vehiculo,kms_inicial,id_usuario,nombre_funcionario,motivo,destino,lat_fin,lng_fin} = req.body
+            const {patente,vehiculo,kms_inicial,id_usuario,nombre_funcionario,motivo,destino,lat_fin,lng_fin,hora_recomendada} = req.body
             
             if(id_usuario && id_usuario !== viajeEncontrado[0].id_usuario){
                 await usuarioModel.changeStatus(Number(viajeEncontrado[0].id_usuario),"Disponible")
@@ -283,7 +285,8 @@ export async function editarViaje(req:Request,res:Response){
                     lat_fin:lat_fin || viajeEncontrado[0].lat_fin,
                     lng_fin:lng_fin || viajeEncontrado[0].lng_fin,
                     modificado_por:adminName,
-                    ultima_modificacion:ultimaModificacion
+                    ultima_modificacion:ultimaModificacion,
+                    hora_recomendada: hora_recomendada ?? viajeEncontrado[0].hora_recomendada
                 })
             if(!actualizaEspera){
                 return res.status(404).json({error: "Viaje no encontrado"})

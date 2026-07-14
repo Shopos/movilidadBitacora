@@ -61,6 +61,15 @@ function dataViewViaje({ viajeSelected, modo }: prop) {
                             <div className="modalDataItemRow">
                                 <span>Motivo: </span>{viajeSelected?.motivo}
                             </div>
+                            <div className='modalDataItemRow'>
+                                {viajeSelected && viajeSelected.hora_recomendada && 
+                                <>
+                                    <span>Fecha hora recomendad inicio</span>{viajeSelected?.hora_recomendada ? (
+                                        viajeSelected.hora_recomendada.slice(0,10) +" "+ viajeSelected.hora_recomendada.slice(11,19)
+                                        ):""}
+                                </>
+                                }
+                            </div>
                         </div>
                         <div className="modalDataItemRow">
                             <span>Carga combustible: </span>{viajeSelected?.carga_combustible ? "Si" : "No"}

@@ -18,6 +18,7 @@ function menuUsuario(){
     const verViajes =()=> navigate("/viajesUsuario");
     const [viajeEspera,setViajeEspera] = useState<Viaje[]>([])
     const [cargando,setCargando] = useState(false)
+    const [viajeVuelta,setViajeVuelta] = useState(false)
 
     /* Verificar si existe un viaje en espera para dicho usuario, si existe mostrar tarjeta con boton para redirigir a iniciarViaje */
     useEffect(()=>{
@@ -40,6 +41,12 @@ function menuUsuario(){
         }
         getViajeUsuario()
     },[usuario,cargando])
+
+    useEffect(()=>{
+        if(viajeEspera.find(vje => vje.modo === "vuelta")){
+            setViajeVuelta(true)
+        }
+    },[viajeEspera])
 
     const sleep = (ms: number):Promise<void>=>new Promise((resolve)=> setTimeout(resolve,ms))
 
@@ -68,7 +75,26 @@ function menuUsuario(){
             navigate("/inicioViaje")
         }
     }
-   
+   const compararFechas = (a:Viaje,b:Viaje):number =>{
+    if(!a.hora_recomendada && !b.hora_recomendada){
+        return 0
+    }
+    if(!a.hora_recomendada){
+        return 1
+    }
+    if(!b.hora_recomendada){
+        return -1
+    }
+    return new Date(a.hora_recomendada).getDate() - new Date(b.hora_recomendada).getDate()
+   }
+
+   const viajeOrdenado = [...viajeEspera].sort((a,b)=>{
+        const porModo = Number(b.modo==="vuelta")-Number(a.modo==="vuelta")
+        if(porModo!==0){
+            return porModo
+        }
+        return compararFechas(a,b)
+   })
 
     return(
         <div>
@@ -76,12 +102,13 @@ function menuUsuario(){
             <div className="containerBotones">
             {viajeEspera && viajeEspera.length>0 ?
              (<div style={{width:"100%", maxWidth:"50vw", height:"50vh", overflow:"auto",boxSizing:"border-box"}}>
-                {[...viajeEspera].sort((a,b)=>{return Number(b.modo==="vuelta")-Number(a.modo==="vuelta")}).map((vje)=>(
+                {viajeOrdenado.map((vje)=>(
                     <div className="containerCard">
                 <Card variant="outlined" className="cardViaje" sx={vje.modo==="vuelta" ? {backgroundColor:"#ffca59"}:{ backgroundColor:"#E7E1B1"}}>
                     <CardContent>
                         <Typography level="h1">Tienes un viaje en espera</Typography>
                         <Typography level="h3">Viaje a {vje.destino}</Typography>
+                        {vje.hora_recomendada && <Typography level="body-md">Hora agendada: {vje.hora_recomendada.slice(0,10)+"  "+vje.hora_recomendada.slice(11,19)}</Typography>}
                         <Typography level="body-md">Vehiculo: {vje!.vehiculo}</Typography>
                         <Typography level="body-md">Patente: {vje!.patente}</Typography>
                     </CardContent>
@@ -90,7 +117,8 @@ function menuUsuario(){
                         flexDirection:"row",
                         justifyContent:"flex-end"
                     }}>
-                        <IconButton variant="solid" color="primary" onClick={()=>manejarViajeEspera(vje.id_viaje)}>Comenzar viaje</IconButton>
+                        {vje.modo === "vuelta" && <IconButton variant="solid" color="primary" onClick={()=>manejarViajeEspera(vje.id_viaje)}>Comenzar viaje</IconButton>}
+                        {!viajeVuelta && <IconButton variant="solid" color="primary" onClick={()=>manejarViajeEspera(vje.id_viaje)}>Comenzar viaje</IconButton>}
                     </CardActions>
                 </Card>
              </div>

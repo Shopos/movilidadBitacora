@@ -38,10 +38,26 @@ export async function getSolicitudes():Promise<solicitud[]>{
     return rows
 }
 
+export async function getSolicitudesUsuario(id:number):Promise<solicitud[]>{
+    const [rows] = await connection.query<solicitud[]>(
+        "SELECT * FROM solicitudes_viaje WHERE id_solicitante=?",[id]
+    )
+    return rows
+}
+
 export async function rechazarSolicitud(id:number,motivo:string,autor:string):Promise<solicitud[]>{
     const [rows] = await connection.query<solicitud[]>(
         `UPDATE solicitudes_viaje
         SET estado='rechazada', resuelta_por=?, fecha_resuelta=NOW(),estado_texto=?
+        WHERE id_solicitud=? AND estado='pendiente' `,[autor,motivo,id]
+    )
+    return rows
+}
+
+export async function aprobarSolicitud(id:number, motivo:string, autor:string): Promise<solicitud[]>{
+    const [rows]=await connection.query<solicitud[]>(
+        `UPDATE solicitudes_viaje
+        SET estado='resuelta',resuelta_por=?, fecha_resuelta=NOW(),estado_texto=?
         WHERE id_solicitud=? AND estado='pendiente' `,[autor,motivo,id]
     )
     return rows

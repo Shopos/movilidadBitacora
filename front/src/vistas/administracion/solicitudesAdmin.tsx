@@ -81,7 +81,8 @@ function solicitudesAdmin() {
         modo: "ida", //modo ida (inicial) -> modo vuelta --->nuevo viaje con datos inversos
         imagen_comprobante_ben: "",
         imagen_tablero_ida: "",
-        imagen_tablero_vuelta: ""
+        imagen_tablero_vuelta: "",
+        hora_recomendada:""
     })
     const viajeVacio: Viaje = {
         id_viaje: 0,
@@ -110,7 +111,8 @@ function solicitudesAdmin() {
         modo: "ida", //modo ida (inicial) -> modo vuelta --->nuevo viaje con datos inversos
         imagen_comprobante_ben: "",
         imagen_tablero_ida: "",
-        imagen_tablero_vuelta: ""
+        imagen_tablero_vuelta: "",
+        hora_recomendada:""
     }
     const points: GPS[] = [dataGPS, dataGPSDestino]
     const [funcionarios, setFuncionarios] = useState<[User]>()
@@ -235,20 +237,26 @@ function solicitudesAdmin() {
     useEffect(() => {
         const sendData = async () => {
             if (formInicio.estado_viaje === "En espera" && solicitudViajeSelected) {
-                await addViajeInicial(formInicio)
-                await pathSolicitudAprobada(solicitudViajeSelected?.id_solicitud,"Viaje Agendado")
-                setModalConfirmar(false)
-                setModalViaje(false)
-                setMotivo("")
-                setFormInicio(viajeVacio)
-                setCargando(false)
+                try{
+                    const res = await pathSolicitudAprobada(solicitudViajeSelected?.id_solicitud,"Viaje Agendado")
+                    if(res){
+                        await addViajeInicial(formInicio)
+                    }
+                    setModalConfirmar(false)
+                    setModalViaje(false)
+                    setMotivo("")
+                    setFormInicio(viajeVacio)
+                    setCargando(false)
+                    showAlerta("Solicitud aprobada, viaje agendado","success")
+                }catch(e){
+                    showAlerta("Error al intentar aprobar solicitud, intenta más tarde","error")
+                }
             }
         }
         sendData()
     },[formInicio])
 
     const handleAprobarSolicitud = async () => {
-        console.log(formInicio)
         setFormInicio((prev) => ({
             ...prev,
             fecha_hora_inicio: "",
@@ -578,6 +586,11 @@ function solicitudesAdmin() {
                                     <div className="itemInput-Modal">
                                         <label>Kilometraje actual</label>
                                         <input disabled type="number" name="kmsInicio" value={vehiculo?.kms_actual}></input>
+                                    </div>
+                                    <div className="itemInput-Modal">
+                                        <label>Fecha y hora recomendada</label>
+                                        <input type="datetime-local" name="hora_recomendada" value={formInicio.hora_recomendada ? formInicio.hora_recomendada:""}
+                                        onChange={(e)=>setFormInicio({...formInicio,hora_recomendada:e.currentTarget.value})}></input>
                                     </div>
                                     <div className="itemInput2-Modal">
                                         <label>Motivo</label>

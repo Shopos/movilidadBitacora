@@ -151,6 +151,23 @@ export async function getViajeID(id: number) {
   }
 }
 
+export async function getSolicitudesUsuario(id:number) {
+  try{
+    if(id){
+      const token = localStorage.getItem("token")
+      const response= await fetch(`${API}/solicitudes/usuario/${id}`,{headers:{'Authorization':`Bearer ${token}`}})
+      if(!response.ok){
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      return await response.json()
+    }
+  }catch(e){
+    console.error(e)
+    return null
+  }
+}
+
+
 export async function getViajeProceso(id: number) {
   try {
     if (id) {
@@ -432,7 +449,7 @@ export async function patchSolicitudRechazo(id:number,data:string){
 }
 
 export async function pathSolicitudAprobada(id:number,data:string){
-  if(data && id){
+  if(data){
     const url = `${API}/solicitudes/${id}/aprobado`
     const token = localStorage.getItem("token")
     try{
@@ -445,6 +462,7 @@ export async function pathSolicitudAprobada(id:number,data:string){
         body: JSON.stringify({motivo:data})
       })
       const json = await res.json()
+      console.log(json)
       return json
     }catch(e){
       console.log({msg: "Error al parchar solicitud aprobada",e})

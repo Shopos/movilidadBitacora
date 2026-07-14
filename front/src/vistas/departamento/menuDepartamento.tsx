@@ -4,9 +4,12 @@ import { useEffect, useState } from "react"
 import { DialogActions, DialogContent, DialogTitle, Divider, Modal } from "@mui/material"
 import {Button} from "@mui/joy"
 import { ModalDialog } from "@mui/joy"
+import AssignmentSharpIcon from '@mui/icons-material/AssignmentSharp';
+import AssignmentTurnedInSharpIcon from '@mui/icons-material/AssignmentTurnedInSharp';
 import { solicitarViaje } from "../../utils/auxiliar"
 import { useAuth } from "../../context/AuthContext"
 import type { SolicitudInicio } from "../../tipos/tipoSistema"
+import "../../estilos/menuDepartamento.css"
 
 function menuDepartamento(){
     const {usuario} = useAuth()
@@ -55,10 +58,10 @@ function menuDepartamento(){
     return(
     <div>
         <NavBar type={0} texto=""/>
-
-        <button onClick={handleOpenModal}>Solicitar un viaje</button>
-        <button onClick={()=>navigate("/solicitudesDepto")}>Ver mis solicitudes</button>
-
+        <div className="menuBotones">
+            <Button startDecorator={<AssignmentTurnedInSharpIcon/>}onClick={handleOpenModal}>Solicitar un viaje</Button>
+            <Button startDecorator={<AssignmentSharpIcon />} onClick={()=>navigate("/solicitudesDepto")}>Ver mis solicitudes</Button>
+        </div>
         <Modal open={modalSolicitud} onClose={()=>openModalSolicitud(false)}>
             <ModalDialog variant="outlined" sx={{ width: { xs: '90%', sm: '500px', md: '700px' } }}>
                 <DialogTitle>
@@ -69,7 +72,7 @@ function menuDepartamento(){
                     <div className="items-Modal">
                        <div className="itemInput-Modal">
                             <label>Departamento solicitante</label>
-                            <input name="solicitante" placeholder="Departamento de informática" value={formSolicitud.solicitante} onChange={handleChange}></input>
+                            <input name="solicitante" value={usuario?.nombre}></input>
                        </div>
                        <div className="itemInput-Modal">
                             <label>Tipo vehículo</label>

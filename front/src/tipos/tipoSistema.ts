@@ -47,6 +47,7 @@ export type Viaje = {
     imagen_tablero_ida:string,
     imagen_tablero_vuelta:string,
     imagen_comprobante_ben:string
+    hora_recomendada:string|null
 }
 
 export type ViajeInputFin = {

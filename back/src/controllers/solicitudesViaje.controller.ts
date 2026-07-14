@@ -20,9 +20,19 @@ export async function agregarSolicitud(req:Request,res:Response){
 }
 
 export async function aprobarSolicitud(req:Request,res:Response){
+    console.log("aprobando...")
     try{
-          
+          const id=Number(req.params.id)
+          const {motivo} = req.body
+          const autor = (req.usuario as any).nombre
+          const response = await solicitudViaje.aprobarSolicitud(id,motivo,autor)
+          if(!response){
+            return res.status(404).json({error: "No se logro completar la aprobación de la solicitud"})
+          }
+          console.log("solicitud aprobada")
+          res.status(200).json({id,mensaje: "Viaje aprobado correctamente"})
     }catch(e){
+        console.log("error solicitud")
         res.status(500).json({error: " Error al agregar aprobar solicitud "})
     }
 }
@@ -37,17 +47,27 @@ export async function getSolicitudes(req:Request,res:Response) {
     }
 }
 
+export async function getSolicitudesUsuario(req:Request,res:Response){
+    try{
+        const id=Number(req.params.id)
+        const solicitudes=await solicitudViaje.getSolicitudesUsuario(id)
+        res.json(solicitudes)
+    }catch(e){
+        console.error(e)
+        res.status(500).json({error: " Error al listar solicitudes "})
+    }
+}
+
 export async function rechazarSolicitud(req:Request,res:Response){
     try{
         const id = Number(req.params.id)
         const {motivo} = req.body
         const autor = (req.usuario as any).nombre
-        console.log(req.body, motivo)
         const response = await solicitudViaje.rechazarSolicitud(id,motivo,autor)
         if(!response){
             return res.status(404).json({ error: " No se logro completar el rechazo de solicitud " })
         }
-        res.status(201).json({id,mensaje:" Viaje rechazado correctamente"})
+        res.status(200).json({id,mensaje:" Viaje rechazado correctamente"})
     }catch(e){
         console.error(e)
         res.status(500).json({error: " Error al rechazar solicitud "})

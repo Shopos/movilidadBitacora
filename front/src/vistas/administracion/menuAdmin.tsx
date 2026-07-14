@@ -110,7 +110,8 @@ function menuAdmin() {
         modo: "ida", //modo ida (inicial) -> modo vuelta --->nuevo viaje con datos inversos
         imagen_comprobante_ben: "",
         imagen_tablero_ida: "",
-        imagen_tablero_vuelta: ""
+        imagen_tablero_vuelta: "",
+        hora_recomendada: ""
     })
     const viajeVacio: Viaje = {
         id_viaje: 0,
@@ -139,7 +140,8 @@ function menuAdmin() {
         modo: "ida", //modo ida (inicial) -> modo vuelta --->nuevo viaje con datos inversos
         imagen_comprobante_ben: "",
         imagen_tablero_ida: "",
-        imagen_tablero_vuelta: ""
+        imagen_tablero_vuelta: "",
+        hora_recomendada: ""
     }
 
     /* Metodo para obtener la lista de viajes, usuarios y vehiculos */
@@ -389,15 +391,16 @@ function menuAdmin() {
         formInicio y al mismo tiempo el estado_viaje de formInicio es "En espera", hace envio de la informacion inicial a DB, guarda
         esta misma informacion en localStorage y envia a la vista de viaje en proceso */
     useEffect(() => {
-        const sendData=async()=>{
-        if (formInicio.estado_viaje === "En espera") {
-            await addViajeInicial(formInicio)
-            setModalNewViaje(false)
-            setCargando(false)
-            showAlerta("Viaje agendado correctamente", "success")
-            setFormInicio(viajeVacio)
-            setVehiculoSelected(undefined)
-        }}
+        const sendData = async () => {
+            if (formInicio.estado_viaje === "En espera") {
+                await addViajeInicial(formInicio)
+                setModalNewViaje(false)
+                setCargando(false)
+                showAlerta("Viaje agendado correctamente", "success")
+                setFormInicio(viajeVacio)
+                setVehiculoSelected(undefined)
+            }
+        }
         sendData()
     }, [formInicio])
 
@@ -642,6 +645,7 @@ function menuAdmin() {
                                 <th style={{ width: "10%" }}>Hora inicio</th>
                                 <th style={{ width: "10%" }}>Hora llegada</th>
                                 <th style={{ width: "10%" }}>Estado viaje</th>
+                                <th style={{ width: "10%" }}>Duración viaje</th>
                                 <th >Acciones</th>
                             </tr>
                         </thead>
@@ -653,11 +657,17 @@ function menuAdmin() {
                                     <td>{viaje.patente}</td>
                                     <td>{viaje.fecha_hora_inicio ? (viaje.fecha_hora_inicio.slice(0, 10)) : ("Viaje en espera")}</td>
                                     <td>{viaje.nombre_funcionario}</td>
-                                    <td>{viaje.fecha_hora_inicio ? (viaje.fecha_hora_inicio.slice(11, 19)) : ("")}</td>
+                                    <td>{viaje.fecha_hora_inicio ? (viaje.fecha_hora_inicio.slice(11, 19)) : ("Aún no iniciado")}</td>
 
-                                    <td>{viaje.fecha_hora_fin ? (viaje.fecha_hora_fin.slice(11, 19)) : ("-")}</td>
+                                    <td>{viaje.fecha_hora_fin ? (viaje.fecha_hora_fin.slice(11, 19)) : ("Aún no terminado")}</td>
 
                                     <td>{viaje.estado_viaje}</td>
+                                    <td>{viaje.estado_viaje === "Terminado" ? (() => {
+                                        const diffMs = new Date(viaje.fecha_hora_fin).valueOf() - new Date(viaje.fecha_hora_inicio).valueOf();
+                                        const hours = Math.floor(diffMs / 1000 / 60 / 60);
+                                        const minutes = Math.floor((diffMs / 1000 / 60) % 60);
+                                        return `${hours}h ${minutes}m`;
+                                    })() : ("Aún no terminado")}</td>
                                     <td>
                                         <div className="buttonsIconTable" style={{ display: "flex", gap: "10px" }}>
                                             <button onClick={() => handleModalViajeView(viaje)}>
@@ -680,7 +690,7 @@ function menuAdmin() {
 
                             {viajeFiltrado.length === 0 && (
                                 <tr >
-                                    <td colSpan={7} style={{ textAlign: "center", padding: "5%" }}>No cuentas con viajes para este filtro</td>
+                                    <td colSpan={8} style={{ textAlign: "center", padding: "5%" }}>No cuentas con viajes para este filtro</td>
                                 </tr>
                             )}
                         </tbody>
@@ -779,6 +789,11 @@ function menuAdmin() {
                                         <label>Kilometraje actual</label>
                                         <input disabled type="number" name="kmsInicio" value={formEdit.kms_inicial}></input>
                                     </div>
+                                    <div className="itemInput-Modal">
+                                        <label>Fecha y hora recomendada</label>
+                                        <input type="datetime-local" name="hora_recomendada" value={formEdit.hora_recomendada ? formEdit.hora_recomendada : ""}
+                                            onChange={(e) => setFormEdit({ ...formEdit, hora_recomendada: e.currentTarget.value })}></input>
+                                    </div>
                                     <div className="itemInput2-Modal">
                                         <label>Motivo</label>
                                         <textarea name="motivo" value={formEdit.motivo} onChange={(e) => {
@@ -809,21 +824,21 @@ function menuAdmin() {
                         )}
                     </DialogContent>
                     <DialogActions>
-                       
+
                         <Button variant="solid" color="success" onClick={() => {
                             handleEditViajeData()
                         }}>
                             guardar cambios
                         </Button>
-                        <Button  variant="plain"  onClick={() => {
+                        <Button variant="plain" onClick={() => {
                             setViajeEditSelected(null)
                             setFormEdit({})
                             setOpenModalEdit(false)
                         }}>
                             Cancelar
                         </Button>
-                         {viajeEdit?.estado_viaje === "En espera" && (
-                            <Button sx={{marginRight:'auto'}} variant="plain" color="danger" onClick={() => {
+                        {viajeEdit?.estado_viaje === "En espera" && (
+                            <Button sx={{ marginRight: 'auto' }} variant="plain" color="danger" onClick={() => {
                                 handleBorrarViaje()
                             }}>Eliminar viaje</Button>
                         )}
@@ -879,6 +894,12 @@ function menuAdmin() {
                             <div className="itemInput-Modal">
                                 <label>Kilometraje actual</label>
                                 <input disabled type="number" name="kmsInicio" value={vehiculoSelected?.kms_actual}></input>
+                            </div>
+
+                            <div className="itemInput-Modal">
+                                <label>Fecha y hora recomendada</label>
+                                <input type="datetime-local" name="hora_recomendada" value={formInicio.hora_recomendada ? formInicio.hora_recomendada : ""}
+                                    onChange={(e) => setFormInicio({ ...formInicio, hora_recomendada: e.currentTarget.value })}></input>
                             </div>
                             <div className="itemInput2-Modal">
                                 <label>Motivo</label>

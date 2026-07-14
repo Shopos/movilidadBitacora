@@ -14,7 +14,7 @@ import { getViajeID } from "../../utils/auxiliar.ts";
 import { TablePagination } from "@mui/material";
 import { useAlerta } from "../../context/AlertaContext.tsx";
 import DateRangeOutlinedIcon from "@mui/icons-material/DateRangeOutlined";
-
+import logoSC from "../../assets/logo.png"
 //Funcion para el filtrado de viajes por fecha, se considera por dia, semana y mes
 function dentroPeriodo(fechaString: string | null, periodo: string): boolean {
     if (!fechaString) {
@@ -135,6 +135,28 @@ function viajesUsuario() {
             return tiempo
         })
     }, [viajesUsuario, periodos])
+    
+
+    const generarViajePdf=()=>{
+        const logo = logoSC
+        const doc = new jsPDF('l',"pt",'a4')
+        doc.addImage(logo,"PNG",750,15,60,60)
+        doc.setFontSize(12)
+        doc.text("ILUSTRE MUNICIPALIDAD SANTA CRUZ Departamento de Movilización",85,30,{align:"center",maxWidth:150})
+        doc.setFontSize(20)
+        doc.text("BITÁCORA VEHICULO",421,80,{align:"center"})
+        doc.setFontSize(12)
+        //doc.text(`Fecha ${viajeSelected?.fecha_hora_inicio.slice(0,10)}`,10,30)
+        //doc.text(`Vehiculo: ${viajeSelected?.vehiculo} Placa patente: ${viajeSelected?.patente}`,10,40,{align:"justify"})
+        //doc.text(`Salida:HRS. ${viajeSelected?.fecha_hora_inicio.slice(11,19)} KMS: ${viajeSelected?.kms_inicial} Llegada:HRS. ${viajeSelected?.fecha_hora_fin ? viajeSelected?.fecha_hora_fin.slice(11,19): ""} KMS: ${viajeSelected?.kms_fin ? viajeSelected.kms_fin:""} `,
+        //10,50,{align:"justify"})
+        //doc.text(`Destino: ${viajeSelected?.destino}`,10,60)
+        //doc.text(`Funcionario: ${viajeSelected?.nombre_funcionario}`,10,70)
+        //doc.text(`Motivo: ${viajeSelected?.motivo}`,10,80)
+        //doc.text(`Combustible Cantidad: ${viajeSelected?.carga_combustible ? viajeSelected?.cantidad_carga:"No aplica"}`,10,90)
+        //doc.text(`Observaciones: ${viajeSelected?.obs_viaje ? viajeSelected.obs_viaje:"No aplica"}`,10,100)
+        doc.save(`viaje ${viajeSelected?.fecha_hora_inicio}${viajeSelected?.nombre_funcionario}.pdf`)
+    }
 
     /*
     Vista para los viajes del usuario
@@ -216,6 +238,7 @@ function viajesUsuario() {
                                     <th style={{ width: "12%" }}>Hora inicio</th>
                                     <th style={{ width: "12%" }}>Hora llegada</th>
                                     <th style={{ width: "12%" }}>Estado viaje</th>
+                                    <th style={{ width: "12%" }}>Duración viaje</th>
                                     <th style={{ width: "12%" }}>Acciones</th>
                                 </tr>
                             </thead>
@@ -229,6 +252,12 @@ function viajesUsuario() {
                                         <td><span className="cell-header">Hora inicio</span>{viaje.fecha_hora_inicio ? `${viaje.fecha_hora_inicio.slice(0, 10)} ${viaje.fecha_hora_inicio.slice(11, 19)}` : "Aun no iniciado"}</td>
                                         <td><span className="cell-header">Hora llegada</span>{viaje.fecha_hora_fin ? `${viaje.fecha_hora_fin.slice(0, 10)} ${viaje.fecha_hora_fin.slice(11, 19)}` : "Aun no terminado"}</td>
                                         <td><span className="cell-header">Estado viaje</span>{viaje.estado_viaje}</td>
+                                        <td>{viaje.estado_viaje === "Terminado" ? (() => {
+                                            const diffMs = new Date(viaje.fecha_hora_fin).valueOf() - new Date(viaje.fecha_hora_inicio).valueOf();
+                                            const hours = Math.floor(diffMs / 1000 / 60 / 60);
+                                            const minutes = Math.floor((diffMs / 1000 / 60) % 60);
+                                            return `${hours}h ${minutes}m`;
+                                        })() : ("Aún no terminado")}</td>
                                         <td>
                                             <span className="cell-header">Acciones</span>
                                             <div style={{ display: "flex", gap: "10px" }}>
@@ -278,6 +307,7 @@ function viajesUsuario() {
                             {viajeSelected ? (<DataViewViaje viajeSelected={viajeSelected} modo={0} />) : "ERROR"}
                         </DialogContent>
                         <DialogActions>
+                            <Button onClick={()=>generarViajePdf()}>Exportar a pdf</Button>
                             <Button variant="soft" color="neutral" onClick={() => setOpenModalViaje(false)}>
                                 Volver
                             </Button>

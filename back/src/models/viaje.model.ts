@@ -44,7 +44,8 @@ export interface ViajeInputInicio{
     ultima_modificacion:string,
     modificado_por:string,
     kms_fin:number,
-    modo:string
+    modo:string,
+    hora_recomendada:string|null
 }
 export interface ViajeInputFuncionarioInicio{
     fecha_hora_inicio:string,
@@ -93,6 +94,7 @@ export interface viajeEspera{
     nombre_funcionario:string,
     ultima_modificacion:string,
     modificado_por:string,
+    hora_recomendada:string|null
 }
 //Metodo que devuelve todos los viajes
 export async function getAllViajes(): Promise<Viaje[]>{
@@ -175,9 +177,10 @@ export async function addViajeInicio(data:ViajeInputInicio): Promise<ViajeInputI
          ultima_modificacion,
          modificado_por,
          kms_fin,
-         modo
+         modo,
+         hora_recomendada
         )
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) `,
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) `,
         [
             data.vehiculo,
             data.id_usuario,
@@ -194,7 +197,8 @@ export async function addViajeInicio(data:ViajeInputInicio): Promise<ViajeInputI
             data.ultima_modificacion,
             data.modificado_por,
             data.kms_fin,
-            data.modo
+            data.modo,
+            data.hora_recomendada
         ]
     )
     //@ts-ignore
@@ -331,9 +335,9 @@ export async function editarTerminado(id:number,data:viajeTerminado){
 export async function editarEspera(id:number, data:viajeEspera){
     const [res] = await connection.query(
         `UPDATE viajes SET
-        patente=?,vehiculo=?,kms_inicial=?,id_usuario=?,nombre_funcionario=?,destino=?,motivo=?,lat_fin=?,lng_fin=?,modificado_por=?,ultima_modificacion=?
+        patente=?,vehiculo=?,kms_inicial=?,id_usuario=?,nombre_funcionario=?,destino=?,motivo=?,lat_fin=?,lng_fin=?,modificado_por=?,ultima_modificacion=?,hora_recomendada=?
         WHERE id_viaje=?`,
-        [data.patente,data.vehiculo,data.kms_inicial,data.id_usuario,data.nombre_funcionario,data.destino,data.motivo,data.lat_fin,data.lng_fin,data.modificado_por,data.ultima_modificacion,id]
+        [data.patente,data.vehiculo,data.kms_inicial,data.id_usuario,data.nombre_funcionario,data.destino,data.motivo,data.lat_fin,data.lng_fin,data.modificado_por,data.ultima_modificacion,data.hora_recomendada,id]
     )
     //@ts-ignore
     return res.affectedRows > 0

@@ -3,6 +3,7 @@ export type Vehiculo={
     modelo:string,
     kms_actual:number,
     estado:"DISPONIBLE"|"EN REPARACION"|"EN RUTA"|"DADO DE BAJA"
+    tipo_vehiculo:"Automóvil"|"Motocicleta"|"Bus"|"Camioneta"|"Furgón"|"Camión"|"Maquinaria"
 }
 export type User={
     id_usuario:number,
@@ -12,7 +13,8 @@ export type User={
     nombre:string,
     cargo:string,
     estado:boolean,
-    estado_viaje_usuario:"Disponible"|"Asignado"|"En ruta"
+    estado_viaje_usuario:"Disponible"|"Asignado"|"En ruta",
+    listaLicencias:string[]
 }
 export type navBarProps={
     type:number;

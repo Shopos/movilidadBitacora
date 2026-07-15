@@ -781,9 +781,14 @@ function menuAdmin() {
                                 </tr>
                             ))}
 
-                            {viajeFiltrado.length === 0 && (
+                            {viajeFiltrado.length === 0 && estado==="Todos" && periodos==="Todos" && busqueda==="" && (
                                 <tr >
-                                    <td colSpan={8} style={{ textAlign: "center", padding: "5%" }}>No cuentas con viajes para este filtro</td>
+                                    <td colSpan={8} style={{ textAlign: "center", padding: "5%" }}>No cuentas con bitácoras de momento</td>
+                                </tr>
+                            )}
+                            {viajeFiltrado.length === 0 && (estado !== "Todos" || periodos !== "Todos" || busqueda !== "") && (
+                                <tr >
+                                    <td colSpan={8} style={{ textAlign: "center", padding: "5%" }}>No cuentas con bitácoras para este filtro</td>
                                 </tr>
                             )}
                         </tbody>

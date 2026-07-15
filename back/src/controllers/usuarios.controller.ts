@@ -65,11 +65,15 @@ export async function getUsuarioId(req: Request, res: Response) {
 */
 export async function agregarUsuario(req: Request, res: Response) {
     try {
-        const { correo, pass, tipo_licencia, nombre, cargo, estado } = req.body
-        if (correo === "" && pass === "" && tipo_licencia === "" && nombre === "" && cargo === "") {
+        const { correo, pass, tipo_licencia, nombre, cargo, estado, lista_licencia } = req.body
+        if (correo === "" || pass === "" || nombre === "" || cargo === "") {
             return res.status(400).json({ error: "Los campos son obligatorios " })
         }
         const id = await usuarioModel.addUsuario({ correo, pass, tipo_licencia, nombre, cargo, estado })
+        //esperar que se agregue usuario para tener id y agregar las licencias
+        if(id){
+            const response = await usuarioModel.addLicencias(id,lista_licencia)
+        }
         res.status(201).json({ id, mensaje: " Usuario agregado correctamente " })
     } catch (e) {
         console.error(e)
@@ -85,9 +89,9 @@ export async function editarUsuario(req: Request, res: Response) {
     try {
         console.log(req)
         const id = req.params.correo
-        const { estado, tipo_licencia } = req.body
+        const { estado, tipo_licencia,lista_licencia } = req.body
 
-        const actualiza = await usuarioModel.editUsuario(id, { estado, tipo_licencia })
+        const actualiza = await usuarioModel.editUsuario(id, { estado, tipo_licencia, lista_licencia })
         if (!actualiza) {
             return res.status(404).json({ error: " usuario no encontrado " })
         }

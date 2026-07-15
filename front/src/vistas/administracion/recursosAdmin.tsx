@@ -3,6 +3,7 @@ import NavBar from "../../componentes/navBar.tsx"
 import Mantenciones from "../../componentes/mantencionesVehiculo.tsx"
 import "../../estilos/recursosAdmin.css"
 import { Table } from '@mui/joy'
+import {FormControl, type SelectChangeEvent} from "@mui/material"
 import { Modal, ModalDialog, DialogTitle, Divider, DialogContent, DialogActions, Button } from "@mui/joy"
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import EditIcon from '@mui/icons-material/Edit';
@@ -11,14 +12,15 @@ import getVehiculos, { addMantencionVehiculo, agregarVehiculo, editarVehiculo, a
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { useAlerta } from '../../context/AlertaContext.tsx'
-import { TablePagination } from '@mui/material'
+import { Box, InputLabel, MenuItem, OutlinedInput, TablePagination, Chip,Select } from '@mui/material'
 
 
 const vehiculoVacio: Vehiculo = {
     patente: "",
     modelo: "",
     kms_actual: 0,
-    estado: "DADO DE BAJA"
+    estado: "DADO DE BAJA",
+    tipo_vehiculo: "Automóvil"
 }
 const mantencionVacia: Mantencion = {
     id_mantencion: 0,
@@ -36,7 +38,8 @@ const usuarioVacio: User = {
     nombre: "",
     pass: "",
     tipo_licencia: "",
-    estado_viaje_usuario: "Disponible"
+    estado_viaje_usuario: "Disponible",
+    listaLicencias: []
 }
 function recursosAdmin() {
     const { showAlerta } = useAlerta()
@@ -46,10 +49,10 @@ function recursosAdmin() {
     const [modalAdd, setOpenModalAdd] = useState<boolean>(false)
     const [modalMantencion, setOpenModalMantencion] = useState<boolean>(false)
     const [modalViewRecurso, openModalViewRecurso] = useState<boolean>(false)
-    const [recursoShow, setRecursoShow] = useState<Vehiculo | User | null>(null)
-    const [recursoEdit, setRecursoEdit] = useState<Vehiculo | User | null>(null)
+    const [recursoShow, setRecursoShow] = useState<Vehiculo | User >()
+    const [recursoEdit, setRecursoEdit] = useState<Vehiculo | User >()
     const [modalEdit, openModalEdit] = useState<boolean>(false)
-
+    const licencias = ["A5", "A4", "A3", "A2", "A1", "B", "C", "D", "E", "F"]
     const [refresh, setRefresh] = useState(false)
 
     const [cargando, setCargando] = useState(false)
@@ -139,12 +142,14 @@ function recursosAdmin() {
             setCargando(true)
             const correo = recursoEdit.correo
             const payload = formU
+            
             const edicion = await editarUsuario(correo, payload)
             if (edicion) {
                 showAlerta("Vehiculo editado correctamente", "success")
             } else {
                 showAlerta("Hubo un problema al editar, intente más tarde", "warning")
             }
+            
             setFormU(usuarioVacio)
             setCargando(false)
             setRefresh(!refresh)
@@ -169,12 +174,14 @@ function recursosAdmin() {
     const handleAgregarUsuario = async () => {
         if (!formAddU || cargando) return
         setCargando(true)
+
         const res = await agregarUsuario(formAddU)
         if (res) {
             showAlerta("Usuario agregado correctamente", "success")
         } else {
             showAlerta("Hubo un problema al agregar, intenta más tarde", "warning")
-        }
+        }            
+
         setFormAddU(usuarioVacio)
         setCargando(false)
         setRefresh(!refresh)
@@ -255,6 +262,25 @@ function recursosAdmin() {
         setPage(0);
     };
 
+    const handleChangeLicencia=(event:SelectChangeEvent<string[]>)=>{
+        const{
+            target:{value},
+        }=event
+        setFormAddU((prev)=>({
+            ...prev,
+            listaLicencias: typeof value === 'string' ? value.split(','):value
+        })
+        )
+    }
+    const handleChangeLicenciaEdit=(event:SelectChangeEvent<string[]>)=>{
+        const{
+            target:{value},
+        }=event
+            setFormU((prev)=>({
+                ...prev,
+                listaLicencias: typeof value === 'string' ? value.split(','):value
+            }))
+    }
     /*
         Vista de recursos del departamento
         
@@ -296,7 +322,7 @@ function recursosAdmin() {
                                 </thead>
 
                                 <tbody>
-                                    {usuarios && usuarios.slice(page*rowsPerPage,page*rowsPerPage+rowsPerPage).map((usuario: User) => (
+                                    {usuarios && usuarios.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((usuario: User) => (
                                         <tr>
                                             <td style={{ overflow: "clip" }}>{usuario.correo}</td>
                                             <td>{usuario.nombre}</td>
@@ -346,8 +372,9 @@ function recursosAdmin() {
                                 }}>
                                 <thead>
                                     <tr>
-                                        <th >Patente</th>
-                                        <th >Modelo</th>
+                                        <th>Patente</th>
+                                        <th>Tipo vehículo</th>
+                                        <th>Modelo</th>
                                         <th style={{ width: "15%" }}>KMS actual</th>
                                         <th style={{ width: "10%" }}>Estado</th>
                                         <th style={{ width: "30%" }}>Acciones</th>
@@ -355,9 +382,10 @@ function recursosAdmin() {
                                 </thead>
 
                                 <tbody>
-                                    {vehiculos && vehiculos.slice(page*rowsPerPage,page*rowsPerPage+rowsPerPage).map((vh: Vehiculo) => (
+                                    {vehiculos && vehiculos.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((vh: Vehiculo) => (
                                         <tr>
                                             <td>{vh.patente}</td>
+                                            <td>{vh.tipo_vehiculo}</td>
                                             <td>{vh.modelo}</td>
                                             <td>{vh.kms_actual}</td>
                                             <td>{vh.estado}</td>
@@ -375,21 +403,21 @@ function recursosAdmin() {
                                     ))}
                                 </tbody>
                             </Table>
-                            {vehiculos && 
-                            <TablePagination
-                                rowsPerPageOptions={[5, 10]}
-                                component="div"
-                                count={vehiculos!.length}
-                                rowsPerPage={rowsPerPage}
-                                page={page}
-                                onPageChange={handleChangePage}
-                                onRowsPerPageChange={handleChangeRowsPerPage}
-                                labelRowsPerPage={"Cantidad de usuarios"}
-                                labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count !== -1 ? count : `más de ${to}`}`}
-                                sx={{
-                                    '& .MuiTablePagination-actions': { width: '5vw' }
-                                }}
-                            />
+                            {vehiculos &&
+                                <TablePagination
+                                    rowsPerPageOptions={[5, 10]}
+                                    component="div"
+                                    count={vehiculos!.length}
+                                    rowsPerPage={rowsPerPage}
+                                    page={page}
+                                    onPageChange={handleChangePage}
+                                    onRowsPerPageChange={handleChangeRowsPerPage}
+                                    labelRowsPerPage={"Cantidad de vehículos"}
+                                    labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count !== -1 ? count : `más de ${to}`}`}
+                                    sx={{
+                                        '& .MuiTablePagination-actions': { width: '5vw' }
+                                    }}
+                                />
                             }
                         </div>
                     )}
@@ -410,6 +438,19 @@ function recursosAdmin() {
                                 <form style={{ display: "flex", flexDirection: "column" }}>
                                     <label>Patente</label>
                                     <input type='text' value={formAddV.patente} onChange={(e) => setFormAddV({ ...formAddV, patente: (e.target.value) })}></input>
+                                    <label>Tipo Vehículo</label>
+                                    <select value={formAddV.tipo_vehiculo} onChange={(e) => setFormAddV({
+                                        ...formAddV, tipo_vehiculo: e.target.value as
+                                            "Motocicleta" | "Automóvil" | "Camioneta" | "Furgón" | "Camión" | "Bus" | "Maquinaria"
+                                    })}>
+                                        <option>Motocicleta</option>
+                                        <option>Automóvil</option>
+                                        <option>Camioneta</option>
+                                        <option>Furgón</option>
+                                        <option>Camión</option>
+                                        <option>Bus</option>
+                                        <option>Maquinaria</option>
+                                    </select>
                                     <label>Modelo</label>
                                     <input type='text' value={formAddV.modelo} onChange={(e) => setFormAddV({ ...formAddV, modelo: (e.target.value) })}></input>
                                     <label>kilometraje actual</label>
@@ -440,19 +481,26 @@ function recursosAdmin() {
                                         <option>Departamento</option>
                                     </select>
                                     <label>Tipo de licencia</label>
-                                    <select defaultValue={""} onChange={(e) => setFormAddU({ ...formAddU, tipo_licencia: (e.target.value) })}>
-                                        <option value={""} disabled>Selecciona el tipo de licencia del usuario</option>
-                                        <option>A1</option>
-                                        <option>A2</option>
-                                        <option>A3</option>
-                                        <option>A4</option>
-                                        <option>A5</option>
-                                        <option>B</option>
-                                        <option>C</option>
-                                        <option>D</option>
-                                        <option>E</option>
-                                        <option>F</option>
-                                    </select>
+                                    <FormControl fullWidth > 
+                                        <Select
+                                            multiple
+                                            value={formAddU.listaLicencias || []} 
+                                            onChange={handleChangeLicencia}
+                                            renderValue={(selected) => (
+                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, height:"20px"}}>
+                                                    {selected.map((value) => (
+                                                        <Chip key={value} label={value} />
+                                                    ))}
+                                                </Box>
+                                            )}
+                                        >
+                                            {licencias.map((lic) => (
+                                                <MenuItem sx={{height:"25px"}} key={lic} value={lic}>
+                                                    {lic}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
                                     <label>Estado</label>
                                     <select value={Number(formAddU.estado)} onChange={(e) => setFormAddU({ ...formAddU, estado: (Number(e.target.value) === 1) ? true : false })}>
                                         <option value={1}>Activo</option>
@@ -590,20 +638,27 @@ function recursosAdmin() {
                                             <option>Funcionario</option>
                                             <option>Administrativo</option>
                                         </select>
-                                        <label>Licencia</label>
-                                        <select defaultValue={""} value={formU.tipo_licencia} onChange={(e) => setFormU({ ...formU, tipo_licencia: (e.target.value) })}>
-                                            <option value={""} disabled>Selecciona el tipo de licencia del usuario</option>
-                                            <option>A1</option>
-                                            <option>A2</option>
-                                            <option>A3</option>
-                                            <option>A4</option>
-                                            <option>A5</option>
-                                            <option>B</option>
-                                            <option>C</option>
-                                            <option>D</option>
-                                            <option>E</option>
-                                            <option>F</option>
-                                        </select>
+                                        <label>Tipo de licencia</label>
+                                    <FormControl fullWidth > 
+                                        <Select
+                                            multiple
+                                            value={formU.listaLicencias || []} 
+                                            onChange={handleChangeLicenciaEdit}
+                                            renderValue={(selected) => (
+                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, height:"20px"}}>
+                                                    {selected.map((value) => (
+                                                        <Chip key={value} label={value} />
+                                                    ))}
+                                                </Box>
+                                            )}
+                                        >
+                                            {licencias.map((lic) => (
+                                                <MenuItem sx={{height:"25px"}} key={lic} value={lic}>
+                                                    {lic}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
                                         <label>Estado</label>
                                         <select value={formU.estado ? "Activo" : "Bloqueado"} defaultValue={Number(recursoEdit.estado) === 1 ? "Activo" : "Bloqueado"} onChange={(e) => setFormU({ ...formU, estado: (e.target.value === "Activo" ? true : false) })}>
                                             <option>Activo</option>

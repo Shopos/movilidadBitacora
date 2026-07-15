@@ -18,11 +18,12 @@ export interface UsuarioInput {
     tipo_licencia:string,
     nombre:string,
     cargo:string, //Administrativo || Funcionario
-    estado:boolean
+    estado:boolean,
 }
 export interface UsuarioEdit{
     estado:string,
-    tipo_licencia:string
+    tipo_licencia:string,
+    lista_licencia:string[]
 }
 //Metodo que devuelve todos los usuarios
 export async function getAllUsuarios(): Promise<Usuario[]>{
@@ -67,6 +68,7 @@ export async function addUsuario(data:UsuarioInput):Promise<Number>{
         "INSERT INTO usuarios (correo,pass,tipo_licencia,nombre,cargo,estado) VALUES (?,?,?,?,?,?)",
         [data.correo,passEncrypt,data.tipo_licencia,data.nombre,data.cargo,data.estado]
     )
+    
     //@ts-ignore
     return res.insertId
 }
@@ -76,6 +78,13 @@ export async function editUsuario(correo:string|string[],data:UsuarioEdit):Promi
         "UPDATE usuarios SET estado=?, tipo_licencia=? WHERE correo = ?",
         [data.estado,data.tipo_licencia,correo]
     )
+    if(data.lista_licencia){
+        const id = await connection.query("SELECT id_usuario FROM usuarios WHERE correo=?",[correo])
+        if(id){
+            //Verificar que no existan id del usuario con las mismas licencias para evitar duplicados
+            //Agregar las licencias 
+        }
+    }
     //@ts-ignore
     return(resultado.affectedRows>0)
 }
@@ -86,4 +95,10 @@ export async function changeStatus(id:number, status:string):Promise<boolean>{
     )
     //@ts-ignore
     return(res.affectedRows>0)
+}
+
+export async function addLicencias(id:Number,lista:string[]){
+    lista.map((licencia)=>(
+        connection.query("INSERT INTO licencias_usuario (id_usuario,tipo_licencia) VALUES (?,?)"),[id,licencia]
+    ))
 }

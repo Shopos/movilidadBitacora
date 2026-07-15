@@ -7,14 +7,26 @@ export interface Vehiculo extends RowDataPacket{
     kms_actual:Number,
     estado: "DISPONIBLE"|"EN RUTA"|"EN REPARACION"|"DADO DE BAJA"
 }
-
+export interface vehiculoEdit {
+    kms_actual:Number,
+    estado: "DISPONIBLE"|"EN RUTA"|"EN REPARACION"|"DADO DE BAJA"
+}
 export interface vehiculoInput {
     patente:String,
     modelo:String,
     kms_actual:Number,
     estado: "DISPONIBLE"|"EN RUTA"|"EN REPARACION"|"DADO DE BAJA"
+    tipo_vehiculo: "Automóvil"|"Motocicleta"|"Bus"|"Camioneta"|"Furgón"|"Camión"|"Maquinaria"
 }
-
+const licenciasPorVehiculo = {
+    "Automóvil": "B",
+    "Camioneta": "B",
+    "Bus": "A2",
+    "Camión": "A4",
+    "Furgón": "A2",
+    "Maquinaria": "D",
+    "Motocicleta": "C"
+};
 //Metodo que devuelve todos los vehiculos
 export async function getAllVehiculos(): Promise<Vehiculo[]>{
     const [rows] =  await connection.query<Vehiculo[]>(
@@ -33,16 +45,17 @@ export async function getVehiculo(patenteBusqueda:string|string[]): Promise<Vehi
 
 //Metodo que agrega un vehiculo
 export async function addVehiculo(data:vehiculoInput): Promise<number>{
+    const licencia_min = licenciasPorVehiculo[data.tipo_vehiculo]||"B"
     const [resultado] = await connection.query(
-        "INSERT INTO vehiculos (patente,modelo,kms_actual,estado) VALUES (?,?,?,?)",
-        [data.patente,data.modelo,data.kms_actual,data.estado]
+        "INSERT INTO vehiculos (patente,modelo,kms_actual,estado,tipo_vehiculo,licencia_min) VALUES (?,?,?,?,?,?)",
+        [data.patente,data.modelo,data.kms_actual,data.estado,data.tipo_vehiculo,licencia_min]
     )
     //@ts-ignore
     return resultado.insertId
 }
 
 //Metodo que edita la informacion de un vehiculo
-export async function editVehiculo(patenteBusqueda:string|string[], data:vehiculoInput): Promise<boolean>{
+export async function editVehiculo(patenteBusqueda:string|string[], data:vehiculoEdit): Promise<boolean>{
     const [resultado] = await connection.query(
         "UPDATE vehiculos SET kms_actual=?,estado=? WHERE patente = ?",
         [data.kms_actual,data.estado, patenteBusqueda]

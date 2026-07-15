@@ -43,12 +43,12 @@ export async function getVehiculoPatente(req:Request,res:Response){
 
 export async function agregarVehiculo(req:Request,res:Response){
     try{
-        const {patente, modelo, kms_actual, estado} = req.body
+        const {patente, modelo, kms_actual, estado, tipo_vehiculo} = req.body
         
         if( patente === "" && modelo === "" ){
             return res.status(400).json({error: " Los campos patente, modelo y estado son obligatorios "})
         }
-        const id = await vehiculoModel.addVehiculo({patente,modelo,kms_actual,estado})
+        const id = await vehiculoModel.addVehiculo({patente,modelo,kms_actual,estado,tipo_vehiculo})
         res.status(201).json({id , mensaje: " vehiculo correctamente agregado "})
     }catch(e){
         console.error(e)
@@ -64,9 +64,9 @@ export async function agregarVehiculo(req:Request,res:Response){
 export async function editarVehiculo(req:Request,res:Response){
     try{
         const id = req.params.patente
-        const {patente,modelo,kms_actual,estado} = req.body
+        const {modelo,kms_actual,estado} = req.body
 
-        const actualiza = await vehiculoModel.editVehiculo(id,{patente,modelo,kms_actual,estado})
+        const actualiza = await vehiculoModel.editVehiculo(id,{kms_actual,estado})
         if(!actualiza){
             return res.status(404).json({error:" vehiculo no encontrado"})
         }

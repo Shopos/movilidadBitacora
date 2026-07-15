@@ -37,6 +37,11 @@ function inicioSesion(){
                 return navigate("/menuDepto")
         }
     }
+    const handleEnterButton=(event:React.KeyboardEvent<HTMLInputElement>):void=>{
+            if(event.key==="Enter"){
+                handleRedirection()
+            }
+        }
 
     //Redirecciona a la vista de solicitud cambio contraseña
     const handleSolicitud = () =>{
@@ -74,7 +79,7 @@ function inicioSesion(){
                 </div>
                 <div className="campo-formulario">
                     <label>Contraseña</label>
-                    <input type="password" name="pass" value={formData.pass} onChange={handleChange} placeholder="*******"></input>
+                    <input type="password" name="pass" value={formData.pass} onKeyDown={handleEnterButton} onChange={handleChange} placeholder="*******"></input>
                 </div>
                 <div className="buttonFormulario">
                     <button onClick={()=>handleRedirection()}>Ingresar</button>

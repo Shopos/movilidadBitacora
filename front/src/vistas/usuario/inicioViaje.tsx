@@ -167,7 +167,7 @@ function inicioViaje() {
         patch()
     },[formInicio?.estado_viaje])
 
-
+    
 
 
     /*Almacena los datos ingresados dentro de formInicio en db y deja el estado del viaje en "true" (viaje activo -> true/viaje terminado ->false) --> vehiculo a "ACTIVO" */

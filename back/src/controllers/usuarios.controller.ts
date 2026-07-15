@@ -14,7 +14,11 @@ dotenv.config()
 export async function getUsuarios(req: Request, res: Response) {
     try {
         const usuarios = await usuarioModel.getAllUsuarios()
-        res.json(usuarios)
+        const usuariosLicencias = usuarios.map((u:any)=>({
+            ...u,
+            lista_licencia:u.licencias_concat ? u.licencias_concat.split(","):[]
+        }))
+        res.json(usuariosLicencias)
     } catch (e) {
         console.error(e)
         res.status(500).json({ error: " error al listar usuarios " })
@@ -65,6 +69,7 @@ export async function getUsuarioId(req: Request, res: Response) {
 */
 export async function agregarUsuario(req: Request, res: Response) {
     try {
+        console.log(req.body)
         const { correo, pass, tipo_licencia, nombre, cargo, estado, lista_licencia } = req.body
         if (correo === "" || pass === "" || nombre === "" || cargo === "") {
             return res.status(400).json({ error: "Los campos son obligatorios " })
@@ -72,9 +77,11 @@ export async function agregarUsuario(req: Request, res: Response) {
         const id = await usuarioModel.addUsuario({ correo, pass, tipo_licencia, nombre, cargo, estado })
         //esperar que se agregue usuario para tener id y agregar las licencias
         if(id){
-            const response = await usuarioModel.addLicencias(id,lista_licencia)
+            console.log("Agregando licencias")
+            console.log(lista_licencia)
+            const response = await usuarioModel.addLicenciasIniciales(id,lista_licencia)
+            res.status(201).json({ id, mensaje: " Usuario agregado correctamente " })
         }
-        res.status(201).json({ id, mensaje: " Usuario agregado correctamente " })
     } catch (e) {
         console.error(e)
         res.status(500).json({ error: " error al agregar usuario " })
@@ -90,7 +97,7 @@ export async function editarUsuario(req: Request, res: Response) {
         console.log(req)
         const id = req.params.correo
         const { estado, tipo_licencia,lista_licencia } = req.body
-
+        console.log(lista_licencia)
         const actualiza = await usuarioModel.editUsuario(id, { estado, tipo_licencia, lista_licencia })
         if (!actualiza) {
             return res.status(404).json({ error: " usuario no encontrado " })
@@ -105,10 +112,11 @@ export async function editarUsuario(req: Request, res: Response) {
 export async function login(req: Request, res: Response) {
     try {
         const { correo, pass } = req.body
-        if (correo === "" && pass === "") {
+        if (correo === "" || pass === "") {
             return res.status(400).json({ error: " Los campos correo y contraseña son obligatorios " })
         }
         const usuarios = await usuarioModel.getUsuarioCorreo(correo)
+        console.log(usuarios)
         const usuarioEncontrado = usuarios[0]
         if (!usuarioEncontrado) {
             return res.status(401).json({ error: " Credenciales invalidas " })

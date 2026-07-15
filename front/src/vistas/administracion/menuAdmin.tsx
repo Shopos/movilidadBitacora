@@ -73,6 +73,10 @@ function menuAdmin() {
 
     const [modoEdicionMapa, setModoEdicionMapa] = useState<"nuevo" | "edicion">("nuevo")
 
+    const [usuariosFiltrados, setUsuariosFiltrados] = useState<User[]>()
+    const [vehiculosFiltrados, setVehiculosFiltrados] = useState<Vehiculo[]>()
+
+
     const [formEdit, setFormEdit] = useState<Partial<Viaje>>({})
     const [viajeSelected, setViajeSelected] = useState<Viaje | null>(null)
     const [viajeEdit, setViajeEditSelected] = useState<Viaje | null>(null)
@@ -81,8 +85,8 @@ function menuAdmin() {
     const [cargando, setCargando] = useState<boolean>(false)
     const [modalNewViaje, setModalNewViaje] = useState(false)
     const [vehiculoSelected, setVehiculoSelected] = useState<Vehiculo>()
-    const [listaUsuarios, setListaUsuarios] = useState<[User]>()
-    const [vehiculos, setListaVehiculos] = useState<[Vehiculo]>()
+    const [listaUsuarios, setListaUsuarios] = useState<User[]>()
+    const [vehiculos, setListaVehiculos] = useState<Vehiculo[]>()
     const [dia, setDia] = useState("")
     const [time, setTime] = useState("")
     const [formInicio, setFormInicio] = useState<Viaje>({
@@ -514,89 +518,102 @@ function menuAdmin() {
 
     const exportViajeSelectedPDF = async () => {
         const logo = logoSC
-        const doc = new jsPDF('l',"pt",'a4')
-        doc.addImage(logo,"PNG",750,15,60,60)
+        const doc = new jsPDF('l', "pt", 'a4')
+        doc.addImage(logo, "PNG", 750, 15, 60, 60)
         doc.setFontSize(11)
-        doc.text("ILUSTRE MUNICIPALIDAD",85,30,{align:"center",maxWidth:150})
-        doc.text("Santa Cruz",90,40,{align:"center"})
-        doc.text("Departamento de Movilización",85,50,{align:"center"})
+        doc.text("ILUSTRE MUNICIPALIDAD", 85, 30, { align: "center", maxWidth: 150 })
+        doc.text("Santa Cruz", 90, 40, { align: "center" })
+        doc.text("Departamento de Movilización", 85, 50, { align: "center" })
         doc.setFontSize(20)
-        doc.text("BITÁCORA VEHICULO",421,80,{align:"center"})
+        doc.text("BITÁCORA VEHICULO", 421, 80, { align: "center" })
         doc.setFontSize(14)
-        doc.text(`Fecha ${viajeSelected?.fecha_hora_inicio.slice(0,10)}`,10,85)
-        doc.text(`Vehiculo: ${viajeSelected?.vehiculo} Placa patente: ${viajeSelected?.patente}`,10,110,{align:"justify"})
-        doc.text(`Salida:HRS. ${viajeSelected?.fecha_hora_inicio.slice(11,19)}  KMS: ${viajeSelected?.kms_inicial}   Llegada:HRS. ${viajeSelected?.fecha_hora_fin ? viajeSelected?.fecha_hora_fin.slice(11,19): ""}  KMS: ${viajeSelected?.kms_fin ? viajeSelected.kms_fin:""} `,
-        10,125,{align:"justify"})
-        doc.text(`Destino: ${viajeSelected?.destino}`,10,140)
-        doc.text(`Funcionario: ${viajeSelected?.nombre_funcionario}`,10,155)
-        doc.text(`Motivo: ${viajeSelected?.motivo}`,10,170,{maxWidth:800})
-        doc.text(`Combustible Cantidad: ${viajeSelected?.carga_combustible ? viajeSelected?.cantidad_carga:"No aplica"}`,10,200)
-        doc.text(`Observaciones: ${viajeSelected?.obs_viaje ? viajeSelected.obs_viaje:"No aplica"}`,10,215,{maxWidth:800})
-        if(viajeSelected?.imagen_tablero_ida){
+        {viajeSelected?.fecha_hora_inicio ? doc.text(`Fecha ${viajeSelected?.fecha_hora_inicio.slice(0, 10)}`, 10, 85):doc.text("Aun no iniciado",10,85)}
+        doc.text(`Vehiculo: ${viajeSelected?.vehiculo} Placa patente: ${viajeSelected?.patente}`, 10, 110, { align: "justify" })
+        doc.text(`Salida:HRS. ${viajeSelected?.fecha_hora_inicio ? viajeSelected.fecha_hora_inicio.slice(11, 19):""}  KMS: ${viajeSelected?.kms_inicial}   Llegada:HRS. ${viajeSelected?.fecha_hora_fin ? viajeSelected?.fecha_hora_fin.slice(11, 19) : ""}  KMS: ${viajeSelected?.kms_fin ? viajeSelected.kms_fin : ""} `,
+            10, 125, { align: "justify" })
+        doc.text(`Destino: ${viajeSelected?.destino}`, 10, 140)
+        doc.text(`Funcionario: ${viajeSelected?.nombre_funcionario}`, 10, 155)
+        doc.text(`Motivo: ${viajeSelected?.motivo}`, 10, 170, { maxWidth: 800 })
+        doc.text(`Combustible Cantidad: ${viajeSelected?.carga_combustible ? viajeSelected?.cantidad_carga : "No aplica"}`, 10, 200)
+        doc.text(`Observaciones: ${viajeSelected?.obs_viaje ? viajeSelected.obs_viaje : "No aplica"}`, 10, 215, { maxWidth: 800 })
+        if (viajeSelected?.imagen_tablero_ida) {
             const ruta = viajeSelected.imagen_tablero_ida
-            try{
-                await new Promise<void>((resolve)=>{
+            try {
+                await new Promise<void>((resolve) => {
                     const img = new Image()
                     img.src = `${API}/uploads/${ruta}`
-                    img.onload=()=>{    
+                    img.onload = () => {
                         doc.addPage("l")
-                        doc.text(`Tablero Vehículo ${viajeSelected.patente} al inicio`,420,20,{align:"center"})
-                        doc.addImage(img,'JPEG',200,140,400,400)
+                        doc.text(`Tablero Vehículo ${viajeSelected.patente} al inicio`, 420, 20, { align: "center" })
+                        doc.addImage(img, 'JPEG', 200, 140, 400, 400)
                         resolve()
                     }
-                    img.onerror=(err)=>{
+                    img.onerror = (err) => {
                         console.error(err)
                         resolve()
                     }
                 })
-            }catch(e){
+            } catch (e) {
                 console.error(e)
             }
         }
-        if(viajeSelected?.imagen_tablero_vuelta){
+        if (viajeSelected?.imagen_tablero_vuelta) {
             const ruta = viajeSelected.imagen_tablero_vuelta
-            try{
-                await new Promise<void>((resolve)=>{
+            try {
+                await new Promise<void>((resolve) => {
                     const img = new Image()
                     img.src = `${API}/uploads/${ruta}`
-                    img.onload=()=>{    
+                    img.onload = () => {
                         doc.addPage("l")
-                        doc.text(`Tablero Vehículo ${viajeSelected.patente} al terminar`,420,20,{align:"center"})
-                        doc.addImage(img,'JPEG',200,140,400,400)
+                        doc.text(`Tablero Vehículo ${viajeSelected.patente} al terminar`, 420, 20, { align: "center" })
+                        doc.addImage(img, 'JPEG', 200, 140, 400, 400)
                         resolve()
                     }
-                    img.onerror=(err)=>{
+                    img.onerror = (err) => {
                         console.error(err)
                         resolve()
                     }
                 })
-            }catch(e){
+            } catch (e) {
                 console.error(e)
             }
         }
-        if(viajeSelected?.imagen_comprobante_ben){
+        if (viajeSelected?.imagen_comprobante_ben) {
             const ruta = viajeSelected.imagen_comprobante_ben
-            try{
-                await new Promise<void>((resolve)=>{
+            try {
+                await new Promise<void>((resolve) => {
                     const img = new Image()
                     img.src = `${API}/uploads/${ruta}`
-                    img.onload=()=>{    
+                    img.onload = () => {
                         doc.addPage("l")
-                        doc.text(`Comprobante carga combustible del vehículo ${viajeSelected.patente}`,420,20,{align:"center"})
-                        doc.addImage(img,'JPEG',200,140,400,400)
+                        doc.text(`Comprobante carga combustible del vehículo ${viajeSelected.patente}`, 420, 20, { align: "center" })
+                        doc.addImage(img, 'JPEG', 200, 140, 400, 400)
                         resolve()
                     }
-                    img.onerror=(err)=>{
+                    img.onerror = (err) => {
                         console.error(err)
                         resolve()
                     }
                 })
-            }catch(e){
+            } catch (e) {
                 console.error(e)
             }
         }
         doc.save(`Bitacora_${viajeSelected?.nombre_funcionario}_${viajeSelected?.fecha_hora_inicio}.pdf`)
     }
+
+    useEffect(() => {
+        if (vehiculoSelected) {
+            const newList = listaUsuarios?.filter((u) => (u.lista_licencia.includes(vehiculoSelected!.licencia_min)))
+            setUsuariosFiltrados(newList)
+        }
+    }, [vehiculoSelected])
+    useEffect(() => {
+        if (formInicio.id_usuario!==0) {
+            const newList = vehiculos!.filter((v) => (listaUsuarios?.find((u) => u.id_usuario === formInicio.id_usuario)!.lista_licencia.includes(v.licencia_min)))
+            setVehiculosFiltrados(newList)
+        }
+    }, [formInicio.id_usuario])
 
     /*
     Vista menu administracion
@@ -781,7 +798,7 @@ function menuAdmin() {
                                 </tr>
                             ))}
 
-                            {viajeFiltrado.length === 0 && estado==="Todos" && periodos==="Todos" && busqueda==="" && (
+                            {viajeFiltrado.length === 0 && estado === "Todos" && periodos === "Todos" && busqueda === "" && (
                                 <tr >
                                     <td colSpan={8} style={{ textAlign: "center", padding: "5%" }}>No cuentas con bitácoras de momento</td>
                                 </tr>
@@ -862,11 +879,12 @@ function menuAdmin() {
                                         }}>
                                             {/**Solo se muestran las patentes de vehiculos disponibles */}
                                             <option>{formEdit?.patente}</option>
-                                            {vehiculos && vehiculos.filter(veh => veh.estado === "DISPONIBLE").map((veh) => (
+                                            {vehiculos && vehiculos.filter(veh => (veh.estado === "DISPONIBLE")).map((veh) => (
                                                 <option key={veh.patente} value={veh.patente}>
                                                     {veh.patente}
                                                 </option>
                                             ))}
+                                            {vehiculos && formInicio.id_usuario !== 0}
                                         </select>
                                     </div>
                                     <div className="itemInput-Modal">
@@ -968,20 +986,37 @@ function menuAdmin() {
                                 <select name="Patentes" defaultValue={""} onChange={manejarDataVehiculo}>
                                     <option value={""} disabled>Selecciona una patente disponible</option>
                                     {/**Solo se muestran las patentes de vehiculos disponibles */}
-                                    {vehiculos && vehiculos.filter(veh => veh.estado === "DISPONIBLE").map((veh) => (
-                                        <option key={veh.patente} value={veh.patente}>
-                                            {veh.patente}
-                                        </option>
-                                    ))}
+                                    {formInicio.id_usuario !== 0 ?
+                                        (vehiculosFiltrados && vehiculosFiltrados.filter(veh => veh.estado === 'DISPONIBLE').map((veh) => (
+                                            <option key={veh.patente} value={veh.patente}>
+                                                {veh.patente}
+                                            </option>
+                                        )))
+                                        :
+                                        (vehiculos && vehiculos.filter(veh => veh.estado === "DISPONIBLE").map((veh) => (
+                                            <option key={veh.patente} value={veh.patente}>
+                                                {veh.patente}
+                                            </option>
+                                        )))
+                                    }
+
                                 </select>
                             </div>
                             <div className="itemInput-Modal">
                                 <label>Funcionario</label>
                                 <select name="funcionarios" defaultValue={""} onChange={manejarDataFuncionario}>
                                     <option value={""} disabled>Designa un funcionario</option>
-                                    {listaUsuarios && listaUsuarios.map((usr: User) => (
-                                        <option value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
-                                    ))}
+                                    {vehiculoSelected?.patente? 
+                                        (
+                                            usuariosFiltrados && usuariosFiltrados.map((usr:User)=>(
+                                                <option value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
+                                            ))
+                                        )
+                                        :(listaUsuarios && listaUsuarios.map((usr: User) => (
+                                            <option value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
+                                        )))
+                                    }
+                                    
                                 </select>
                             </div>
                             <div className="itemInput-Modal">

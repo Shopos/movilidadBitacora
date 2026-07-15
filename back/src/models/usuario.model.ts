@@ -26,16 +26,18 @@ export interface UsuarioEdit{
     lista_licencia:string[]
 }
 //Metodo que devuelve todos los usuarios
-export async function getAllUsuarios(): Promise<Usuario[]>{
+export async function getAllUsuarios(): Promise<any[]>{
     const [rows] = await connection.query<Usuario[]>(
-        "SELECT * FROM usuarios"
+        `SELECT u.*, GROUP_CONCAT(lu.tipo_licencia) AS licencias_concat
+            FROM usuarios u LEFT JOIN licencias_usuario lu ON lu.id_usuario = u.id_usuario
+            GROUP BY u.id_usuario`
     )
     return rows
 }
 //Metodo que devuelve el usuario cual correo sea igual al solicitado
 export async function getUsuarioCorreo(correo:string|string[]): Promise<Usuario[]>{
     const [rows] = await connection.query<Usuario[]>(
-        "SELECT * FROM usuarios WHERE correo = ? ",[correo]
+        `SELECT * from usuarios where correo=?`,[correo]
     )
     return rows
 }
@@ -79,8 +81,9 @@ export async function editUsuario(correo:string|string[],data:UsuarioEdit):Promi
         [data.estado,data.tipo_licencia,correo]
     )
     if(data.lista_licencia){
-        const id = await connection.query("SELECT id_usuario FROM usuarios WHERE correo=?",[correo])
-        if(id){
+        const [rows] = await connection.query<RowDataPacket[]>("SELECT id_usuario FROM usuarios WHERE correo=?",[correo])
+        if(rows[0]){
+            await addLicencias(rows[0].id_usuario,data.lista_licencia)
             //Verificar que no existan id del usuario con las mismas licencias para evitar duplicados
             //Agregar las licencias 
         }
@@ -98,7 +101,27 @@ export async function changeStatus(id:number, status:string):Promise<boolean>{
 }
 
 export async function addLicencias(id:Number,lista:string[]){
-    lista.map((licencia)=>(
-        connection.query("INSERT INTO licencias_usuario (id_usuario,tipo_licencia) VALUES (?,?)"),[id,licencia]
-    ))
+    await connection.query("DELETE FROM licencias_usuario WHERE id_usuario=?",[id])
+    if(!lista||lista.length===0)return
+    const val = lista.map((lic)=>[id,lic])
+    await connection.query(
+        "INSERT INTO licencias_usuario (id_usuario,tipo_licencia) VALUES ? ",[val]
+    )
+}
+
+export async function addLicenciasIniciales(id:Number,lista:string[]){
+    if(!lista||lista.length===0)return
+    const val = lista.map((lic)=>[id,lic])
+    const res = await connection.query(
+        "INSERT INTO licencias_usuario (id_usuario,tipo_licencia) VALUES ? ",[val]
+    )
+    //@ts-ignore
+    return res.insertId
+}
+
+export async function getLicenciasUsuario(id_usuario:number):Promise<string[]>{
+    const [rows]=await connection.query<RowDataPacket[]>(
+        "SELECT tipo_licencia FROM licencias_usuario WHERE id_usuario=?",[id_usuario]
+    )
+    return rows.map(r=>r.tipo_licencia)
 }

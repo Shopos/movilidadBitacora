@@ -3,7 +3,7 @@ import NavBar from "../../componentes/navBar.tsx"
 import Mantenciones from "../../componentes/mantencionesVehiculo.tsx"
 import "../../estilos/recursosAdmin.css"
 import { Table } from '@mui/joy'
-import {FormControl, type SelectChangeEvent} from "@mui/material"
+import { FormControl, type SelectChangeEvent } from "@mui/material"
 import { Modal, ModalDialog, DialogTitle, Divider, DialogContent, DialogActions, Button } from "@mui/joy"
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import EditIcon from '@mui/icons-material/Edit';
@@ -12,7 +12,7 @@ import getVehiculos, { addMantencionVehiculo, agregarVehiculo, editarVehiculo, a
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { useAlerta } from '../../context/AlertaContext.tsx'
-import { Box, InputLabel, MenuItem, OutlinedInput, TablePagination, Chip,Select } from '@mui/material'
+import { Box, MenuItem, TablePagination, Chip, Select } from '@mui/material'
 
 
 const vehiculoVacio: Vehiculo = {
@@ -20,7 +20,8 @@ const vehiculoVacio: Vehiculo = {
     modelo: "",
     kms_actual: 0,
     estado: "DADO DE BAJA",
-    tipo_vehiculo: "Automóvil"
+    tipo_vehiculo: "Automóvil",
+    licencia_min:"B"
 }
 const mantencionVacia: Mantencion = {
     id_mantencion: 0,
@@ -39,7 +40,8 @@ const usuarioVacio: User = {
     pass: "",
     tipo_licencia: "",
     estado_viaje_usuario: "Disponible",
-    listaLicencias: []
+    lista_licencia: [],
+    licencias_concat:""
 }
 function recursosAdmin() {
     const { showAlerta } = useAlerta()
@@ -49,8 +51,8 @@ function recursosAdmin() {
     const [modalAdd, setOpenModalAdd] = useState<boolean>(false)
     const [modalMantencion, setOpenModalMantencion] = useState<boolean>(false)
     const [modalViewRecurso, openModalViewRecurso] = useState<boolean>(false)
-    const [recursoShow, setRecursoShow] = useState<Vehiculo | User >()
-    const [recursoEdit, setRecursoEdit] = useState<Vehiculo | User >()
+    const [recursoShow, setRecursoShow] = useState<Vehiculo | User>()
+    const [recursoEdit, setRecursoEdit] = useState<Vehiculo | User>()
     const [modalEdit, openModalEdit] = useState<boolean>(false)
     const licencias = ["A5", "A4", "A3", "A2", "A1", "B", "C", "D", "E", "F"]
     const [refresh, setRefresh] = useState(false)
@@ -130,7 +132,7 @@ function recursosAdmin() {
             const payload = formV
             const edicion = await editarVehiculo(patente, payload)
             if (edicion) {
-                showAlerta("Vehiculo editado correctamente", "success")
+                showAlerta("Vehículo editado correctamente", "success")
             } else {
                 showAlerta("Hubo un problema al editar, intente más tarde", "warning")
             }
@@ -142,14 +144,14 @@ function recursosAdmin() {
             setCargando(true)
             const correo = recursoEdit.correo
             const payload = formU
-            
+
             const edicion = await editarUsuario(correo, payload)
             if (edicion) {
-                showAlerta("Vehiculo editado correctamente", "success")
+                showAlerta("Usuario editado correctamente", "success")
             } else {
                 showAlerta("Hubo un problema al editar, intente más tarde", "warning")
             }
-            
+
             setFormU(usuarioVacio)
             setCargando(false)
             setRefresh(!refresh)
@@ -180,7 +182,7 @@ function recursosAdmin() {
             showAlerta("Usuario agregado correctamente", "success")
         } else {
             showAlerta("Hubo un problema al agregar, intenta más tarde", "warning")
-        }            
+        }
 
         setFormAddU(usuarioVacio)
         setCargando(false)
@@ -233,7 +235,7 @@ function recursosAdmin() {
                 const rows = usuarios.map((usr) => [
                     usr.nombre,
                     usr.correo,
-                    usr.tipo_licencia,
+                    usr.licencias_concat,
                     usr.cargo,
                     (usr.estado ? "Activo" : "Bloqueado")
                 ])
@@ -262,24 +264,24 @@ function recursosAdmin() {
         setPage(0);
     };
 
-    const handleChangeLicencia=(event:SelectChangeEvent<string[]>)=>{
-        const{
-            target:{value},
-        }=event
-        setFormAddU((prev)=>({
+    const handleChangeLicencia = (event: SelectChangeEvent<string[]>) => {
+        const {
+            target: { value },
+        } = event
+        setFormAddU((prev) => ({
             ...prev,
-            listaLicencias: typeof value === 'string' ? value.split(','):value
+            lista_licencia: typeof value === 'string' ? value.split(',') : value
         })
         )
     }
-    const handleChangeLicenciaEdit=(event:SelectChangeEvent<string[]>)=>{
-        const{
-            target:{value},
-        }=event
-            setFormU((prev)=>({
-                ...prev,
-                listaLicencias: typeof value === 'string' ? value.split(','):value
-            }))
+    const handleChangeLicenciaEdit = (event: SelectChangeEvent<string[]>) => {
+        const {
+            target: { value },
+        } = event
+        setFormU((prev) => ({
+            ...prev,
+            lista_licencia: typeof value === 'string' ? value.split(',') : value
+        }))
     }
     /*
         Vista de recursos del departamento
@@ -481,13 +483,13 @@ function recursosAdmin() {
                                         <option>Departamento</option>
                                     </select>
                                     <label>Tipo de licencia</label>
-                                    <FormControl fullWidth > 
+                                    <FormControl fullWidth >
                                         <Select
                                             multiple
-                                            value={formAddU.listaLicencias || []} 
+                                            value={formAddU.lista_licencia || []}
                                             onChange={handleChangeLicencia}
                                             renderValue={(selected) => (
-                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, height:"20px"}}>
+                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, height: "20px" }}>
                                                     {selected.map((value) => (
                                                         <Chip key={value} label={value} />
                                                     ))}
@@ -495,7 +497,7 @@ function recursosAdmin() {
                                             )}
                                         >
                                             {licencias.map((lic) => (
-                                                <MenuItem sx={{height:"25px"}} key={lic} value={lic}>
+                                                <MenuItem sx={{ height: "25px" }} key={lic} value={lic}>
                                                     {lic}
                                                 </MenuItem>
                                             ))}
@@ -583,7 +585,8 @@ function recursosAdmin() {
                         {recursoShow && 'correo' in recursoShow ? (
                             <>
                                 <p><strong>Nombre: </strong>{recursoShow.nombre}</p>
-                                <p><strong>Licencia: </strong>{recursoShow.tipo_licencia}</p>
+                                <p><strong>Licencia: </strong><span>{recursoShow.lista_licencia.join(",")}</span>
+                                </p>
                                 <p><strong>Cargo: </strong>{recursoShow.cargo}</p>
                                 <p><strong>Estado: </strong>{Number(recursoShow.estado) === 0 ? "Bloqueado" : "Activo"}</p>
                             </>
@@ -639,26 +642,26 @@ function recursosAdmin() {
                                             <option>Administrativo</option>
                                         </select>
                                         <label>Tipo de licencia</label>
-                                    <FormControl fullWidth > 
-                                        <Select
-                                            multiple
-                                            value={formU.listaLicencias || []} 
-                                            onChange={handleChangeLicenciaEdit}
-                                            renderValue={(selected) => (
-                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, height:"20px"}}>
-                                                    {selected.map((value) => (
-                                                        <Chip key={value} label={value} />
-                                                    ))}
-                                                </Box>
-                                            )}
-                                        >
-                                            {licencias.map((lic) => (
-                                                <MenuItem sx={{height:"25px"}} key={lic} value={lic}>
-                                                    {lic}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
+                                        <FormControl fullWidth >
+                                            <Select
+                                                multiple
+                                                value={formU.lista_licencia || []}
+                                                onChange={handleChangeLicenciaEdit}
+                                                renderValue={(selected) => (
+                                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, height: "20px" }}>
+                                                        {selected.map((value) => (
+                                                            <Chip key={value} label={value} />
+                                                        ))}
+                                                    </Box>
+                                                )}
+                                            >
+                                                {licencias.map((lic) => (
+                                                    <MenuItem sx={{ height: "25px" }} key={lic} value={lic}>
+                                                        {lic}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
                                         <label>Estado</label>
                                         <select value={formU.estado ? "Activo" : "Bloqueado"} defaultValue={Number(recursoEdit.estado) === 1 ? "Activo" : "Bloqueado"} onChange={(e) => setFormU({ ...formU, estado: (e.target.value === "Activo" ? true : false) })}>
                                             <option>Activo</option>

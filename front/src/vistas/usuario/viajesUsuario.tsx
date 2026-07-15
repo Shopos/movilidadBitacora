@@ -15,6 +15,8 @@ import { TablePagination } from "@mui/material";
 import { useAlerta } from "../../context/AlertaContext.tsx";
 import DateRangeOutlinedIcon from "@mui/icons-material/DateRangeOutlined";
 import logoSC from "../../assets/logo.png"
+const API = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+
 //Funcion para el filtrado de viajes por fecha, se considera por dia, semana y mes
 function dentroPeriodo(fechaString: string | null, periodo: string): boolean {
     if (!fechaString) {
@@ -137,25 +139,90 @@ function viajesUsuario() {
     }, [viajesUsuario, periodos])
     
 
-    const generarViajePdf=()=>{
+    const generarViajePdf=async()=>{
         const logo = logoSC
         const doc = new jsPDF('l',"pt",'a4')
         doc.addImage(logo,"PNG",750,15,60,60)
-        doc.setFontSize(12)
-        doc.text("ILUSTRE MUNICIPALIDAD SANTA CRUZ Departamento de Movilización",85,30,{align:"center",maxWidth:150})
+        doc.setFontSize(11)
+        doc.text("ILUSTRE MUNICIPALIDAD",85,30,{align:"center",maxWidth:150})
+        doc.text("Santa Cruz",90,40,{align:"center"})
+        doc.text("Departamento de Movilización",85,50,{align:"center"})
         doc.setFontSize(20)
         doc.text("BITÁCORA VEHICULO",421,80,{align:"center"})
-        doc.setFontSize(12)
-        //doc.text(`Fecha ${viajeSelected?.fecha_hora_inicio.slice(0,10)}`,10,30)
-        //doc.text(`Vehiculo: ${viajeSelected?.vehiculo} Placa patente: ${viajeSelected?.patente}`,10,40,{align:"justify"})
-        //doc.text(`Salida:HRS. ${viajeSelected?.fecha_hora_inicio.slice(11,19)} KMS: ${viajeSelected?.kms_inicial} Llegada:HRS. ${viajeSelected?.fecha_hora_fin ? viajeSelected?.fecha_hora_fin.slice(11,19): ""} KMS: ${viajeSelected?.kms_fin ? viajeSelected.kms_fin:""} `,
-        //10,50,{align:"justify"})
-        //doc.text(`Destino: ${viajeSelected?.destino}`,10,60)
-        //doc.text(`Funcionario: ${viajeSelected?.nombre_funcionario}`,10,70)
-        //doc.text(`Motivo: ${viajeSelected?.motivo}`,10,80)
-        //doc.text(`Combustible Cantidad: ${viajeSelected?.carga_combustible ? viajeSelected?.cantidad_carga:"No aplica"}`,10,90)
-        //doc.text(`Observaciones: ${viajeSelected?.obs_viaje ? viajeSelected.obs_viaje:"No aplica"}`,10,100)
-        doc.save(`viaje ${viajeSelected?.fecha_hora_inicio}${viajeSelected?.nombre_funcionario}.pdf`)
+        doc.setFontSize(14)
+        doc.text(`Fecha ${viajeSelected?.fecha_hora_inicio.slice(0,10)}`,10,85)
+        doc.text(`Vehiculo: ${viajeSelected?.vehiculo} Placa patente: ${viajeSelected?.patente}`,10,110,{align:"justify"})
+        doc.text(`Salida:HRS. ${viajeSelected?.fecha_hora_inicio.slice(11,19)}  KMS: ${viajeSelected?.kms_inicial}   Llegada:HRS. ${viajeSelected?.fecha_hora_fin ? viajeSelected?.fecha_hora_fin.slice(11,19): ""}  KMS: ${viajeSelected?.kms_fin ? viajeSelected.kms_fin:""} `,
+        10,125,{align:"justify"})
+        doc.text(`Destino: ${viajeSelected?.destino}`,10,140)
+        doc.text(`Funcionario: ${viajeSelected?.nombre_funcionario}`,10,155)
+        doc.text(`Motivo: ${viajeSelected?.motivo}`,10,170,{maxWidth:800})
+        doc.text(`Combustible Cantidad: ${viajeSelected?.carga_combustible ? viajeSelected?.cantidad_carga:"No aplica"}`,10,200)
+        doc.text(`Observaciones: ${viajeSelected?.obs_viaje ? viajeSelected.obs_viaje:"No aplica"}`,10,215,{maxWidth:800})
+        if(viajeSelected?.imagen_tablero_ida){
+            const ruta = viajeSelected.imagen_tablero_ida
+            try{
+                await new Promise<void>((resolve)=>{
+                    const img = new Image()
+                    img.src = `${API}/uploads/${ruta}`
+                    img.onload=()=>{    
+                        doc.addPage("l")
+                        doc.text(`Tablero Vehículo ${viajeSelected.patente} al inicio`,420,20,{align:"center"})
+                        doc.addImage(img,'JPEG',200,140,400,400)
+                        resolve()
+                    }
+                    img.onerror=(err)=>{
+                        console.error(err)
+                        resolve()
+                    }
+                })
+            }catch(e){
+                console.error(e)
+            }
+        }
+        if(viajeSelected?.imagen_tablero_vuelta){
+            const ruta = viajeSelected.imagen_tablero_vuelta
+            try{
+                await new Promise<void>((resolve)=>{
+                    const img = new Image()
+                    img.src = `${API}/uploads/${ruta}`
+                    img.onload=()=>{    
+                        doc.addPage("l")
+                        doc.text(`Tablero Vehículo ${viajeSelected.patente} al terminar`,420,20,{align:"center"})
+                        doc.addImage(img,'JPEG',200,140,400,400)
+                        resolve()
+                    }
+                    img.onerror=(err)=>{
+                        console.error(err)
+                        resolve()
+                    }
+                })
+            }catch(e){
+                console.error(e)
+            }
+        }
+        if(viajeSelected?.imagen_comprobante_ben){
+            const ruta = viajeSelected.imagen_comprobante_ben
+            try{
+                await new Promise<void>((resolve)=>{
+                    const img = new Image()
+                    img.src = `${API}/uploads/${ruta}`
+                    img.onload=()=>{    
+                        doc.addPage("l")
+                        doc.text(`Comprobante carga combustible Vehículo ${viajeSelected.patente}`,420,20,{align:"center"})
+                        doc.addImage(img,'JPEG',200,140,400,400)
+                        resolve()
+                    }
+                    img.onerror=(err)=>{
+                        console.error(err)
+                        resolve()
+                    }
+                })
+            }catch(e){
+                console.error(e)
+            }
+        }
+        doc.save(`Bitacora_${viajeSelected?.nombre_funcionario}_${viajeSelected?.fecha_hora_inicio}.pdf`)
     }
 
     /*

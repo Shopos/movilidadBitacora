@@ -16,31 +16,35 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `vehiculos`
+-- Table structure for table `solicitudes_reset`
 --
 
-DROP TABLE IF EXISTS `vehiculos`;
+DROP TABLE IF EXISTS `solicitudes_reset`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `vehiculos` (
-  `patente` varchar(15) NOT NULL,
-  `modelo` varchar(100) NOT NULL,
-  `kms_actual` int NOT NULL,
-  `estado` enum('DISPONIBLE','EN RUTA','EN REPARACION','DADO DE BAJA') NOT NULL,
-  `tipo_vehiculo` varchar(100) DEFAULT 'Automovil',
-  `licencia_min` varchar(4) DEFAULT 'B',
-  PRIMARY KEY (`patente`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `solicitudes_reset` (
+  `id_solicitud` int NOT NULL AUTO_INCREMENT,
+  `id_usuario` int NOT NULL,
+  `correo` varchar(100) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `fecha_solicitada` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `estado` enum('pendiente','resuelta') NOT NULL DEFAULT 'pendiente',
+  `resuelta_por` varchar(100) DEFAULT 'administracionDB',
+  `fecha_resuelta` datetime DEFAULT NULL,
+  PRIMARY KEY (`id_solicitud`),
+  KEY `id_usuario` (`id_usuario`),
+  CONSTRAINT `solicitudes_reset_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `vehiculos`
+-- Dumping data for table `solicitudes_reset`
 --
 
-LOCK TABLES `vehiculos` WRITE;
-/*!40000 ALTER TABLE `vehiculos` DISABLE KEYS */;
-INSERT INTO `vehiculos` VALUES ('123','qwe',123005,'DISPONIBLE','automovil','B'),('12pepe','peeplopez',12321,'EN RUTA','automovil','B'),('abbb','Nissan',6111,'EN REPARACION','automovil','B'),('abbb2','Tesla',3302,'EN RUTA','automovil','B'),('abc123','Toyota',6,'EN RUTA','automovil','B'),('bbbb2','Ford',2100,'EN RUTA','automovil','B'),('bc1245','Suzuki',12016,'DISPONIBLE','automovil','B'),('cvfg12','Nissan',5010,'DISPONIBLE','automovil','B'),('dc1243','Maxus',14002,'EN RUTA','automovil','B'),('fgk123','Subaru',16000,'DADO DE BAJA','automovil','B');
-/*!40000 ALTER TABLE `vehiculos` ENABLE KEYS */;
+LOCK TABLES `solicitudes_reset` WRITE;
+/*!40000 ALTER TABLE `solicitudes_reset` DISABLE KEYS */;
+INSERT INTO `solicitudes_reset` VALUES (1,9,'pepe.lopez@muni.cl','Pepe Lopez','2026-07-07 17:03:42','resuelta','duplicada-sistema','2026-07-07 17:13:14'),(2,9,'pepe.lopez@muni.cl','Pepe Lopez','2026-07-07 17:13:14','resuelta','Administrativo 1','2026-07-08 10:46:44'),(3,9,'pepe.lopez@muni.cl','Pepe Lopez','2026-07-08 10:47:18','resuelta','Administrativo 1','2026-07-08 10:47:37');
+/*!40000 ALTER TABLE `solicitudes_reset` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

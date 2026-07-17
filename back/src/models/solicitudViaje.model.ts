@@ -19,7 +19,7 @@ export interface solicitud extends RowDataPacket{
     solicitante:string,
     motivo:string,
 }
-
+//Agrega una solicitud de viaje
 export async function crearSolicitud(data:solicitudViaje):Promise<boolean>{
     //solicitar nueva solicitud
     const [rows] = await connection.query(
@@ -30,21 +30,21 @@ export async function crearSolicitud(data:solicitudViaje):Promise<boolean>{
     //@ts-ignore
     return rows.insertId
 }
-
+//Devuelve todas las solicitudes actuales de viajes
 export async function getSolicitudes():Promise<solicitud[]>{
     const [rows] = await connection.query<solicitud[]>(
         "SELECT * FROM solicitudes_viaje"
     )
     return rows
 }
-
+//Devuelve las solicitudes de viajes de un usuario
 export async function getSolicitudesUsuario(id:number):Promise<solicitud[]>{
     const [rows] = await connection.query<solicitud[]>(
         "SELECT * FROM solicitudes_viaje WHERE id_solicitante=?",[id]
     )
     return rows
 }
-
+//Actualiza la solicitud a estado Rechazada
 export async function rechazarSolicitud(id:number,motivo:string,autor:string):Promise<solicitud[]>{
     const [rows] = await connection.query<solicitud[]>(
         `UPDATE solicitudes_viaje
@@ -53,7 +53,7 @@ export async function rechazarSolicitud(id:number,motivo:string,autor:string):Pr
     )
     return rows
 }
-
+//Actualiza la solicitud a estado Aprobada
 export async function aprobarSolicitud(id:number, motivo:string, autor:string): Promise<solicitud[]>{
     const [rows]=await connection.query<solicitud[]>(
         `UPDATE solicitudes_viaje

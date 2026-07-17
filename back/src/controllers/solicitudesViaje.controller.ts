@@ -4,10 +4,10 @@ import * as solicitudViaje from "../models/solicitudViaje.model"
 
 dotenv.config
 
+//Agrega una solicitud de viaje
 export async function agregarSolicitud(req:Request,res:Response){
     try{
         const { id_solicitante,motivo,solicitante,vehiculo_solicitado } = req.body
-        console.log(req.body)
         if(motivo==="" && solicitante===""){
             return res.status(400).json({error:"Los campos no pueden estar vacíos"})
         }
@@ -18,9 +18,8 @@ export async function agregarSolicitud(req:Request,res:Response){
         res.status(500).json({ error: " Error al agregar solicitud " })
     }
 }
-
+//Aprueba una solicitud de un viaje id
 export async function aprobarSolicitud(req:Request,res:Response){
-    console.log("aprobando...")
     try{
           const id=Number(req.params.id)
           const {motivo} = req.body
@@ -29,14 +28,13 @@ export async function aprobarSolicitud(req:Request,res:Response){
           if(!response){
             return res.status(404).json({error: "No se logro completar la aprobación de la solicitud"})
           }
-          console.log("solicitud aprobada")
           res.status(200).json({id,mensaje: "Viaje aprobado correctamente"})
     }catch(e){
         console.log("error solicitud")
         res.status(500).json({error: " Error al agregar aprobar solicitud "})
     }
 }
-
+//Devuelve las solicitudes
 export async function getSolicitudes(req:Request,res:Response) {
     try{
         const solicitudes = await solicitudViaje.getSolicitudes()
@@ -46,7 +44,7 @@ export async function getSolicitudes(req:Request,res:Response) {
         res.status(500).json({error: " Error al listar solicitudes "})
     }
 }
-
+//Devuelve las solicitudes de un usuario
 export async function getSolicitudesUsuario(req:Request,res:Response){
     try{
         const id=Number(req.params.id)
@@ -57,7 +55,7 @@ export async function getSolicitudesUsuario(req:Request,res:Response){
         res.status(500).json({error: " Error al listar solicitudes "})
     }
 }
-
+//Rechaza una solicitud de un viaje id
 export async function rechazarSolicitud(req:Request,res:Response){
     try{
         const id = Number(req.params.id)

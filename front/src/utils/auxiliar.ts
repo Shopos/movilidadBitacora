@@ -121,6 +121,7 @@ export async function getMantencionesVehiculo(patente: string) {
     return null;
   }
 }
+
 export async function getViajeUsuarioEspera(id: number) {
   try {
     if (id) {
@@ -166,7 +167,6 @@ export async function getSolicitudesUsuario(id:number) {
     return null
   }
 }
-
 
 export async function getViajeProceso(id: number) {
   try {
@@ -249,7 +249,6 @@ export async function agregarVehiculo(data: Vehiculo) {
   }
 }
 
-
 export async function agregarUsuario(data: User) {
   if (data) {
     const url = `${API}/usuarios`
@@ -301,7 +300,6 @@ export async function addViajeInicial(data: Viaje) {
     }
   }
 }
-
 
 export async function addDataViajeFin(patente: string, data: ViajeInputFin) {
   if (data && patente) {
@@ -356,7 +354,6 @@ export async function editarVehiculo(patente: string, data: Vehiculo) {
     }
   }
 }
-
 
 export async function editarUsuario(correo: string, data: User) {
   if (data) {
@@ -470,7 +467,6 @@ export async function pathSolicitudAprobada(id:number,data:string){
   }
 }
 
-
 export async function editarViaje(id: number, data: Partial<Viaje>) {
   const token = localStorage.getItem("token")
   const url = `${API}/viajes/${id}`
@@ -496,8 +492,31 @@ export async function editarViaje(id: number, data: Partial<Viaje>) {
   }
 }
 
+/**Metod para borrar un elemento hacia el backend
+ * 
+ * Solo esta restringido para eliminar un viaje que este en espera y no haya sido iniciado por algun usuario
+ * 
+ */
+export async function borrarViajeEspera(idViaje: number) {
+  const token = localStorage.getItem("token")
+  const url = `${API}/viajes/${idViaje}`
+  try {
+    const res = await fetch(url, {
+      method: "DELETE",
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    const json = await res.json()
+    if (!res.ok) {
+      throw new Error(json.error || "No se logro eliminar viaje en espera")
+    }
+    return json
+  } catch (e) {
+    console.log("error borrando viaje en espera")
+    return null
+  }
+}
 
-/*********/
+/***SOLICITUDES******/
 
 export async function solicitarRecuperarContraseña(correo: string) {
   try {
@@ -511,6 +530,7 @@ export async function solicitarRecuperarContraseña(correo: string) {
     return { error: 'No se logro solicitar cambio' }
   }
 }
+
 export async function getSolicitudes() {
   const token = localStorage.getItem("token")
   const url = `${API}/usuarios/solicitudes-reset`
@@ -527,6 +547,7 @@ export async function getSolicitudes() {
   }
 
 }
+
 export async function resolverSolicitudesCambio(id: number, pass: string) {
   const token = localStorage.getItem("token")
   const url = `${API}/usuarios/solicitudes-reset/${id}/resolver`
@@ -545,7 +566,6 @@ export async function resolverSolicitudesCambio(id: number, pass: string) {
   }
   return json
 }
-
 
 export async function solicitarViaje(data: SolicitudInicio) {
   const payload = data
@@ -570,8 +590,6 @@ export async function solicitarViaje(data: SolicitudInicio) {
     return null
   }
 }
-
-
 
 export async function resolverSubidaImagen(
   id: number,
@@ -599,21 +617,3 @@ export async function resolverSubidaImagen(
   }
 }
 
-export async function borrarViajeEspera(idViaje: number) {
-  const token = localStorage.getItem("token")
-  const url = `${API}/viajes/${idViaje}`
-  try {
-    const res = await fetch(url, {
-      method: "DELETE",
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-    const json = await res.json()
-    if (!res.ok) {
-      throw new Error(json.error || "No se logro eliminar viaje en espera")
-    }
-    return json
-  } catch (e) {
-    console.log("error borrando viaje en espera")
-    return null
-  }
-}

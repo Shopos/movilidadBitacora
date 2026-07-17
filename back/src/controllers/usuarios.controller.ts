@@ -69,7 +69,6 @@ export async function getUsuarioId(req: Request, res: Response) {
 */
 export async function agregarUsuario(req: Request, res: Response) {
     try {
-        console.log(req.body)
         const { correo, pass, tipo_licencia, nombre, cargo, estado, lista_licencia } = req.body
         if (correo === "" || pass === "" || nombre === "" || cargo === "") {
             return res.status(400).json({ error: "Los campos son obligatorios " })
@@ -77,8 +76,6 @@ export async function agregarUsuario(req: Request, res: Response) {
         const id = await usuarioModel.addUsuario({ correo, pass, tipo_licencia, nombre, cargo, estado })
         //esperar que se agregue usuario para tener id y agregar las licencias
         if(id){
-            console.log("Agregando licencias")
-            console.log(lista_licencia)
             const response = await usuarioModel.addLicenciasIniciales(id,lista_licencia)
             res.status(201).json({ id, mensaje: " Usuario agregado correctamente " })
         }
@@ -94,10 +91,8 @@ export async function agregarUsuario(req: Request, res: Response) {
 */
 export async function editarUsuario(req: Request, res: Response) {
     try {
-        console.log(req)
         const id = req.params.correo
         const { estado, tipo_licencia,lista_licencia } = req.body
-        console.log(lista_licencia)
         const actualiza = await usuarioModel.editUsuario(id, { estado, tipo_licencia, lista_licencia })
         if (!actualiza) {
             return res.status(404).json({ error: " usuario no encontrado " })
@@ -116,7 +111,6 @@ export async function login(req: Request, res: Response) {
             return res.status(400).json({ error: " Los campos correo y contraseña son obligatorios " })
         }
         const usuarios = await usuarioModel.getUsuarioCorreo(correo)
-        console.log(usuarios)
         const usuarioEncontrado = usuarios[0]
         if (!usuarioEncontrado) {
             return res.status(401).json({ error: " Credenciales invalidas " })
@@ -160,7 +154,6 @@ export async function solicitarReset(req: Request, res: Response) {
         //verificar que existe
         const usuarios = await usuarioModel.getUsuarioCorreo(mail)
         const usuario = usuarios[0]
-        console.log(usuario)
         //obtener data asociada
         if (usuario && usuario.estado) {
             const idUsuario = usuario.id_usuario

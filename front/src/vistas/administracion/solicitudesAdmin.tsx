@@ -27,6 +27,15 @@ type GPS = {
 interface prop {
     points: GPS[]
 }
+
+/**
+ * Vista para el manejo de solicitudes por parte de la administracion del sistema
+ * se manejan dos estados
+ *  -False --> Muestra la vista de solicitudes pendientes de usuarios en relacion a temas de cambio de contraseñas
+ *  -True --> Muestra la vista de solicitudes de viajes de usuarios departamento: 
+ *      Si son aprobadas -> Genera un viaje dependiendo de lo ingresado o solicitando / cambia estado de la solicitud -aprobada-
+ *      Si son rechazadas -> Cambia estado solicitud -rechazada- y agrega el motivo del rechazo
+ */
 function solicitudesAdmin() {
     const { showAlerta } = useAlerta()
     const [solicitudesPendientes, setSolicitudesPendientes] = useState([])
@@ -121,7 +130,7 @@ function solicitudesAdmin() {
     const [modalDestino, openModalDestino] = useState(false)
     const { usuario } = useAuth()
 
-    //Metodo para obtener las solicitudes pendientes
+    //Metodo para obtener las solicitudes pendientes, usuarios y vehiculos por si se requiere agregar un viaje
     useEffect(() => {
         const getSolicitudesPendientes = async () => {
             try {
@@ -202,21 +211,24 @@ function solicitudesAdmin() {
             showAlerta("Error al cambiar contraseña", "error")
         }
     }
+    
     const handleCloseModal = () => {
         setModalSol(false)
         setPass("")
         setPass2("")
         setSolicitudSelected(null)
     }
+    //Apertura modal solicitudes usuario
     const openModalSol = (solicitud: Solicitud) => {
         setSolicitudSelected(solicitud)
         setModalSol(true)
     }
-
+    //Rechazar solicitud viaje de departamento
     const rechazarSolicitud = () => {
         setModo(false)
         setModalConfirmar(true)
     }
+    //Trata el modal para aprobar una solicitude de un viaje comenzando el flujo de inicio de un viaje
     const aprobarSolicitud = () => {
         setModo(true)
         setModalConfirmar(true)
@@ -233,7 +245,7 @@ function solicitudesAdmin() {
         return formato
     }
 
-
+    //Use effect para el tratamiento de un viaje, si dentro del formulario de inicio y una solicitud seleccionada agrega un viaje y aprueba la solicitud
     useEffect(() => {
         const sendData = async () => {
             if (formInicio.estado_viaje === "En espera" && solicitudViajeSelected) {
@@ -266,6 +278,7 @@ function solicitudesAdmin() {
             modo: "ida"
         }))
     }
+    //rechaza la solicitud de viaje de un departamento
     const handleRechazarSolicitud = async () => {
         if (solicitudViajeSelected) {
             await patchSolicitudRechazo(solicitudViajeSelected.id_solicitud, motivo)
@@ -275,6 +288,7 @@ function solicitudesAdmin() {
             setCargando(false)
         }
     }
+    //funcion para el manejo del destino gps usado en el mapa
     const manejarMovimientoDestino = (e: any) => {
         const marker = e.target;
         if (marker != null) {
@@ -284,6 +298,8 @@ function solicitudesAdmin() {
             setDataGPSDestino({ lat: gps.lat, lng: gps.lng });
         }
     };
+
+    /*---> AGREGAR LOGICA LISTA DE VEHICULOS USUARIOS DEPENDIENDO DE LAS LICENCIAS PERMITIDAS */
 
     /** Si se selecciona un vehiculo desde un modal, reemplaza con los datos de dicho vehiculo en el formulario */
     const manejarDataVehiculo = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -302,7 +318,7 @@ function solicitudesAdmin() {
             kms_inicial: vehiculoEncontrado ? vehiculoEncontrado.kms_actual : 0
         }))
     }
-
+    //Maneja la logica del usuario funcionario dentro de la seleccion de un viaje
     const manejarDataFuncionario = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const usuarioSelected = (event.target.value).split(" / ")
         const usuarioFind = funcionarios!.find(

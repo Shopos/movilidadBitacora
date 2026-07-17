@@ -138,7 +138,7 @@ function viajesUsuario() {
         })
     }, [viajesUsuario, periodos])
     
-
+/**Funcion para generar PDF de un viaje seleccionado, si este cuenta con imagenes, crea las paginas adicionales con dichas imagenes */
     const generarViajePdf=async()=>{
         const logo = logoSC
         const doc = new jsPDF('l',"pt",'a4')
@@ -150,9 +150,9 @@ function viajesUsuario() {
         doc.setFontSize(20)
         doc.text("BITÁCORA VEHICULO",421,80,{align:"center"})
         doc.setFontSize(14)
-        doc.text(`Fecha ${viajeSelected?.fecha_hora_inicio.slice(0,10)}`,10,85)
+        doc.text(`Fecha ${viajeSelected?.fecha_hora_inicio?viajeSelected?.fecha_hora_inicio.slice(0,10):"No iniciado"}`,10,85)
         doc.text(`Vehiculo: ${viajeSelected?.vehiculo} Placa patente: ${viajeSelected?.patente}`,10,110,{align:"justify"})
-        doc.text(`Salida:HRS. ${viajeSelected?.fecha_hora_inicio.slice(11,19)}  KMS: ${viajeSelected?.kms_inicial}   Llegada:HRS. ${viajeSelected?.fecha_hora_fin ? viajeSelected?.fecha_hora_fin.slice(11,19): ""}  KMS: ${viajeSelected?.kms_fin ? viajeSelected.kms_fin:""} `,
+        doc.text(`Salida:HRS. ${viajeSelected?.fecha_hora_inicio? viajeSelected.fecha_hora_inicio.slice(11,19):"-"}  KMS: ${viajeSelected?.kms_inicial}   Llegada:HRS. ${viajeSelected?.fecha_hora_fin ? viajeSelected?.fecha_hora_fin.slice(11,19): "-"}  KMS: ${viajeSelected?.kms_fin ? viajeSelected.kms_fin:"-"} `,
         10,125,{align:"justify"})
         doc.text(`Destino: ${viajeSelected?.destino}`,10,140)
         doc.text(`Funcionario: ${viajeSelected?.nombre_funcionario}`,10,155)

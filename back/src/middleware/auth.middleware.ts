@@ -40,7 +40,7 @@ export const autenticarJWT = (req:Request,res:Response, next:NextFunction):void 
 /**Verifica que la solicitud enviada sea de un usuario con cargo Administrativo */
 export const verifyAdmin = (req:Request, res:Response, next:NextFunction)=>{
     const user = req.usuario as UsuarioPayload | undefined
-    if(!user && user!.cargo !== "Administrativo"){
+    if(!user || user!.cargo !== "Administrativo"){
         return res.status(400).json({msg: " No tienes credenciales necesarias para entrar en este espacio "})
     }
     next()

@@ -208,10 +208,11 @@ function recursosAdmin() {
         doc.setFontSize(12)
         if (vistaActual === true) {
             //Exportar pdf tabla vehiculos
-            const columns = ['Patente', 'Modelo', 'Kilometraje', 'Estado']
+            const columns = ['Patente','Tipo', 'Modelo', 'Kilometraje', 'Estado']
             if (vehiculos) {
                 const rows = vehiculos.map((veh) => [
                     veh.patente,
+                    veh.tipo_vehiculo,
                     veh.modelo,
                     veh.kms_actual,
                     veh.estado
@@ -263,7 +264,7 @@ function recursosAdmin() {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
-
+    //Manejo de cambio de la lista de licencias disponibles para un usuario --> se agrega un arreglo con la lista de licencias elegidas 
     const handleChangeLicencia = (event: SelectChangeEvent<string[]>) => {
         const {
             target: { value },
@@ -274,6 +275,7 @@ function recursosAdmin() {
         })
         )
     }
+    //Manejo de edicion de las licencias permitidas por un usuario
     const handleChangeLicenciaEdit = (event: SelectChangeEvent<string[]>) => {
         const {
             target: { value },

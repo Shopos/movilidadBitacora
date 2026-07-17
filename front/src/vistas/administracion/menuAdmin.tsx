@@ -516,6 +516,7 @@ function menuAdmin() {
         setViajeSelected(null)
     }
 
+    //FUncion para exportar la vista de un viaje en formato Bitacora
     const exportViajeSelectedPDF = async () => {
         const logo = logoSC
         const doc = new jsPDF('l', "pt", 'a4')
@@ -527,9 +528,9 @@ function menuAdmin() {
         doc.setFontSize(20)
         doc.text("BITÁCORA VEHICULO", 421, 80, { align: "center" })
         doc.setFontSize(14)
-        {viajeSelected?.fecha_hora_inicio ? doc.text(`Fecha ${viajeSelected?.fecha_hora_inicio.slice(0, 10)}`, 10, 85):doc.text("Aun no iniciado",10,85)}
+        { viajeSelected?.fecha_hora_inicio ? doc.text(`Fecha ${viajeSelected?.fecha_hora_inicio.slice(0, 10)}`, 10, 85) : doc.text("Aun no iniciado", 10, 85) }
         doc.text(`Vehiculo: ${viajeSelected?.vehiculo} Placa patente: ${viajeSelected?.patente}`, 10, 110, { align: "justify" })
-        doc.text(`Salida:HRS. ${viajeSelected?.fecha_hora_inicio ? viajeSelected.fecha_hora_inicio.slice(11, 19):""}  KMS: ${viajeSelected?.kms_inicial}   Llegada:HRS. ${viajeSelected?.fecha_hora_fin ? viajeSelected?.fecha_hora_fin.slice(11, 19) : ""}  KMS: ${viajeSelected?.kms_fin ? viajeSelected.kms_fin : ""} `,
+        doc.text(`Salida:HRS. ${viajeSelected?.fecha_hora_inicio ? viajeSelected.fecha_hora_inicio.slice(11, 19) : ""}  KMS: ${viajeSelected?.kms_inicial}   Llegada:HRS. ${viajeSelected?.fecha_hora_fin ? viajeSelected?.fecha_hora_fin.slice(11, 19) : ""}  KMS: ${viajeSelected?.kms_fin ? viajeSelected.kms_fin : ""} `,
             10, 125, { align: "justify" })
         doc.text(`Destino: ${viajeSelected?.destino}`, 10, 140)
         doc.text(`Funcionario: ${viajeSelected?.nombre_funcionario}`, 10, 155)
@@ -602,18 +603,35 @@ function menuAdmin() {
         doc.save(`Bitacora_${viajeSelected?.nombre_funcionario}_${viajeSelected?.fecha_hora_inicio}.pdf`)
     }
 
+    //Manejo de la lista de vehiculos y usuarios disponibles segun licencia. Si un vehiculo es seleccionado, la lista de funcionarios cambia para mostrar
+    //aquellos que pueden usar dicho vehiculo
     useEffect(() => {
-        if (vehiculoSelected) {
-            const newList = listaUsuarios?.filter((u) => (u.lista_licencia.includes(vehiculoSelected!.licencia_min)))
-            setUsuariosFiltrados(newList)
+        const vehiculoSelect = vehiculoSelected
+        const vehiculoEdit = formEdit?.patente ? vehiculos?.find(v=>v.patente === formEdit.patente):null
+
+        const vehiculoActivo  = vehiculoSelect || vehiculoEdit
+
+        if(!vehiculoActivo){
+            setUsuariosFiltrados(listaUsuarios||[])
+            return
         }
-    }, [vehiculoSelected])
+        const filtra = (listaUsuarios||[]).filter(u=> u.lista_licencia?.includes(vehiculoActivo.licencia_min))
+        setUsuariosFiltrados(filtra)
+    }, [vehiculoSelected,formEdit.patente,listaUsuarios,vehiculos])
+
+    //Maneja la lista de vehiculos dependiendo si existe un usuario seleccionado en el formulario mostrando aquellos vehiculos que el usuario seleccionado puede usar
     useEffect(() => {
-        if (formInicio.id_usuario!==0) {
-            const newList = vehiculos!.filter((v) => (listaUsuarios?.find((u) => u.id_usuario === formInicio.id_usuario)!.lista_licencia.includes(v.licencia_min)))
-            setVehiculosFiltrados(newList)
+        const idUsuarioActivo = formInicio.id_usuario === 0 ? formEdit.id_usuario : formInicio.id_usuario;
+        if (!idUsuarioActivo || idUsuarioActivo === 0) {
+            setVehiculosFiltrados([])
         }
-    }, [formInicio.id_usuario])
+        const usuarios = listaUsuarios?.find((u) => u.id_usuario === idUsuarioActivo)
+        const licenciasUsuario = usuarios?.lista_licencia || []
+        const newList = (vehiculos || []).filter((v) =>
+            licenciasUsuario?.includes(v.licencia_min)
+        )
+        setVehiculosFiltrados(newList)
+    }, [formInicio.id_usuario, formEdit.id_usuario])
 
     /*
     Vista menu administracion
@@ -879,21 +897,31 @@ function menuAdmin() {
                                         }}>
                                             {/**Solo se muestran las patentes de vehiculos disponibles */}
                                             <option>{formEdit?.patente}</option>
-                                            {vehiculos && vehiculos.filter(veh => (veh.estado === "DISPONIBLE")).map((veh) => (
+                                            {formEdit.id_usuario !== 0 ? (
+                                                vehiculosFiltrados && vehiculosFiltrados!.filter((veh) => (veh.estado === "DISPONIBLE")).map((veh) => (
+                                                    <option key={veh.patente} value={veh.patente}>
+                                                        {veh.patente}
+                                                    </option>
+                                                ))
+                                            ) : (vehiculos && vehiculos.filter(veh => (veh.estado === "DISPONIBLE")).map((veh) => (
                                                 <option key={veh.patente} value={veh.patente}>
                                                     {veh.patente}
-                                                </option>
-                                            ))}
-                                            {vehiculos && formInicio.id_usuario !== 0}
+                                                </option>)))}
+
                                         </select>
                                     </div>
                                     <div className="itemInput-Modal">
                                         <label>Funcionario</label>
                                         <select name="funcionarios" defaultValue={""} onChange={manejarDataFuncionarioEdit}>
                                             <option value={""}>{formEdit?.nombre_funcionario}</option>
-                                            {listaUsuarios && listaUsuarios.map((usr: User) => (
+                                            {formEdit?.patente ? 
+                                            (
+                                                usuariosFiltrados?.map((usr: User) => (
                                                 <option value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
-                                            ))}
+                                            ))) : (
+                                                listaUsuarios && listaUsuarios.map((usr: User) => (
+                                                <option value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
+                                            )))}
                                         </select>
                                     </div>
                                     <div className="itemInput-Modal">
@@ -1006,17 +1034,17 @@ function menuAdmin() {
                                 <label>Funcionario</label>
                                 <select name="funcionarios" defaultValue={""} onChange={manejarDataFuncionario}>
                                     <option value={""} disabled>Designa un funcionario</option>
-                                    {vehiculoSelected?.patente? 
+                                    {vehiculoSelected?.patente ?
                                         (
-                                            usuariosFiltrados && usuariosFiltrados.map((usr:User)=>(
+                                            usuariosFiltrados && usuariosFiltrados.map((usr: User) => (
                                                 <option value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
                                             ))
                                         )
-                                        :(listaUsuarios && listaUsuarios.map((usr: User) => (
+                                        : (listaUsuarios && listaUsuarios.map((usr: User) => (
                                             <option value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
                                         )))
                                     }
-                                    
+
                                 </select>
                             </div>
                             <div className="itemInput-Modal">

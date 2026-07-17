@@ -45,7 +45,7 @@ export async function agregarVehiculo(req:Request,res:Response){
     try{
         const {patente, modelo, kms_actual, estado, tipo_vehiculo} = req.body
         
-        if( patente === "" && modelo === "" ){
+        if( patente === "" || modelo === "" ){
             return res.status(400).json({error: " Los campos patente, modelo y estado son obligatorios "})
         }
         const id = await vehiculoModel.addVehiculo({patente,modelo,kms_actual,estado,tipo_vehiculo})
@@ -64,7 +64,7 @@ export async function agregarVehiculo(req:Request,res:Response){
 export async function editarVehiculo(req:Request,res:Response){
     try{
         const id = req.params.patente
-        const {modelo,kms_actual,estado} = req.body
+        const {kms_actual,estado} = req.body
 
         const actualiza = await vehiculoModel.editVehiculo(id,{kms_actual,estado})
         if(!actualiza){

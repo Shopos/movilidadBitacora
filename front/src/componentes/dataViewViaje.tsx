@@ -64,7 +64,7 @@ function dataViewViaje({ viajeSelected, modo }: prop) {
                             <div className='modalDataItemRow'>
                                 {viajeSelected && viajeSelected.hora_recomendada && 
                                 <>
-                                    <span>Fecha hora recomendad inicio</span>{viajeSelected?.hora_recomendada ? (
+                                    <span>Fecha hora recomendada para iniciar</span>{viajeSelected?.hora_recomendada ? (
                                         viajeSelected.hora_recomendada.slice(0,10) +" "+ viajeSelected.hora_recomendada.slice(11,19)
                                         ):""}
                                 </>
@@ -130,7 +130,7 @@ function dataViewViaje({ viajeSelected, modo }: prop) {
                                     <img style={{ width: "95%" }} src={`${API}/uploads/${viajeSelected.imagen_tablero_ida}`}></img>
                                 </div>
                             ) : (
-                                <div style={{ width: "40%", marginRight: "5px" }}>
+                                <div style={{ width: "45%", marginRight: "5px" }}>
                                     <label style={{ fontWeight: 'bold' }}>Tablero al cerrar</label>
                                     <p>Aun no se tiene una imagen para este momento</p>
                                 </div>
@@ -138,7 +138,7 @@ function dataViewViaje({ viajeSelected, modo }: prop) {
                             {viajeSelected.imagen_tablero_vuelta ? (
                                 <div style={{ width: "50%" }}>
                                     <label style={{ fontWeight: 'bold' }}>Tablero al cerrar</label>
-                                    <img src={`${API}/uploads/${viajeSelected.imagen_tablero_vuelta}`}></img>
+                                    <img style={{ width: "95%" }} src={`${API}/uploads/${viajeSelected.imagen_tablero_vuelta}`}></img>
                                 </div>
                             ) : (
                             <div style={{ width: "45%", marginLeft  : "5px" }}>

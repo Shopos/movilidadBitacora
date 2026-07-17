@@ -99,7 +99,7 @@ export async function changeStatus(id:number, status:string):Promise<boolean>{
     //@ts-ignore
     return(res.affectedRows>0)
 }
-
+//Agrega licencias a un usuario, en vez de editar la tabla de licencias del usuario, se borran sus licencias actuales y se agregan las solicitudes ingresadas
 export async function addLicencias(id:Number,lista:string[]){
     await connection.query("DELETE FROM licencias_usuario WHERE id_usuario=?",[id])
     if(!lista||lista.length===0)return
@@ -108,7 +108,7 @@ export async function addLicencias(id:Number,lista:string[]){
         "INSERT INTO licencias_usuario (id_usuario,tipo_licencia) VALUES ? ",[val]
     )
 }
-
+//Agrega inicialmente las licencias a un usuario en una tabla especifica 
 export async function addLicenciasIniciales(id:Number,lista:string[]){
     if(!lista||lista.length===0)return
     const val = lista.map((lic)=>[id,lic])
@@ -118,7 +118,7 @@ export async function addLicenciasIniciales(id:Number,lista:string[]){
     //@ts-ignore
     return res.insertId
 }
-
+//Devuelve las licencias de un usuario
 export async function getLicenciasUsuario(id_usuario:number):Promise<string[]>{
     const [rows]=await connection.query<RowDataPacket[]>(
         "SELECT tipo_licencia FROM licencias_usuario WHERE id_usuario=?",[id_usuario]

@@ -11,6 +11,11 @@ import { Modal, ModalDialog, DialogTitle, DialogContent, DialogActions, Button }
 import ArrowBackSharpIcon from '@mui/icons-material/ArrowBackSharp';
 import { TablePagination } from "@mui/material";
 import { VisibilitySharp } from "@mui/icons-material";
+
+
+
+/**Vista de las solicitudes de un usuario departamento, muestra el estado en el que estan y los motivos de su aprobacion o rechazo
+ */
 function solicitudesDepartamento(){
     const {usuario} = useAuth()
     const {showAlerta} = useAlerta()

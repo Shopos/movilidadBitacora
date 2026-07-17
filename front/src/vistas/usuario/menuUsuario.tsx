@@ -2,9 +2,9 @@ import { useNavigate } from "react-router-dom"
 import { useEffect,useState } from 'react'
 import NavBar from "../../componentes/navBar.tsx"
 import '../../estilos/menuUsuario.css'
-import type { Viaje } from "../../tipos/tipoSistema.ts"
+import type { Vehiculo, Viaje } from "../../tipos/tipoSistema.ts"
 import { useAuth } from "../../context/AuthContext.tsx"
-import { getViajeProceso, getViajeUsuarioEspera } from "../../utils/auxiliar.ts"
+import getVehiculos, { getViajeProceso, getViajeUsuarioEspera } from "../../utils/auxiliar.ts"
 import { Card, CardActions, CardContent, IconButton, Typography } from "@mui/joy"
 import { useAlerta } from "../../context/AlertaContext.tsx"
 /*Vista del menu del usuario
@@ -19,15 +19,17 @@ function menuUsuario(){
     const [viajeEspera,setViajeEspera] = useState<Viaje[]>([])
     const [cargando,setCargando] = useState(false)
     const [viajeVuelta,setViajeVuelta] = useState(false)
-
+    const [vehiculos,setVehiculos] = useState<Vehiculo[]>([])
     /* Verificar si existe un viaje en espera para dicho usuario, si existe mostrar tarjeta con boton para redirigir a iniciarViaje */
     useEffect(()=>{
         const getViajeUsuario=async()=>{
             try{
                 if(usuario){
                     const response = await getViajeUsuarioEspera(usuario?.id)
-                    if (response && Object.keys(response).length > 0) {
+                    const veh = await getVehiculos()
+                    if (response && Object.keys(response).length > 0 && Object.keys(veh).length>0) {
                         showAlerta("Tienes un viaje en espera","info")
+                        setVehiculos(veh)
                         setViajeEspera(response) //
                         setCargando(true)
                     } else {
@@ -41,6 +43,15 @@ function menuUsuario(){
         }
         getViajeUsuario()
     },[usuario,cargando])
+
+    //Funcion para verificar el estado de la patente -> si el elemento.patente existe en la lista de vehiculos y dicho elemento esta en estado "DISPONIBLE"
+    //retorna T caso contrario F
+    function checkPatenteDis(patente:string): boolean{
+        if(vehiculos){
+            return !vehiculos.some((veh)=>veh.patente===patente && veh.estado==="DISPONIBLE")
+        }
+        return false
+    }
 
     useEffect(()=>{
         if(viajeEspera.find(vje => vje.modo === "vuelta")){
@@ -75,6 +86,14 @@ function menuUsuario(){
             navigate("/inicioViaje")
         }
     }
+
+    /**Funcion para comparar fechas 
+     * 
+     * Verifica si ambas fechas recomendadas son nulas, caso verdadero retorna las posiciones normales
+     * -Verifica si la hora 'a' es nula retornando que la fecha 'b' va antes
+     * -Verifica si la hora 'b' es nula retornando que la fecha 'a' va antes
+     * -Verifica ambas fechas verificando y retornando que fecha tendria prioridad
+    */
    const compararFechas = (a:Viaje,b:Viaje):number =>{
     if(!a.hora_recomendada && !b.hora_recomendada){
         return 0
@@ -85,9 +104,13 @@ function menuUsuario(){
     if(!b.hora_recomendada){
         return -1
     }
-    return new Date(a.hora_recomendada).getDate() - new Date(b.hora_recomendada).getDate()
+    return new Date(a.hora_recomendada).getTime() - new Date(b.hora_recomendada).getTime()
    }
-
+   /**Ordena los viajes del usuarios dependiendo de el modo del viaje y las fechas recomendadas
+    *   -Prioridad 1-> Viajes modo vuelta -> SI existe un viaje queda arriba de todos los demas y no permite iniciar un nuevo viaje 
+    *   -Prioridad 2-> Viajes con horas recomendadas -> SI tiene una fecha recomendad, se ordenan por prioridad -> Fechas más actuales quedan arriba
+    *   -Prioridad 3-> Viajes sin hora -> Quedan al fondo de la lista -> Viajes sin una prioridad real, el usuario determina el inicio
+    */
    const viajeOrdenado = [...viajeEspera].sort((a,b)=>{
         const porModo = Number(b.modo==="vuelta")-Number(a.modo==="vuelta")
         if(porModo!==0){
@@ -103,6 +126,7 @@ function menuUsuario(){
             {viajeEspera && viajeEspera.length>0 ?
              (<div style={{width:"100%", maxWidth:"50vw", height:"50vh", overflow:"auto",boxSizing:"border-box"}}>
                 {viajeOrdenado.map((vje)=>(
+                    
                     <div className="containerCard">
                 <Card variant="outlined" className="cardViaje" sx={vje.modo==="vuelta" ? {backgroundColor:"#ffca59"}:{ backgroundColor:"#E7E1B1"}}>
                     <CardContent>
@@ -118,7 +142,7 @@ function menuUsuario(){
                         justifyContent:"flex-end"
                     }}>
                         {vje.modo === "vuelta" && <IconButton variant="solid" color="primary" onClick={()=>manejarViajeEspera(vje.id_viaje)}>Comenzar viaje</IconButton>}
-                        {!viajeVuelta && <IconButton variant="solid" color="primary" onClick={()=>manejarViajeEspera(vje.id_viaje)}>Comenzar viaje</IconButton>}
+                        {!viajeVuelta && !checkPatenteDis(vje.patente) && <IconButton variant="solid" color="primary" onClick={()=>manejarViajeEspera(vje.id_viaje)}>Comenzar viaje</IconButton>}
                     </CardActions>
                 </Card>
              </div>

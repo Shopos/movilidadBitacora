@@ -1,5 +1,6 @@
 import {connection}from "../config/database"
 import {RowDataPacket} from 'mysql2'
+import { queryAsUser } from "../utils/auditoria.utils"
 
 export interface Vehiculo extends RowDataPacket{
     patente:String,
@@ -44,22 +45,18 @@ export async function getVehiculo(patenteBusqueda:string|string[]): Promise<Vehi
 }
 
 //Metodo que agrega un vehiculo
-export async function addVehiculo(data:vehiculoInput): Promise<number>{
+export async function addVehiculo(data:vehiculoInput,usuarioResponsable:string): Promise<number>{
     const licencia_min = licenciasPorVehiculo[data.tipo_vehiculo]||"B"
-    const [resultado] = await connection.query(
-        "INSERT INTO vehiculos (patente,modelo,kms_actual,estado,tipo_vehiculo,licencia_min) VALUES (?,?,?,?,?,?)",
-        [data.patente,data.modelo,data.kms_actual,data.estado,data.tipo_vehiculo,licencia_min]
-    )
+    const resultado:any = await queryAsUser(usuarioResponsable, "INSERT INTO vehiculos (patente,modelo,kms_actual,estado,tipo_vehiculo,licencia_min) VALUES (?,?,?,?,?,?)",
+        [data.patente,data.modelo,data.kms_actual,data.estado,data.tipo_vehiculo,licencia_min])
     //@ts-ignore
     return resultado.insertId
 }
 
 //Metodo que edita la informacion de un vehiculo
-export async function editVehiculo(patenteBusqueda:string|string[], data:vehiculoEdit): Promise<boolean>{
-    const [resultado] = await connection.query(
-        "UPDATE vehiculos SET kms_actual=?,estado=? WHERE patente = ?",
-        [data.kms_actual,data.estado, patenteBusqueda]
-    )
+export async function editVehiculo(patenteBusqueda:string|string[], data:vehiculoEdit,usuarioResponsable:string): Promise<boolean>{
+    const resultado:any = await queryAsUser(usuarioResponsable,"UPDATE vehiculos SET kms_actual=?,estado=? WHERE patente = ?",
+        [data.kms_actual,data.estado, patenteBusqueda])
     //@ts-ignore
     return (resultado.affectedRows > 0)
 }

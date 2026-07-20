@@ -3,7 +3,7 @@ import { useState, useEffect, type ChangeEvent } from "react"
 import NavBar from "../../componentes/navBar.tsx"
 import ImageUploader from "../../componentes/imageUploader.tsx"
 import "../../estilos/cierreViaje.css"
-import type { Viaje, ViajeInputFin } from "../../tipos/tipoSistema.ts"
+import type { Viaje, ViajeInputFin } from "../../types/tipoSistema.ts"
 
 import { Modal, ModalDialog, DialogTitle, Divider, DialogContent, DialogActions, Button } from "@mui/joy"
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded';

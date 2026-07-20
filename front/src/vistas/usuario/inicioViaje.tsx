@@ -4,7 +4,7 @@ import ImageUploader from "../../componentes/imageUploader.tsx";
 import "../../estilos/inicioViaje.css"
 import React, { useEffect, useState } from "react";
 import { Modal, ModalDialog, DialogTitle, Divider, DialogContent, DialogActions, Button } from "@mui/joy"
-import type { Viaje } from "../../tipos/tipoSistema.ts";
+import type { Viaje } from "../../types/tipoSistema.ts";
 import Routing from "../../componentes/routing.tsx" /*Componente para marcar la ruta entre inicio y destino en mapa*/
 import 'leaflet/dist/leaflet.css';
 import L from "leaflet"

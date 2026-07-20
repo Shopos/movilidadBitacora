@@ -1,5 +1,6 @@
 import { RowDataPacket } from "mysql2"
 import { connection } from "../config/database"
+import { queryAsUser } from "../utils/auditoria.utils"
 
 export interface solicitudViaje{
     id_solicitante:Number,
@@ -20,9 +21,9 @@ export interface solicitud extends RowDataPacket{
     motivo:string,
 }
 //Agrega una solicitud de viaje
-export async function crearSolicitud(data:solicitudViaje):Promise<boolean>{
+export async function crearSolicitud(data:solicitudViaje,usuarioResponsable:string):Promise<boolean>{
     //solicitar nueva solicitud
-    const [rows] = await connection.query(
+    const rows:any = await queryAsUser(usuarioResponsable,
         `INSERT INTO solicitudes_viaje
         (id_solicitante,solicitante,motivo,vehiculo_solicitado) VALUES (?,?,?,?)`,
         [data.id_solicitante,data.solicitante,data.motivo,data.vehiculo_solicitado]
@@ -45,8 +46,8 @@ export async function getSolicitudesUsuario(id:number):Promise<solicitud[]>{
     return rows
 }
 //Actualiza la solicitud a estado Rechazada
-export async function rechazarSolicitud(id:number,motivo:string,autor:string):Promise<solicitud[]>{
-    const [rows] = await connection.query<solicitud[]>(
+export async function rechazarSolicitud(id:number,motivo:string,autor:string,usuarioResponsable:string):Promise<solicitud[]>{
+    const rows:any = await queryAsUser(usuarioResponsable,
         `UPDATE solicitudes_viaje
         SET estado='rechazada', resuelta_por=?, fecha_resuelta=NOW(),estado_texto=?
         WHERE id_solicitud=? AND estado='pendiente' `,[autor,motivo,id]
@@ -54,8 +55,8 @@ export async function rechazarSolicitud(id:number,motivo:string,autor:string):Pr
     return rows
 }
 //Actualiza la solicitud a estado Aprobada
-export async function aprobarSolicitud(id:number, motivo:string, autor:string): Promise<solicitud[]>{
-    const [rows]=await connection.query<solicitud[]>(
+export async function aprobarSolicitud(id:number, motivo:string, autor:string,usuarioResponsable:string): Promise<solicitud[]>{
+    const rows:any=await queryAsUser(usuarioResponsable,
         `UPDATE solicitudes_viaje
         SET estado='resuelta',resuelta_por=?, fecha_resuelta=NOW(),estado_texto=?
         WHERE id_solicitud=? AND estado='pendiente' `,[autor,motivo,id]

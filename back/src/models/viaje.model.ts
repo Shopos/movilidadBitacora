@@ -1,6 +1,7 @@
 import { connection } from "../config/database"
 import { RowDataPacket } from "mysql2"
 import { getIdUsuario } from "./usuario.model"
+import { queryAsUser } from "../utils/auditoria.utils"
 
 export interface Viaje extends RowDataPacket{
     id_viaje:number,
@@ -159,9 +160,8 @@ export async function checkPatenteEstado(id:string): Promise<Viaje[]>{
 }
 
 //Metodo para agregar un viaje con los datos necesarios para comenzar uno
-export async function addViajeInicio(data:ViajeInputInicio): Promise<ViajeInputInicio>{
-    const [resultado] = await connection.query(
-         `INSERT INTO viajes (
+export async function addViajeInicio(data:ViajeInputInicio,usuarioResponsable:string): Promise<ViajeInputInicio>{
+    const res:any = await queryAsUser(usuarioResponsable,`INSERT INTO viajes (
          vehiculo,
          id_usuario,
          patente,
@@ -199,10 +199,9 @@ export async function addViajeInicio(data:ViajeInputInicio): Promise<ViajeInputI
             data.kms_fin,
             data.modo,
             data.hora_recomendada
-        ]
-    )
+        ])
     //@ts-ignore
-    return resultado.insertId
+    return res.insertId
 }
 
 //Metodo para editar/agregar informacion de un viaje que termina su recoleccion de informacion
@@ -242,9 +241,8 @@ export async function editViajeFin(patente:string|string[],data:ViajeInputFin): 
 }
 
 //Agrega la informacion a un viaje{id} inicialmente
-export async function parcheInicio(id:number,data:ViajeInputFuncionarioInicio): Promise<boolean>{
-    const [res] = await connection.query(
-        `UPDATE viajes SET fecha_hora_inicio = ?, ultima_modificacion = ?, modificado_por = ?, estado_viaje = ? WHERE id_viaje = ? AND estado_viaje= ? `,
+export async function parcheInicio(id:number,data:ViajeInputFuncionarioInicio,usuarioResponsable:string): Promise<boolean>{
+    const res:any = await queryAsUser(usuarioResponsable,`UPDATE viajes SET fecha_hora_inicio = ?, ultima_modificacion = ?, modificado_por = ?, estado_viaje = ? WHERE id_viaje = ? AND estado_viaje= ? `,
         [data.fecha_hora_inicio,data.ultima_modificacion,data.modificado_por,"En proceso",id,"En espera"]
     )
     //@ts-ignore
@@ -259,9 +257,8 @@ export async function changeStatusViaje(id:number,status:string): Promise<boolea
     return (res.affectedRows > 0)
 }
 //Agrega la informacion faltante a un viaje{id} para cerrar un viaje
-export async function parcheFin(id:number,data:ViajeInputFuncionarioFin): Promise<boolean>{
-    const [res] = await connection.query(
-        `UPDATE viajes 
+export async function parcheFin(id:number,data:ViajeInputFuncionarioFin,usuarioResponsable:string): Promise<boolean>{
+    const res:any = await queryAsUser(usuarioResponsable, `UPDATE viajes 
         SET fecha_hora_fin = ?, obs_viaje = ?, carga_combustible=?,cantidad_carga=? , ultima_modificacion = ?, modificado_por = ?,kms_fin=? ,estado_viaje = ? 
         WHERE id_viaje = ?`,
         [data.fecha_hora_fin,
@@ -273,8 +270,7 @@ export async function parcheFin(id:number,data:ViajeInputFuncionarioFin): Promis
             data.kms_fin,
             "Terminado",
             id
-        ]
-    )
+        ])
     //@ts-ignore
     return (res.affectedRows > 0)
 }
@@ -323,18 +319,16 @@ export async function addViajeRegreso(viajeInicial:Viaje,modificacion:string,kms
     return res.insertId
 }
 //Modifica la informacion de un viaje{id} terminado
-export async function editarTerminado(id:number,data:viajeTerminado){
-    const [res] = await connection.query(
-        `UPDATE viajes SET obs_viaje = ?, cantidad_carga=?, ultima_modificacion=?, modificado_por=?
+export async function editarTerminado(id:number,data:viajeTerminado,usuarioResponsable:string){
+    const res:any = await queryAsUser(usuarioResponsable,`UPDATE viajes SET obs_viaje = ?, cantidad_carga=?, ultima_modificacion=?, modificado_por=?
         WHERE id_viaje = ? `,[data.obs_viaje+" -Administración",data.cantidad_carga,data.ultimaModificacion,data.adminName,id]
     )
     //@ts-ignore
     return res.affectedRows>0
 }
 //Modifica los datos de un viaje que esta en modo espera
-export async function editarEspera(id:number, data:viajeEspera){
-    const [res] = await connection.query(
-        `UPDATE viajes SET
+export async function editarEspera(id:number, data:viajeEspera,usuarioResponsable:string){
+    const res:any = await queryAsUser(usuarioResponsable, `UPDATE viajes SET
         patente=?,vehiculo=?,kms_inicial=?,id_usuario=?,nombre_funcionario=?,destino=?,motivo=?,lat_fin=?,lng_fin=?,modificado_por=?,ultima_modificacion=?,hora_recomendada=?
         WHERE id_viaje=?`,
         [data.patente,data.vehiculo,data.kms_inicial,data.id_usuario,data.nombre_funcionario,data.destino,data.motivo,data.lat_fin,data.lng_fin,data.modificado_por,data.ultima_modificacion,data.hora_recomendada,id]

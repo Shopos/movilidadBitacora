@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { getMantencionesPatente, agregarMantencion } from "../controllers/mantenciones.controller";
+import { autenticarJWT } from "../middleware/auth.middleware";
 
 const router = Router()
 
@@ -7,6 +8,6 @@ const router = Router()
 router.get('/:patente',getMantencionesPatente)
 
 //Agrega mantencion a un vehiculo
-router.post('/',agregarMantencion)
+router.post('/',autenticarJWT,agregarMantencion)
 
 export default router

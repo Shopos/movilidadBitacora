@@ -1,5 +1,6 @@
 import { connection } from "../config/database"
 import { RowDataPacket } from "mysql2"
+import { queryAsUser } from "../utils/auditoria.utils"
 
 export interface Mantencion extends RowDataPacket{
     id_mantencion:Number,
@@ -27,8 +28,8 @@ export async function getMantencionesVehiculo(patenteBuscada:string|string[]):Pr
 }
 
 //Metodo que agrega una mantencion
-export async function addMantencion(data:mantencionInput):Promise<number> {
-    const [resultado] = await connection.query(
+export async function addMantencion(data:mantencionInput,usuarioResponsable:string):Promise<number> {
+    const resultado:any = await queryAsUser(usuarioResponsable,
         "INSERT INTO mantenciones (ultimo_cambio_aceite,taller,ultima_mantencion,detalle_mantencion,patente) VALUES (?,?,?,?,?)",
         [data.ultimo_cambio_aceite,data.taller,data.ultima_mantencion,data.detalle_mantencion,data.patente]
     )

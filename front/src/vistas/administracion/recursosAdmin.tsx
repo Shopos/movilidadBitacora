@@ -7,7 +7,7 @@ import { FormControl, type SelectChangeEvent } from "@mui/material"
 import { Modal, ModalDialog, DialogTitle, Divider, DialogContent, DialogActions, Button } from "@mui/joy"
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import EditIcon from '@mui/icons-material/Edit';
-import type { Vehiculo, User, Mantencion } from '../../tipos/tipoSistema.ts'
+import type { Vehiculo, User, Mantencion } from '../../types/tipoSistema.ts'
 import getVehiculos, { addMantencionVehiculo, agregarVehiculo, editarVehiculo, agregarUsuario, getUsuarios, editarUsuario } from "../../utils/auxiliar.ts"
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'

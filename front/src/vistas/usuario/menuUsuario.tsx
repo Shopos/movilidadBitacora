@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom"
 import { useEffect,useState } from 'react'
 import NavBar from "../../componentes/navBar.tsx"
 import '../../estilos/menuUsuario.css'
-import type { Vehiculo, Viaje } from "../../tipos/tipoSistema.ts"
+import type { Vehiculo, Viaje } from "../../types/tipoSistema.ts"
 import { useAuth } from "../../context/AuthContext.tsx"
 import getVehiculos, { getViajeProceso, getViajeUsuarioEspera } from "../../utils/auxiliar.ts"
 import { Card, CardActions, CardContent, IconButton, Typography } from "@mui/joy"

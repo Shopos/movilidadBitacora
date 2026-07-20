@@ -7,11 +7,12 @@ dotenv.config
 //Agrega una solicitud de viaje
 export async function agregarSolicitud(req:Request,res:Response){
     try{
+        const usuario = (req.usuario as any).correo
         const { id_solicitante,motivo,solicitante,vehiculo_solicitado } = req.body
-        if(motivo==="" && solicitante===""){
+        if(motivo==="" || solicitante===""){
             return res.status(400).json({error:"Los campos no pueden estar vacíos"})
         }
-        const id = await solicitudViaje.crearSolicitud({id_solicitante,motivo,solicitante,vehiculo_solicitado})
+        const id = await solicitudViaje.crearSolicitud({id_solicitante,motivo,solicitante,vehiculo_solicitado},usuario)
         res.status(201).json({ id, mensaje: " Viaje solicitado " })
     }catch(e){
          console.error(e)
@@ -24,7 +25,8 @@ export async function aprobarSolicitud(req:Request,res:Response){
           const id=Number(req.params.id)
           const {motivo} = req.body
           const autor = (req.usuario as any).nombre
-          const response = await solicitudViaje.aprobarSolicitud(id,motivo,autor)
+          const autorMail = (req.usuario as any).correo
+          const response = await solicitudViaje.aprobarSolicitud(id,motivo,autor,autorMail)
           if(!response){
             return res.status(404).json({error: "No se logro completar la aprobación de la solicitud"})
           }
@@ -61,7 +63,8 @@ export async function rechazarSolicitud(req:Request,res:Response){
         const id = Number(req.params.id)
         const {motivo} = req.body
         const autor = (req.usuario as any).nombre
-        const response = await solicitudViaje.rechazarSolicitud(id,motivo,autor)
+        const autorMail = (req.usuario as any).correo
+        const response = await solicitudViaje.rechazarSolicitud(id,motivo,autor,autorMail)
         if(!response){
             return res.status(404).json({ error: " No se logro completar el rechazo de solicitud " })
         }

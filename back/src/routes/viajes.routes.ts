@@ -16,12 +16,12 @@ router.get('/:id',getViajeIdUsuarioEspera)
 
 
 //Agrega un viaje inicialmente
-router.post('/', addViajeInicio)
+router.post('/',autenticarJWT, addViajeInicio)
 
 //Edita los elementos necesarios para dar partida a un viaje {id}
-router.patch('/inicio/:id', parcheInicio)
+router.patch('/inicio/:id',autenticarJWT, parcheInicio)
 //Edita los elementos necesarios para finalizar un viaje {id}
-router.patch('/fin/:id', parcheFin)
+router.patch('/fin/:id',autenticarJWT, parcheFin)
 
 //Agrega la foto de tablero al inicio de un viaje
 router.patch('/:id/foto-inicio',autenticarJWT,...uploadImagenInicio)

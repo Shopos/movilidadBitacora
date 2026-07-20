@@ -4,6 +4,7 @@ import * as vehiculoModel from "../models/vehiculo.model"
 import * as usuarioModel from "../models/usuario.model"
 import { uploadImageComprobante, uploadImageTableroFin, uploadImageTableroInicio } from "../config/multer";
 import { connection } from "../config/database";
+import { queryAsUser } from "../utils/auditoria.utils";
 
 /* Controladores para el llamado al modelo de viajes con el fin de manejar correctamente la informacion solicitada y recibida */
 
@@ -64,7 +65,7 @@ export async function getViajeIdUsuario(req: Request, res: Response) {
     con el fin de que no existan dos viajes con un vehiculo participando al mismo tiempo
 */
 export async function addViajeInicio(req: Request, res: Response) {
-
+    
     try {
         const {
             vehiculo,
@@ -85,9 +86,10 @@ export async function addViajeInicio(req: Request, res: Response) {
             modo,
             hora_recomendada
         } = req.body
-        if (patente === " " && nombre_funcionario === "" && !estado_viaje) {
+        if (patente === " " || nombre_funcionario === "" || !estado_viaje) {
             return res.status(400).json({ error: " Los campos patente, nombre funcionario no pueden estar vacios " })
         }
+        const usuario = (req.usuario as any).correo
         const id = await viajesModel.addViajeInicio({
             vehiculo,
             id_usuario,
@@ -106,7 +108,7 @@ export async function addViajeInicio(req: Request, res: Response) {
             kms_fin,
             modo,
             hora_recomendada
-        })
+        },usuario)
         await usuarioModel.changeStatus(id_usuario, "Asignado")
         res.status(201).json({ id, mensaje: " Viaje agregado inicialmente " })
 
@@ -142,16 +144,17 @@ export async function parcheInicio(req: Request, res: Response) {
         const id = Number(req.params.id)
         const { fecha_hora_inicio, ultima_modificacion, modificado_por } = req.body
         const viaje = await getViajeByid(Number(id))
+        const usuario = (req.usuario as any).correo
         if (!viaje) {
             return res.status(404).json({ error: 'Viaje no encontrado' })
         }
         if (viaje[0].estado_viaje !== "En espera") {
             return res.status(400).json({ error: " El viaje asignado no esta en modo 'En espera' " })
         }
-        if (fecha_hora_inicio === "" && ultima_modificacion === "" && modificado_por === "") {
+        if (fecha_hora_inicio === "" || ultima_modificacion === "" ||modificado_por === "") {
             return res.status(400).json({ error: " Los campos fecha_hora_inicio no puede estar vacio " })
         }
-        const resultado = await viajesModel.parcheInicio(id, { fecha_hora_inicio, ultima_modificacion, modificado_por })
+        const resultado = await viajesModel.parcheInicio(id, { fecha_hora_inicio, ultima_modificacion, modificado_por },usuario)
         if (!resultado) {
             return res.status(404).json({ error: " No se logro actualizar viaje al inicio " })
         }
@@ -182,14 +185,14 @@ export async function parcheFin(req: Request, res: Response) {
             kms_fin
         } = req.body
         const viaje = await getViajeByid(Number(id))
-
+        const usuario = (req.usuario as any).correo
         if (!viaje) {
             return res.status(404).json({ error: 'Viaje no encontrado' })
         }
         if (viaje[0].estado_viaje !== "En proceso") {
             return res.status(400).json({ error: " El viaje encontrado no esta en modo 'En proceso' " })
         }
-        if (fecha_hora_fin === "" && modificado_por === "" && ultima_modificacion === "") {
+        if (fecha_hora_fin === "" || modificado_por === "" || ultima_modificacion === "") {
             return res.status(400).json({ error: " Los campos fecha_hora_fin no puede estar vacio " })
         }
         const resultado = await viajesModel.parcheFin(id, {
@@ -200,7 +203,7 @@ export async function parcheFin(req: Request, res: Response) {
             ultima_modificacion,
             modificado_por,
             kms_fin
-        },
+        },usuario
         )
 
         await vehiculoModel.changeKms(viaje[0].patente, kms_fin)
@@ -242,7 +245,7 @@ export async function editarViaje(req: Request, res: Response) {
         const adminName = (req.usuario as any).nombre
         const ahora = new Date()
         const ultimaModificacion = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')} ${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`
-
+        const adminMail = (req.usuario as any).correo
         const viajeEncontrado = await viajesModel.getViajeId(id)
         if (viajeEncontrado[0].estado_viaje === "Terminado") {
             const { obs_viaje, cantidad_carga } = req.body
@@ -253,7 +256,7 @@ export async function editarViaje(req: Request, res: Response) {
                     cantidad_carga,
                     ultimaModificacion,
                     adminName
-                })
+                },adminMail)
             if (!actualizaTerminado) {
                 return res.status(404).json({ error: "Viaje no encontrado" })
             }
@@ -286,7 +289,7 @@ export async function editarViaje(req: Request, res: Response) {
                     modificado_por: adminName,
                     ultima_modificacion: ultimaModificacion,
                     hora_recomendada: hora_recomendada ?? viajeEncontrado[0].hora_recomendada
-                })
+                },adminMail)
             if (!actualizaEspera) {
                 return res.status(404).json({ error: "Viaje no encontrado" })
             }
@@ -307,14 +310,14 @@ export async function deleteViajeEspera(req: Request, res: Response) {
     try {
         const id = Number(req.params.id)
         const viajeEncontrado = await viajesModel.getViajeId(id)
+        const usuario = (req.usuario as any).correo
         if (viajeEncontrado[0].estado_viaje === "En espera") {
             //limpiar estado funcionario y vehiculo
             await vehiculoModel.changeStatus(viajeEncontrado[0].patente, "DISPONIBLE")
             await usuarioModel.changeStatus(Number(viajeEncontrado[0].id_usuario), "Disponible")
             //borrar viaje
-            await connection.query(
-                `DELETE FROM viajes WHERE id_viaje = ?`, [id]
-            )
+            await queryAsUser(usuario,`DELETE FROM viajes WHERE id_viaje = ?`, [id])
+            
             res.json({ msg: "Viaje eliminado" })
         }
     } catch (e) {

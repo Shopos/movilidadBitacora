@@ -1,4 +1,4 @@
-import type { Mantencion, Vehiculo, User, Viaje, ViajeInputFin, ViajeInputInicio, SolicitudInicio } from "../tipos/tipoSistema";
+import type { Mantencion, Vehiculo, User, Viaje, ViajeInputFin, ViajeInputInicio, SolicitudInicio } from "../types/tipoSistema";
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 /* Clase auxiliar para manejar la solicitud de informacion hacia el backend del proyecto */
@@ -198,11 +198,13 @@ export async function addMantencionVehiculo(data: Mantencion) {
   if (data) {
     const url = `${API}/mantenciones`
     const payload = data
+    const key = localStorage.getItem("token")
     try {
       const res = await fetch(url, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${key}`
         },
         body: JSON.stringify(payload)
       })
@@ -223,14 +225,16 @@ export async function agregarVehiculo(data: Vehiculo) {
   if (data) {
     const url = `${API}/vehiculos`
     const payload = data
-    console.log(data)
+    const key=localStorage.getItem("token")
     try {
       const res = await fetch(url, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${key}`
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+         
       })
       if (!res.ok) {
         const errorData = await res.json().catch(() => {
@@ -281,11 +285,13 @@ export async function addViajeInicial(data: Viaje) {
   if (data) {
     const url = `${API}/viajes`
     const payload = data
+    const key = localStorage.getItem("token")
     try {
       const res = await fetch(url, {
         method: 'POST',
         headers: {
-          'Content-type': 'application/json'
+          'Content-type': 'application/json',
+          'Authorization': `Bearer ${key}`
         },
         body: JSON.stringify(payload)
       })
@@ -337,11 +343,13 @@ export async function editarVehiculo(patente: string, data: Vehiculo) {
     const patenteBuscada = patente
     const url = `${API}/vehiculos/${patenteBuscada}`
     const payload = data
+    const key = localStorage.getItem("token")
     try {
       const res = await fetch(url, {
         method: 'PUT',
         headers: {
-          'Content-type': 'application/json'
+          'Content-type': 'application/json',
+          'Authorization': `Bearer ${key}`
         },
         body: JSON.stringify(payload)
       })
@@ -385,11 +393,13 @@ export async function patchInicio(id: number, data: ViajeInputInicio) {
   if (data) {
     const url = `${API}/viajes/inicio/${id}`
     const payload = data
+    const key = localStorage.getItem("token")
     try {
       const res = await fetch(url, {
         method: 'PATCH',
         headers: {
-          'Content-type': 'application/json'
+          'Content-type': 'application/json',
+          'Authorization': `Bearer ${key}`
         },
         body: JSON.stringify(payload)
       })
@@ -407,11 +417,13 @@ export async function patchFin(id: number, data: ViajeInputFin) {
     console.log("Agregando info final")
     const url = `${API}/viajes/fin/${id}`
     const payload = data
+    const key = localStorage.getItem("token")
     try {
       const res = await fetch(url, {
         method: 'PATCH',
         headers: {
-          'Content-type': 'application/json'
+          'Content-type': 'application/json',
+          'Authorization': `Bearer ${key}`
         },
         body: JSON.stringify(payload)
       })

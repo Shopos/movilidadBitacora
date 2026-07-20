@@ -4,7 +4,7 @@ import getVehiculos, { getSolicitudes, resolverSolicitudesCambio, getSolicitudes
 import { useAlerta } from "../../context/AlertaContext"
 import Table from "@mui/joy/Table"
 import { Modal, ModalDialog, DialogTitle, Divider, DialogContent, DialogActions, Button } from "@mui/joy"
-import { type User, type Vehiculo, type Solicitud, type SolicitudViaje, type Viaje } from "../../tipos/tipoSistema"
+import { type User, type Vehiculo, type Solicitud, type SolicitudViaje, type Viaje } from "../../types/tipoSistema.ts"
 import "../../estilos/solicitudesAdmin.css"
 
 import 'leaflet/dist/leaflet.css';

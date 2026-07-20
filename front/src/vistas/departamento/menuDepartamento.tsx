@@ -8,7 +8,7 @@ import AssignmentSharpIcon from '@mui/icons-material/AssignmentSharp';
 import AssignmentTurnedInSharpIcon from '@mui/icons-material/AssignmentTurnedInSharp';
 import { solicitarViaje } from "../../utils/auxiliar"
 import { useAuth } from "../../context/AuthContext"
-import type { SolicitudInicio } from "../../tipos/tipoSistema"
+import type { SolicitudInicio } from "../../types/tipoSistema"
 import "../../estilos/menuDepartamento.css"
 
 function menuDepartamento(){

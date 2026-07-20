@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import NavBar from "../../componentes/navBar";
 import { useEffect, useState } from "react";
-import type{ SolicitudViaje } from "../../tipos/tipoSistema";
+import type{ SolicitudViaje } from "../../types/tipoSistema";
 import { useAuth } from "../../context/AuthContext";
 import { useAlerta } from "../../context/AlertaContext";
 import { getSolicitudesUsuario } from "../../utils/auxiliar";

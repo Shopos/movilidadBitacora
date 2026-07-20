@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useState } from "react"
 import { Modal, ModalDialog, DialogTitle, Divider, DialogContent, DialogActions, Button, Chip } from "@mui/joy"
 import { useNavigate } from "react-router-dom";
 import "../../estilos/viajesUsuario.css"
-import type { Viaje } from "../../tipos/tipoSistema.ts"
+import type { Viaje } from "../../types/tipoSistema.ts"
 import DataViewViaje from "../../componentes/dataViewViaje.tsx"
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";

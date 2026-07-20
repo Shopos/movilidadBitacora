@@ -17,7 +17,7 @@ import { jsPDF } from "jspdf"
 import autoTable from "jspdf-autotable";
 import { TablePagination } from "@mui/material"
 
-import type { Vehiculo, Viaje, User } from "../../tipos/tipoSistema.ts"
+import type { Vehiculo, Viaje, User } from "../../types/tipoSistema.ts"
 import getVehiculos, { getViajes, getFuncionarios, addViajeInicial, editarViaje, borrarViajeEspera } from "../../utils/auxiliar.ts";
 import { useAuth } from "../../context/AuthContext.tsx";
 import { useAlerta } from "../../context/AlertaContext.tsx";

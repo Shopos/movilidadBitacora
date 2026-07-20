@@ -1,4 +1,4 @@
-import type { mantencionProp, Mantencion } from "../tipos/tipoSistema"
+import type { mantencionProp, Mantencion } from "../types/tipoSistema"
 import { useEffect, useState } from 'react'
 import { getMantencionesVehiculo } from "../utils/auxiliar"
 import "../estilos/mantencionesVehiculo.css"

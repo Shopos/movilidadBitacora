@@ -5,6 +5,7 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import dotenv from "dotenv"
 import { connection } from "../config/database";
+import { registroEvento } from "../utils/auditoria.utils";
 
 dotenv.config()
 /*Controladores para el llamado al modelo de usuarios con el fin de manejar correctamente la informacion solicitada y recibida */
@@ -70,10 +71,11 @@ export async function getUsuarioId(req: Request, res: Response) {
 export async function agregarUsuario(req: Request, res: Response) {
     try {
         const { correo, pass, tipo_licencia, nombre, cargo, estado, lista_licencia } = req.body
+        const usuarioResponsable=(req.usuario as any).correo
         if (correo === "" || pass === "" || nombre === "" || cargo === "") {
             return res.status(400).json({ error: "Los campos son obligatorios " })
         }
-        const id = await usuarioModel.addUsuario({ correo, pass, tipo_licencia, nombre, cargo, estado })
+        const id = await usuarioModel.addUsuario({ correo, pass, tipo_licencia, nombre, cargo, estado },usuarioResponsable)
         //esperar que se agregue usuario para tener id y agregar las licencias
         if(id){
             const response = await usuarioModel.addLicenciasIniciales(id,lista_licencia)
@@ -93,7 +95,8 @@ export async function editarUsuario(req: Request, res: Response) {
     try {
         const id = req.params.correo
         const { estado, tipo_licencia,lista_licencia } = req.body
-        const actualiza = await usuarioModel.editUsuario(id, { estado, tipo_licencia, lista_licencia })
+        const autor = (req.usuario as any).correo
+        const actualiza = await usuarioModel.editUsuario(id, { estado, tipo_licencia, lista_licencia },autor)
         if (!actualiza) {
             return res.status(404).json({ error: " usuario no encontrado " })
         }
@@ -136,6 +139,8 @@ export async function login(req: Request, res: Response) {
             process.env.JWT_SECRET as string,
             { expiresIn: (process.env.JWT_EXPIRES || '9h') as any }
         )
+        await registroEvento("usuarios",Number(usuarioEncontrado.id_usuario),"LOGIN",usuarioEncontrado.correo.toString(),{nombre:usuarioEncontrado.nombre,cargo:usuarioEncontrado.cargo,})
+
         res.json({ token, usuario: payload })
 
     } catch (e) {

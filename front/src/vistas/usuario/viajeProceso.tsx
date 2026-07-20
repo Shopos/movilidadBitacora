@@ -6,7 +6,7 @@ import Routing from "../../componentes/routing.tsx" /*Componente para marcar la 
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
 import L from "leaflet"
-import type { Viaje } from "../../tipos/tipoSistema.ts"
+import type { Viaje } from "../../types/tipoSistema.ts"
 
 import "../../estilos/viajeProceso.css"
 

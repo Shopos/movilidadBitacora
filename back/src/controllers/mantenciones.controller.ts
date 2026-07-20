@@ -30,11 +30,11 @@ export async function getMantencionesPatente(req:Request,res:Response){
 export async function agregarMantencion(req:Request,res:Response) {
     try{
         const {ultimo_cambio_aceite,taller,ultima_mantencion,detalle_mantencion,patente} = req.body
-
-        if(patente === "" && taller === "" && ultimo_cambio_aceite === "" ){
+        const usuario = (req.usuario as any).correo
+        if(patente === "" || taller === "" || ultimo_cambio_aceite === "" ){
             return res.status(400).json({error: "Los campos patente, taller y ultimo cambio de aceite son obligatorios "})
         }
-        const id = await mantencionModel.addMantencion({ultimo_cambio_aceite,taller,ultima_mantencion,detalle_mantencion,patente})
+        const id = await mantencionModel.addMantencion({ultimo_cambio_aceite,taller,ultima_mantencion,detalle_mantencion,patente},usuario)
         res.status(201).json({id, mensaje: " Mantencion agregada correctamente "})
     }catch(e){
         res.status(500).json({error:" Error al agregar mantencion "})

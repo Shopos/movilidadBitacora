@@ -1,6 +1,7 @@
 import { connection } from "../config/database"
 import { RowDataPacket } from "mysql2"
 import bcrypt from "bcrypt"
+import { queryAsUser } from "../utils/auditoria.utils"
 
 export interface Usuario extends RowDataPacket{
     id_usuario: Number,
@@ -64,22 +65,23 @@ async function hashPass(pass:string) :Promise<string>{
 }
 
 //Agrega un usuario y encripta su contraseña haciendo uso de bcrypt
-export async function addUsuario(data:UsuarioInput):Promise<Number>{
+export async function addUsuario(data:UsuarioInput,usuarioResponsable:string):Promise<Number>{
     const passEncrypt  = await hashPass(data.pass)
-    const [res] = await connection.query(
-        "INSERT INTO usuarios (correo,pass,tipo_licencia,nombre,cargo,estado) VALUES (?,?,?,?,?,?)",
-        [data.correo,passEncrypt,data.tipo_licencia,data.nombre,data.cargo,data.estado]
-    )
+    const resultado:any = await queryAsUser(usuarioResponsable,"INSERT INTO usuarios (correo,pass,tipo_licencia,nombre,cargo,estado) VALUES (?,?,?,?,?,?)",
+        [data.correo,passEncrypt,data.tipo_licencia,data.nombre,data.cargo,data.estado])
     
     //@ts-ignore
-    return res.insertId
+    return resultado.insertId
 }
 //Edita el usuario donde solo se podra actualizar su estado y licencia 
-export async function editUsuario(correo:string|string[],data:UsuarioEdit):Promise<boolean>{
+export async function editUsuario(correo:string|string[],data:UsuarioEdit,usuarioResponsable:string):Promise<boolean>{
+    /*
     const [resultado] = await connection.query(
         "UPDATE usuarios SET estado=?, tipo_licencia=? WHERE correo = ?",
         [data.estado,data.tipo_licencia,correo]
-    )
+    )*/
+   const resultado:any = await queryAsUser(usuarioResponsable, "UPDATE usuarios SET estado=?, tipo_licencia=? WHERE correo = ?",
+        [data.estado,data.tipo_licencia,correo])
     if(data.lista_licencia){
         const [rows] = await connection.query<RowDataPacket[]>("SELECT id_usuario FROM usuarios WHERE correo=?",[correo])
         if(rows[0]){

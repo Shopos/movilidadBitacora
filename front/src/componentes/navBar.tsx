@@ -3,7 +3,7 @@ import { useState } from 'react'
 import "../estilos/navBar.css"
 import PersonIcon from '@mui/icons-material/Person';
 import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button} from "@mui/joy"
-import type { navBarProps } from '../tipos/tipoSistema';
+import type { navBarProps } from '../types/tipoSistema';
 import { useAuth } from '../context/AuthContext';
 
 

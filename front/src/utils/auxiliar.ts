@@ -188,6 +188,7 @@ export async function getViajeProceso(id: number) {
 }
 
 
+
 /** Metodos para solicitar agregar informacion hacia backend
  * 
  * Considerando "/{algo}" se agregara informacion a la tabla asociada a dicha ruta descrita en backend

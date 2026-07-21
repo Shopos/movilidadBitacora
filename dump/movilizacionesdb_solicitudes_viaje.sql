@@ -43,7 +43,7 @@ CREATE TABLE `solicitudes_viaje` (
 
 LOCK TABLES `solicitudes_viaje` WRITE;
 /*!40000 ALTER TABLE `solicitudes_viaje` DISABLE KEYS */;
-INSERT INTO `solicitudes_viaje` VALUES (1,'2026-07-13 12:55:33','rechazada','Administrativo 1','2026-07-13 16:55:14',11,'test','tewsyt','Camioneta','abc'),(2,'2026-07-13 17:06:43','resuelta','Administrativo 1','2026-07-14 09:17:37',11,'departamento 123','Departamento solicitando viaje a feria el dia miercoles con 3 pasajeros','Furgon','Viaje Agendado'),(3,'2026-07-14 09:20:04','resuelta','Administrativo 1','2026-07-14 09:20:49',11,'depto','depto','Camioneta','Viaje Agendado'),(4,'2026-07-14 15:23:22','pendiente',NULL,NULL,11,'departamento 234','Se pide un automovil para realizar un viaje informativo a la municipalidad de chepica el dia miercoles 15 a las 15:00','Auto',NULL);
+INSERT INTO `solicitudes_viaje` VALUES (1,'2026-07-13 12:55:33','rechazada','Administrativo 1','2026-07-13 16:55:14',11,'test','tewsyt','Camioneta','abc'),(2,'2026-07-13 17:06:43','resuelta','Administrativo 1','2026-07-14 09:17:37',11,'departamento 123','Departamento solicitando viaje a feria el dia miercoles con 3 pasajeros','Furgon','Viaje Agendado'),(3,'2026-07-14 09:20:04','resuelta','Administrativo 1','2026-07-14 09:20:49',11,'depto','depto','Camioneta','Viaje Agendado'),(4,'2026-07-14 15:23:22','rechazada','Administrativo 1','2026-07-15 17:18:49',11,'departamento 234','Se pide un automovil para realizar un viaje informativo a la municipalidad de chepica el dia miercoles 15 a las 15:00','Auto','No se puede');
 /*!40000 ALTER TABLE `solicitudes_viaje` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -56,4 +56,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-15  9:53:23
+-- Dump completed on 2026-07-21 14:16:08

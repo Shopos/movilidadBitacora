@@ -33,7 +33,7 @@ CREATE TABLE `usuarios` (
   `estado_viaje_usuario` enum('Disponible','Asignado','En ruta') DEFAULT 'Disponible',
   PRIMARY KEY (`id_usuario`),
   UNIQUE KEY `correo` (`correo`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -42,7 +42,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (5,'pepelopez@muni.cl','$2b$11$JVdfdFzafroEjmZXP2D.cupZ8mNp02DX7c0hb81xIhvoLW6LoxUX6','A2','Pepe lopez','Funcionario',0,'Disponible'),(6,'admin@admin.cl','$2b$11$tDuBuEP/Ozav06yJjtL4IOIc/p90eLDX8C/rOq4mb0rSa/kRmMhii','A2','Administracion test','Administrativo',1,'Disponible'),(7,'admin@muni.cl','$2b$11$25xb/gS2yByMKzYDzAU5rOE85JSGMucVruH/2bWKny8OlBq0IaSz2','A1','Administrativo 1','Administrativo',1,'Disponible'),(8,'usuarioPrueba@muni.cl','$2b$11$I0../6qt5xNg5SoY/V3hyOPt/RAhDA5H37.EMf1P9bGP3FFsb8erq','A3','usuario prueba','Funcionario',1,'En ruta'),(9,'pepe.lopez@muni.cl','$2b$11$hyfE0x4TTeYLeys0rrCHRu1yfl32QIEMgj7zu/lGyqjwE2vdo5Uy2','A1','Pepe Lopez','Funcionario',1,'Disponible'),(10,'admin2@muni.cl','$2b$11$htkQrTbSLg2upThTuHbtM.2Gf4C5xWk6Fd.k31px3.UH/m0qm1S6a','A2','Admin dos','Administrativo',1,'Disponible'),(11,'departamento@muni.cl','$2b$11$X8LNMRIUhH2yBy7J8aSN8eokofIA0DTNh0HqH3mOMPkQbC8nP.b.G','F','departamento','Departamento',1,'Disponible');
+INSERT INTO `usuarios` VALUES (5,'pepelopez@muni.cl','$2b$11$JVdfdFzafroEjmZXP2D.cupZ8mNp02DX7c0hb81xIhvoLW6LoxUX6','A2','Pepe lopez','Funcionario',0,'Disponible'),(6,'admin@admin.cl','$2b$11$tDuBuEP/Ozav06yJjtL4IOIc/p90eLDX8C/rOq4mb0rSa/kRmMhii','A2','Administracion test','Administrativo',1,'Disponible'),(7,'admin@muni.cl','$2b$11$25xb/gS2yByMKzYDzAU5rOE85JSGMucVruH/2bWKny8OlBq0IaSz2','A1','Administrativo 1','Administrativo',1,'Disponible'),(8,'usuarioPrueba@muni.cl','$2b$11$I0../6qt5xNg5SoY/V3hyOPt/RAhDA5H37.EMf1P9bGP3FFsb8erq','A3','usuario prueba','Funcionario',1,'En ruta'),(10,'admin2@muni.cl','$2b$11$htkQrTbSLg2upThTuHbtM.2Gf4C5xWk6Fd.k31px3.UH/m0qm1S6a','A2','Admin dos','Administrativo',1,'Disponible'),(11,'departamento@muni.cl','$2b$11$X8LNMRIUhH2yBy7J8aSN8eokofIA0DTNh0HqH3mOMPkQbC8nP.b.G','F','departamento','Departamento',1,'Disponible'),(26,'licencia@muni.cl','$2b$11$PTy.W2UUgkgrixkTH9/wMuxRZGUCY8mT1T6kNKeZ2eIztX7Qp7Ivm','','licencia test','Funcionario',1,'Disponible'),(29,'pepe.lopez@muni.cl','$2b$11$tfbM32azMNFhLQO9eRbureHe4WUecC1TaHO9Ahn3RPVcqTdaCMVXO','','Pepe Lopez','Funcionario',1,'Disponible'),(30,'juan.pedro@muni.cl','$2b$11$WfEyT4LRH2MmOfO.ITJmeeeo/CtnT0adOC9fTpKLcGkLFQCWY53FO','','Juan Pedro','Funcionario',1,'Disponible');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -55,4 +55,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-15  9:53:23
+-- Dump completed on 2026-07-21 14:16:08

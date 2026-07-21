@@ -11,6 +11,7 @@ import CambioPass from "./vistas/cambioPass.tsx"
 import Solicitudes from "./vistas/administracion/solicitudesAdmin.tsx"
 import MenuDepartamento from "./vistas/departamento/menuDepartamento.tsx"
 import SolicitudesDepartamento from "./vistas/departamento/solicitudesDepartamento.tsx"
+import Auditoria from "./vistas/administracion/menuAudit.tsx"
 import { AuthProvider } from "./context/AuthContext.tsx"
 import ProtectedRoute from "./componentes/protectedRoute.tsx"
 import { AlertProvider } from "./context/AlertaContext.tsx"
@@ -35,7 +36,7 @@ function App(){
             <Route path="/menuAdmin" element={<ProtectedRoute rolesPermitidos="Administrativo"><MenuAdmin /></ProtectedRoute>}></Route>
             <Route path="/recursos" element={<ProtectedRoute rolesPermitidos="Administrativo"><Recursos /></ProtectedRoute>}/>
             <Route path="/solicitudes" element={<ProtectedRoute rolesPermitidos="Administrativo"><Solicitudes /></ProtectedRoute>}/>
-
+            <Route path="/auditoria" element={<ProtectedRoute rolesPermitidos="Administrativo"><Auditoria/></ProtectedRoute>}/>
             {/**Rutas departamento */}
             <Route path="/menuDepto" element={<ProtectedRoute rolesPermitidos="Departamento"><MenuDepartamento /></ProtectedRoute>}></Route>
             <Route path="/solicitudesDepto" element={<ProtectedRoute rolesPermitidos="Departamento"><SolicitudesDepartamento /></ProtectedRoute>}></Route>

@@ -81,8 +81,7 @@ BEGIN
         'estado',OLD.estado,
         'tipo_licencia',OLD.tipo_licencia)
     );
- END $$
- 
+END$$
 -- =========VEHICULOS===========
 CREATE TRIGGER trg_vehiculos_insert
 AFTER INSERT ON vehiculos
@@ -111,7 +110,7 @@ AFTER UPDATE ON vehiculos
 FOR EACH ROW
 BEGIN
 INSERT INTO auditoria(
-tabla_afectada,id_registro,accion,cambiada_por,valor_old,valor_new
+tabla_afectada,id_registro,accion,cambiado_por,valor_old,valor_new
 )VALUES(
 	'vehiculos',
 	NEW.patente,
@@ -128,12 +127,14 @@ tabla_afectada,id_registro,accion,cambiada_por,valor_old,valor_new
 )
 );
 END$$
+
+
 CREATE TRIGGER trg_vehiculos_delete
 AFTER DELETE ON vehiculos
 FOR EACH ROW 
 BEGIN
 INSERT INTO auditoria(
-tabla_afectada,id_registro,accion,cambiada_por,valor_old)
+tabla_afectada,id_registro,accion,cambiado_por,valor_old)
 VALUES(
 	'vehiculos',
     OLD.patente,
@@ -168,8 +169,8 @@ BEGIN
 INSERT INTO auditoria(tabla_afectada,id_registro,accion,cambiado_por,valor_old,valor_new)
 VALUES(
 	'viajes',NEW.id_viaje,'UPDATE',COALESCE(@usuario_actual,'CONSOLA'),
-	JSON_OBJECT('estado',OLD.estado,'destino',OLD.destino,'kms_fin',OLD.kms_fin,'obs_viaje',OLD.obs_viaje,'fecha_hora_fin',OLD.fecha_hora_fin),
-    JSON_OBJECT('estado',NEW.estado,'destino',NEW.destino,'kms_fin',NEW.kms_fin,'obs_viaje',NEW.obs_viaje,'fecha_hora_fin',NEW.fecha_hora_fin)
+	JSON_OBJECT('estado',OLD.estado_viaje,'destino',OLD.destino,'kms_fin',OLD.kms_fin,'obs_viaje',OLD.obs_viaje,'fecha_hora_fin',OLD.fecha_hora_fin),
+    JSON_OBJECT('estado',NEW.estado_viaje,'destino',NEW.destino,'kms_fin',NEW.kms_fin,'obs_viaje',NEW.obs_viaje,'fecha_hora_fin',NEW.fecha_hora_fin)
 );
 END$$
 
@@ -180,7 +181,7 @@ BEGIN
 INSERT INTO auditoria(tabla_afectada,id_registro,accion,cambiado_por,valor_old)
 VALUES(
 	'viajes',OLD.id_viaje,'DELETE',COALESCE(@usuario_actual,'CONSOLA'),
-    JSON_OBJECT('patente',OLD.patente,'id_usuario',OLD.id_usuario,'estado',OLD.estado)
+    JSON_OBJECT('patente',OLD.patente,'id_usuario',OLD.id_usuario,'estado',OLD.estado_viaje)
 );
 END$$
 
@@ -202,6 +203,7 @@ INSERT INTO auditoria(tabla_afectada,id_registro,accion,cambiado_por,valor_old,v
 VALUES(
 'solicitudes_viaje',
 NEW.id_solicitud,
+'UPDATE',
 COALESCE(@usuario_actual,'CONSOLA'),
 JSON_OBJECT('estado',OLD.estado,'resuelta_por',OLD.resuelta_por),
 JSON_OBJECT('estado',NEW.estado,'resuelta_por',NEW.resuelta_por)

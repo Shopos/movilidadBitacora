@@ -24,8 +24,8 @@ DROP TABLE IF EXISTS `licencias_usuario`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `licencias_usuario` (
   `id_usuario` int NOT NULL,
-  `tipo_licencia` varchar(4) DEFAULT 'B',
-  KEY `fk_usuario_licencia` (`id_usuario`),
+  `tipo_licencia` varchar(4) NOT NULL DEFAULT 'B',
+  PRIMARY KEY (`id_usuario`,`tipo_licencia`),
   CONSTRAINT `fk_usuario_licencia` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -36,6 +36,7 @@ CREATE TABLE `licencias_usuario` (
 
 LOCK TABLES `licencias_usuario` WRITE;
 /*!40000 ALTER TABLE `licencias_usuario` DISABLE KEYS */;
+INSERT INTO `licencias_usuario` VALUES (5,'A5'),(6,'B'),(7,'B'),(8,'A3'),(8,'C'),(10,'B'),(26,'D'),(26,'E'),(29,'A4'),(29,'B'),(29,'C'),(29,'D'),(30,'B');
 /*!40000 ALTER TABLE `licencias_usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -48,4 +49,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-15  9:53:23
+-- Dump completed on 2026-07-21 14:16:08

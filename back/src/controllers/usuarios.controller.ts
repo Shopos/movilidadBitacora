@@ -34,7 +34,7 @@ export async function getUsuarioCorreo(req: Request, res: Response) {
     try {
         const correoUsuario = req.params.correo
         const usuario = await usuarioModel.getUsuarioCorreo(correoUsuario)
-        if (!usuario) {
+        if (usuario.length === 0) {
             return res.status(404).json({ error: " Usuario no encontrado para este correo " })
         }
         res.json(usuario)
@@ -53,7 +53,7 @@ export async function getUsuarioId(req: Request, res: Response) {
     try {
         const id = Number(req.params.id)
         const usuario = await usuarioModel.getUsuarioId(id)
-        if (!usuario) {
+        if (usuario.length === 0) {
             return res.status(404).json({ error: " Usuario no encontrado para este id" })
         }
         res.json(usuario)
@@ -198,12 +198,14 @@ export async function resolverResetPass(req: Request, res: Response) {
 
         if(!pass){
             res.status(404).json({error: " Contraseña invalida para su cambio "})
+            return
         }
         const [solicitud] = await connection.query<any>(
             "SELECT * FROM solicitudes_reset WHERE id_solicitud=? AND estado='pendiente'",[idSolicitud]
         )
         if(!solicitud[0]){
             res.status(404).json({error: " Error encontrando solicitud asociada "})
+            return
         }
         const hashPass = await bcrypt.hash(pass,11)
         await connection.query("UPDATE usuarios SET pass=? WHERE id_usuario=?" , [hashPass,solicitud[0].id_usuario])

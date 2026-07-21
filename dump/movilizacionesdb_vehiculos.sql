@@ -39,7 +39,7 @@ CREATE TABLE `vehiculos` (
 
 LOCK TABLES `vehiculos` WRITE;
 /*!40000 ALTER TABLE `vehiculos` DISABLE KEYS */;
-INSERT INTO `vehiculos` VALUES ('123','qwe',123005,'DISPONIBLE','automovil','B'),('12pepe','peeplopez',12321,'EN RUTA','automovil','B'),('abbb','Nissan',6111,'EN REPARACION','automovil','B'),('abbb2','Tesla',3302,'EN RUTA','automovil','B'),('abc123','Toyota',6,'EN RUTA','automovil','B'),('bbbb2','Ford',2100,'EN RUTA','automovil','B'),('bc1245','Suzuki',12016,'DISPONIBLE','automovil','B'),('cvfg12','Nissan',5010,'DISPONIBLE','automovil','B'),('dc1243','Maxus',14002,'EN RUTA','automovil','B'),('fgk123','Subaru',16000,'DADO DE BAJA','automovil','B');
+INSERT INTO `vehiculos` VALUES ('DSPL69','Volkswagen Aljibe',0,'DISPONIBLE','Camión','A4'),('FXHB22','JAC',0,'DISPONIBLE','Camión','A4'),('HVYY72','KIA',0,'DISPONIBLE','Automóvil','B'),('JJVB95','Mercedes Benz Atego',0,'DISPONIBLE','Camión','A4'),('KHXH51','Nissan',0,'EN RUTA','Camioneta','B'),('KRSW96','Retroexcavadora',0,'DISPONIBLE','Maquinaria','D'),('KWLW28','Nissan',0,'DISPONIBLE','Camioneta','B'),('LCJK18','Nissan',0,'DISPONIBLE','Camioneta','B'),('LKVX46','Volkswagen Tolva',0,'DISPONIBLE','Camión','A4'),('SKYP73','Mitsubishi Katana',0,'DISPONIBLE','Camioneta','B'),('SKYP74','Mitsubishi Katana',0,'DISPONIBLE','Camioneta','B'),('SSGW81','Mitsubishi Fuso',110,'DISPONIBLE','Camión','A4'),('SYVD41','Hyundai Staria',0,'DISPONIBLE','Furgón','A2'),('TBWW59','Volkswagen Aljibe',0,'DISPONIBLE','Camión','A4'),('TPLB28','Maxus T90',0,'DISPONIBLE','Camioneta','B'),('TPLB38','Maxus T90',0,'DISPONIBLE','Camioneta','B'),('TPTP13','NISSAN TEST ',0,'DISPONIBLE','Camioneta','B'),('TPZP31','Nissan Kiks',0,'DISPONIBLE','Automóvil','B'),('TPZS17','Nissan Navara',0,'DISPONIBLE','Camioneta','B');
 /*!40000 ALTER TABLE `vehiculos` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -52,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-15  9:53:22
+-- Dump completed on 2026-07-21 14:16:08

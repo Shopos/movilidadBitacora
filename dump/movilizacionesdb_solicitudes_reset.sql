@@ -43,7 +43,6 @@ CREATE TABLE `solicitudes_reset` (
 
 LOCK TABLES `solicitudes_reset` WRITE;
 /*!40000 ALTER TABLE `solicitudes_reset` DISABLE KEYS */;
-INSERT INTO `solicitudes_reset` VALUES (1,9,'pepe.lopez@muni.cl','Pepe Lopez','2026-07-07 17:03:42','resuelta','duplicada-sistema','2026-07-07 17:13:14'),(2,9,'pepe.lopez@muni.cl','Pepe Lopez','2026-07-07 17:13:14','resuelta','Administrativo 1','2026-07-08 10:46:44'),(3,9,'pepe.lopez@muni.cl','Pepe Lopez','2026-07-08 10:47:18','resuelta','Administrativo 1','2026-07-08 10:47:37');
 /*!40000 ALTER TABLE `solicitudes_reset` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -56,4 +55,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-15  9:53:22
+-- Dump completed on 2026-07-21 14:16:08

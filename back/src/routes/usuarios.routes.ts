@@ -25,5 +25,4 @@ router.post('/solicitar-reset',solicitarReset)
 router.get('/solicitudes-reset',autenticarJWT,verifyAdmin,getSolicitudes)
 //Actualiza el estado de una solicitud y cambia una contraseña dado un id
 router.post('/solicitudes-reset/:id_solicitud/resolver',autenticarJWT,verifyAdmin,resolverResetPass)
-
 export default router

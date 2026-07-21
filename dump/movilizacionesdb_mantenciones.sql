@@ -41,7 +41,6 @@ CREATE TABLE `mantenciones` (
 
 LOCK TABLES `mantenciones` WRITE;
 /*!40000 ALTER TABLE `mantenciones` DISABLE KEYS */;
-INSERT INTO `mantenciones` VALUES (1,'2026-06-23','LALA','2026-06-23','TEST 1','abc123'),(2,'2026-06-22','LAL','2026-06-22','Prueba 2','abc123'),(3,'2026-06-02','LALA','2026-06-09','Mantencion de ','bc1245'),(4,'2026-06-24','LOLO','2026-06-25','Prueba $4','abc123'),(5,'2026-06-23','LILI','2026-06-23','Prueba 5','abc123'),(6,'2026-06-25','LILI','2026-06-16','aaaa','abc123'),(8,'2026-06-25','LOLO','2026-06-26','LOOO','abc123');
 /*!40000 ALTER TABLE `mantenciones` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -54,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-15  9:53:23
+-- Dump completed on 2026-07-21 14:16:08

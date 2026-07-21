@@ -617,12 +617,13 @@ function menuAdmin() {
         }
         const filtra = (listaUsuarios||[]).filter(u=> u.lista_licencia?.includes(vehiculoActivo.licencia_min))
         setUsuariosFiltrados(filtra)
-    }, [vehiculoSelected,formEdit.patente,listaUsuarios,vehiculos])
+    }, [vehiculoSelected,formEdit.patente])
 
     //Maneja la lista de vehiculos dependiendo si existe un usuario seleccionado en el formulario mostrando aquellos vehiculos que el usuario seleccionado puede usar
     useEffect(() => {
         const idUsuarioActivo = formInicio.id_usuario === 0 ? formEdit.id_usuario : formInicio.id_usuario;
         if (!idUsuarioActivo || idUsuarioActivo === 0) {
+            console.log(idUsuarioActivo)
             setVehiculosFiltrados([])
         }
         const usuarios = listaUsuarios?.find((u) => u.id_usuario === idUsuarioActivo)

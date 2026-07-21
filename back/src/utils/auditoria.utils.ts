@@ -12,7 +12,7 @@ export async function queryAsUser<T=any>(
         const [result] = await conn.query(sql,params)
         return result as T
     }finally{
-        conn.release
+        conn.release()
     }
 }
 

@@ -32,10 +32,6 @@ function navBar({type,texto}:navBarProps){
         {type===1 ? 
         (
         <div className='gridAdmin'>
-            <div className='encabezado'>
-                <h1>Departamento de movilización</h1>
-                <h2>{texto}</h2>
-            </div>
             <div className='barraAux'>
                 <div className='imgIconBar'>
                     <img src='./src/assets/icon.jpg'></img>
@@ -44,12 +40,17 @@ function navBar({type,texto}:navBarProps){
                 <button className='buttonBarra' onClick={()=>irRecursos()}>Recursos</button>
                 <button className='buttonBarra' onClick={()=>irSolicitudes()}>Solicitudes</button>
                 <button className='buttonBarra' onClick={()=>setOpenModalCierre(true)}>
-                    <PersonIcon sx={{color:"black"}} style={{
+                    <PersonIcon sx={{color:"white"}} style={{
                         justifyContent:"center",
                         alignContent:"center"
                     }} />   
                 </button>
             </div>
+            <div className='encabezado'>
+                <h1>Departamento de movilización</h1>
+                <h2>{texto}</h2>
+            </div>
+            
         </div>
         )        
         : 

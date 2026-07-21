@@ -115,7 +115,8 @@ function menuAudit() {
                                     <th>Acción</th>
                                     <th>Cambiado por</th>
                                     <th>Fecha</th>
-                                    <th>Detalle</th>
+                                    <th>Antes</th>
+                                    <th>Después</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -127,14 +128,19 @@ function menuAudit() {
                                         <td>{`${adt.fecha_cambio.slice(0,10)} ${adt.fecha_cambio.slice(11,19)}`}</td>
                                         <td>
                                             <pre style={{whiteSpace: 'pre-wrap', fontSize:'0.7rem'}}>
-                                                {JSON.stringify(adt.valor_old ?? adt.valor_new, null, 1)}
+                                                {adt.valor_old === null ? "":JSON.stringify(adt.valor_old, null, 1)}
+                                            </pre>
+                                        </td>
+                                        <td>
+                                            <pre style={{whiteSpace: 'pre-wrap', fontSize:'0.7rem'}}>
+                                                {adt.valor_new === null ? "":JSON.stringify(adt.valor_new,null,1)}
                                             </pre>
                                         </td>
                                     </tr>
                                 ))}
                                 {logFiltro.length === 0  /** && Filtros */ && (
                                     <tr>
-                                        <td colSpan={5} style={{ textAlign: "center", padding: "5%" }}>No hay registros por mostrar</td>
+                                        <td colSpan={6} style={{ textAlign: "center", padding: "5%" }}>No hay registros por mostrar</td>
                                     </tr>
                                 )}
                             </tbody>

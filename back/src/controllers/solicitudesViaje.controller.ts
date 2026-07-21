@@ -6,6 +6,7 @@ dotenv.config
 
 //Agrega una solicitud de viaje
 export async function agregarSolicitud(req:Request,res:Response){
+    console.log("agregando")
     try{
         const usuario = (req.usuario as any).correo
         const { id_solicitante,motivo,solicitante,vehiculo_solicitado } = req.body

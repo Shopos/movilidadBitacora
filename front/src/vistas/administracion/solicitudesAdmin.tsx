@@ -129,7 +129,10 @@ function solicitudesAdmin() {
     const [vehiculo, setVehiculo] = useState<Vehiculo>()
     const [modalDestino, openModalDestino] = useState(false)
     const { usuario } = useAuth()
-
+    
+    const [vehiculoSelected,setVehiculoSelected] = useState<Vehiculo>()
+    const [usuariosFiltrados, setUsuariosFiltrados] = useState<User[]>()
+    const [vehiculosFiltrados, setVehiculosFiltrados] = useState<Vehiculo[]>()
     //Metodo para obtener las solicitudes pendientes, usuarios y vehiculos por si se requiere agregar un viaje
     useEffect(() => {
         const getSolicitudesPendientes = async () => {
@@ -320,9 +323,9 @@ function solicitudesAdmin() {
     }
     //Maneja la logica del usuario funcionario dentro de la seleccion de un viaje
     const manejarDataFuncionario = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const usuarioSelected = (event.target.value).split(" / ")
+        const usuarioSelected = Number(event.target.value)
         const usuarioFind = funcionarios!.find(
-            (usr) => usr.nombre === usuarioSelected[0] && usr.correo === usuarioSelected[1]
+            (usr) => usr.id_usuario === usuarioSelected 
         )
         if (usuarioFind && usuarioFind.id_usuario !== 0) {
             setFormInicio((prevData) => ({
@@ -383,62 +386,48 @@ function solicitudesAdmin() {
         }))
     }
 
+    //Manejo de la lista de vehiculos y usuarios disponibles segun licencia. Si un vehiculo es seleccionado, la lista de funcionarios cambia para mostrar
+    //aquellos que pueden usar dicho vehiculo
+    useEffect(() => {
+        const vehiculoActivo = vehiculoSelected || null
+        if(!vehiculoActivo){
+            setUsuariosFiltrados(funcionarios||[])
+            return
+        }
+        const filtra = (funcionarios || []).filter(u=>u.lista_licencia?.includes(vehiculoActivo?.licencia_min))
+        setUsuariosFiltrados(filtra)
+
+        if(formInicio.id_usuario && !filtra.some(u=>u.id_usuario === formInicio.id_usuario)){
+            setFormInicio(prev=>({...prev,id_usuario:0,nombre_funcionario:""}))
+        }
+    }, [vehiculoSelected])
+
+    //Maneja la lista de vehiculos dependiendo si existe un usuario seleccionado en el formulario mostrando aquellos vehiculos que el usuario seleccionado puede usar
+    useEffect(() => {
+        const idUsuarioActivo = formInicio.id_usuario
+        if(!idUsuarioActivo){
+            setVehiculoSelected(undefined)
+            return
+        }
+        const usr = funcionarios?.find((u)=>u.id_usuario === idUsuarioActivo)
+        const licenciasUsuario = usr?.lista_licencia || []
+        const newList = (vehiculos||[]).filter((v)=>licenciasUsuario.includes(v.licencia_min))
+        setVehiculosFiltrados(newList)
+        if(formInicio.patente && !newList.some(v=>v.patente===formInicio.patente)){
+            setFormInicio(prev=>({...prev,patente:"",vehiculo:"",kms_inicial:0}))
+            setVehiculoSelected(undefined)
+        }
+    }, [formInicio.id_usuario])
 
     return (
         <>
             <NavBar type={1} texto={"Solicitudes"}></NavBar>
             <div>
                 <div className='buttonsTablaH'>
-                    <button className="bordeIzquierdoBoton" disabled={!vistaActual} onClick={() => setVistaActual(false)}>Solicitudes usuarios</button>
-                    <button className="bordeDerechaBoton" disabled={vistaActual} onClick={() => setVistaActual(true)}>Solicitudes viajes</button>
+                    
+                    <button className="bordeIzquierdoBoton" disabled={vistaActual} onClick={() => setVistaActual(true)}>Solicitudes viajes</button>
+                    <button className="bordeDerechaBoton" disabled={!vistaActual} onClick={() => setVistaActual(false)}>Solicitudes usuarios</button>
                 </div>
-                {solicitudesPendientes && !vistaActual && (
-                    <>
-                        <Table hoverRow borderAxis='y' sx={{
-                            '& tr:nth-of-type(odd)': { backgroundColor: '#FBF5DD' },
-                            '& tr:nth-of-type(even)': { backgroundColor: '#E7E1B1' },
-                            '& td': { textAlign: 'left', paddingLeft: 1.9 },
-                            '& th': { backgroundColor: "#bad8b6" },
-                            marginTop: "1vh"
-                        }}>
-                            <thead>
-                                <tr>
-                                    <th style={{ width: "5%" }}>N°</th>
-                                    <th>Correo</th>
-                                    <th>Nombre</th>
-                                    <th>Fecha solicitada</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {solicitudesPendientes && solicitudesPendientes.map((sol: Solicitud, index) => (
-                                    <tr>
-                                        <td>{index.valueOf() + 1}</td>
-                                        <td>{sol.correo}</td>
-                                        <td>{sol.nombre}</td>
-                                        <td>{String(sol.fecha_solicitada).slice(0, 10) + " " + String(sol.fecha_solicitada).slice(11, 19)}</td>
-                                        <td>{sol.estado}</td>
-                                        <td>
-                                            <div className="buttonsIconTable" style={{ display: "flex", gap: "10px" }}>
-                                                <button style={{ width: "4.5vh" }} onClick={() => openModalSol(sol)}>
-                                                    <ManageAccountsSharpIcon />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {solicitudesPendientes.length === 0 && (
-                                    <tr>
-                                        <td colSpan={6} style={{ textAlign: "center", padding: "5%" }}>
-                                            No hay solicitudes pendientes por solucionar
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </Table>
-                    </>
-                )}
                 {vistaActual && solicitudesViaje && (
                     <>
                         <Table hoverRow borderAxis='y' sx={{
@@ -488,6 +477,54 @@ function solicitudesAdmin() {
                         </Table>
                     </>
                 )}
+                {solicitudesPendientes && !vistaActual && (
+                    <>
+                        <Table hoverRow borderAxis='y' sx={{
+                            '& tr:nth-of-type(odd)': { backgroundColor: '#FBF5DD' },
+                            '& tr:nth-of-type(even)': { backgroundColor: '#E7E1B1' },
+                            '& td': { textAlign: 'left', paddingLeft: 1.9 },
+                            '& th': { backgroundColor: "#bad8b6" },
+                            marginTop: "1vh"
+                        }}>
+                            <thead>
+                                <tr>
+                                    <th style={{ width: "5%" }}>N°</th>
+                                    <th>Correo</th>
+                                    <th>Nombre</th>
+                                    <th>Fecha solicitada</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {solicitudesPendientes && solicitudesPendientes.map((sol: Solicitud, index) => (
+                                    <tr>
+                                        <td>{index.valueOf() + 1}</td>
+                                        <td>{sol.correo}</td>
+                                        <td>{sol.nombre}</td>
+                                        <td>{String(sol.fecha_solicitada).slice(0, 10) + " " + String(sol.fecha_solicitada).slice(11, 19)}</td>
+                                        <td>{sol.estado}</td>
+                                        <td>
+                                            <div className="buttonsIconTable" style={{ display: "flex", gap: "10px" }}>
+                                                <button style={{ width: "4.5vh" }} onClick={() => openModalSol(sol)}>
+                                                    <ManageAccountsSharpIcon />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {solicitudesPendientes.length === 0 && (
+                                    <tr>
+                                        <td colSpan={6} style={{ textAlign: "center", padding: "5%" }}>
+                                            No hay solicitudes pendientes por solucionar
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </Table>
+                    </>
+                )}
+                
 
             </div>
             {/**Modal para el tratamiento del cambio de contraseñas --> se debe confirmar que ambas contraseñas sean iguales */}
@@ -575,26 +612,43 @@ function solicitudesAdmin() {
                                 <div className="items-Modal">
 
                                     <div className="itemInput-Modal">
-                                        <label>Patente</label>
-                                        <select name="Patentes" defaultValue={""} onChange={manejarDataVehiculo}>
-                                            <option value={""} disabled>Selecciona una patente disponible</option>
-                                            {/**Solo se muestran las patentes de vehiculos disponibles */}
-                                            {vehiculos && vehiculos.filter(veh => veh.estado === "DISPONIBLE").map((veh) => (
-                                                <option key={veh.patente} value={veh.patente}>
-                                                    {veh.patente}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                <label>Patente</label>
+                                <select name="Patentes" value={formInicio.patente} onChange={manejarDataVehiculo}>
+                                    <option value={""} disabled>Selecciona una patente disponible</option>
+                                    {/**Solo se muestran las patentes de vehiculos disponibles */}
+                                    {formInicio.id_usuario !== 0 ?
+                                        (vehiculosFiltrados && vehiculosFiltrados.filter(veh => veh.estado === 'DISPONIBLE').map((veh) => (
+                                            <option key={veh.patente} value={veh.patente}>
+                                                {veh.patente}
+                                            </option>
+                                        )))
+                                        :
+                                        (vehiculos && vehiculos.filter(veh => veh.estado === "DISPONIBLE").map((veh) => (
+                                            <option key={veh.patente} value={veh.patente}>
+                                                {veh.patente}
+                                            </option>
+                                        )))
+                                    }
+
+                                </select>
+                            </div>
                                     <div className="itemInput-Modal">
-                                        <label>Funcionario</label>
-                                        <select name="funcionarios" defaultValue={""} onChange={manejarDataFuncionario}>
-                                            <option value={""} disabled>Designa un funcionario</option>
-                                            {funcionarios && funcionarios.map((usr: User) => (
-                                                <option value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                <label>Funcionario</label>
+                                <select name="funcionarios" value={formInicio.id_usuario || ""} onChange={manejarDataFuncionario}>
+                                    <option value={""} disabled>Designa un funcionario</option>
+                                    {vehiculoSelected?.patente ?
+                                        (
+                                            usuariosFiltrados && usuariosFiltrados.map((usr: User) => (
+                                                <option key={usr.id_usuario} value={usr.id_usuario}>{usr.nombre}</option>
+                                            ))
+                                        )
+                                        : (funcionarios && funcionarios.map((usr: User) => (
+                                            <option key={usr.id_usuario} value={usr.id_usuario}>{usr.nombre}</option>
+                                        )))
+                                    }
+
+                                </select>
+                            </div>
                                     <div className="itemInput-Modal">
                                         <label>Modelo Vehículo</label>
                                         <input disabled value={formInicio.vehiculo} placeholder=""></input>

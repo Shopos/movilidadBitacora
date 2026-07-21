@@ -250,11 +250,11 @@ function menuAdmin() {
 
     /** Si se selecciona un usuario desde un modal, reemplaza con los datos de dicho usuario en formulario */
     const manejarDataFuncionario = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const usuarioSelected = (event.target.value).split(" / ")
+        const idSelect = Number(event.target.value)
         const usuarioFind = listaUsuarios!.find(
-            (usr) => usr.nombre === usuarioSelected[0] && usr.correo === usuarioSelected[1]
+            (usr) => usr.id_usuario === idSelect
         )
-        if (usuarioFind && usuarioFind.id_usuario !== 0) {
+        if (usuarioFind) {
             setFormInicio((prevData) => ({
                 ...prevData,
                 id_usuario: usuarioFind ? usuarioFind.id_usuario : 0,
@@ -265,9 +265,9 @@ function menuAdmin() {
 
     //Maneja el cambio de informacion del funcionario a editar en un viaje
     const manejarDataFuncionarioEdit = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const partes = (event.target.value).split(" / ")
+        const idSelect = Number(event.target.value)
         const usrFind = listaUsuarios!.find(
-            (usr) => usr.nombre === partes[0] && usr.correo === partes[1]
+            (usr) => usr.id_usuario === idSelect
         )
         if (usrFind) {
             setFormEdit((prevData) => ({
@@ -607,10 +607,11 @@ function menuAdmin() {
     //aquellos que pueden usar dicho vehiculo
     useEffect(() => {
         const vehiculoActivo = vehiculoSelected || (formEdit.patente ? vehiculos?.find(v=>v.patente===formEdit.patente):null)
-        if(vehiculoActivo){
+        if(!vehiculoActivo){
             setUsuariosFiltrados(listaUsuarios||[])
+            return
         }
-        const filtra = (listaUsuarios || []).filter(u=>u.lista_licencia!.includes(vehiculoActivo!.licencia_min))
+        const filtra = (listaUsuarios || []).filter(u=>u.lista_licencia?.includes(vehiculoActivo?.licencia_min))
         setUsuariosFiltrados(filtra)
 
         if(formInicio.id_usuario && !filtra.some(u=>u.id_usuario === formInicio.id_usuario)){
@@ -914,15 +915,15 @@ function menuAdmin() {
                                     </div>
                                     <div className="itemInput-Modal">
                                         <label>Funcionario</label>
-                                        <select name="funcionarios" value={formEdit.nombre_funcionario} onChange={manejarDataFuncionarioEdit}>
+                                        <select name="funcionarios" value={formEdit.id_usuario||""} onChange={manejarDataFuncionarioEdit}>
                                             <option value={""}>{formEdit?.nombre_funcionario}</option>
                                             {formEdit?.patente ? 
                                             (
                                                 usuariosFiltrados?.map((usr: User) => (
-                                                <option key={usr.id_usuario} value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
+                                                <option key={usr.id_usuario} value={usr.id_usuario}>{usr.nombre}</option>
                                             ))) : (
                                                 listaUsuarios && listaUsuarios.map((usr: User) => (
-                                                <option key={usr.id_usuario} value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
+                                                <option key={usr.id_usuario} value={usr.id_usuario}>{usr.nombre}</option>
                                             )))}
                                         </select>
                                     </div>
@@ -1034,16 +1035,16 @@ function menuAdmin() {
                             </div>
                             <div className="itemInput-Modal">
                                 <label>Funcionario</label>
-                                <select name="funcionarios" value={formInicio.id_usuario ? `${formInicio.nombre_funcionario}`:""} onChange={manejarDataFuncionario}>
+                                <select name="funcionarios" value={formInicio.id_usuario || ""} onChange={manejarDataFuncionario}>
                                     <option value={""} disabled>Designa un funcionario</option>
                                     {vehiculoSelected?.patente ?
                                         (
                                             usuariosFiltrados && usuariosFiltrados.map((usr: User) => (
-                                                <option key={usr.id_usuario} value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
+                                                <option key={usr.id_usuario} value={usr.id_usuario}>{usr.nombre}</option>
                                             ))
                                         )
                                         : (listaUsuarios && listaUsuarios.map((usr: User) => (
-                                            <option key={usr.id_usuario} value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
+                                            <option key={usr.id_usuario} value={usr.id_usuario}>{usr.nombre}</option>
                                         )))
                                     }
 

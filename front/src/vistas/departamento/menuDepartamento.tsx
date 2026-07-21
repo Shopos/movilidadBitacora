@@ -39,6 +39,7 @@ function menuDepartamento(){
         //Si solicitud se cancela o no es aprobada el estado del viaje queda en terminado y se deja en blanco. La observacion del viaje queda con los motivos del rechazo
         //La solicitud debe quedar con un estado cancelada y el porque ademas se rechazo    
     const handleSolicitar=async()=>{
+        console.log("solicitando",formSolicitud)
         if(formSolicitud && formSolicitud.motivo!==""&&formSolicitud.solicitante!==""&&formSolicitud.id_solicitante!==0){
             await solicitarViaje(formSolicitud)
             openModalSolicitud(false)
@@ -72,7 +73,7 @@ function menuDepartamento(){
                     <div className="items-Modal">
                        <div className="itemInput-Modal">
                             <label>Departamento solicitante</label>
-                            <input name="solicitante" value={usuario?.nombre}></input>
+                            <input name="solicitante" placeholder={usuario?.nombre} value={formSolicitud.solicitante} onChange={(e)=>setFormSolicitud((prev)=>({...prev,solicitante:e.target.value}))}></input>
                        </div>
                        <div className="itemInput-Modal">
                             <label>Tipo vehículo</label>

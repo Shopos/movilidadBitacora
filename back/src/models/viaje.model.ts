@@ -205,8 +205,8 @@ export async function addViajeInicio(data:ViajeInputInicio,usuarioResponsable:st
 }
 
 //Metodo para editar/agregar informacion de un viaje que termina su recoleccion de informacion
-export async function editViajeFin(patente:string|string[],data:ViajeInputFin): Promise<boolean>{
-    const [resultado] = await connection.query(
+export async function editViajeFin(patente:string|string[],data:ViajeInputFin,usuarioResponsable:string): Promise<boolean>{
+    const [resultado] = await queryAsUser(usuarioResponsable,
         `UPDATE viajes SET 
         fecha_hora_fin = ?, 
         lat_fin_real = ?,
@@ -249,8 +249,8 @@ export async function parcheInicio(id:number,data:ViajeInputFuncionarioInicio,us
     return (res.affectedRows > 0)
 }
 //cambia el estado del viaje
-export async function changeStatusViaje(id:number,status:string): Promise<boolean>{
-    const [res] = await connection.query(
+export async function changeStatusViaje(id:number,status:string,usuarioResponsable:string): Promise<boolean>{
+    const [res] = await queryAsUser(usuarioResponsable,
         `UPDATE viajes set estado_viaje = ? WHERE id_viaje = ?`,[status,id]
     )
     //@ts-ignore
@@ -275,8 +275,8 @@ export async function parcheFin(id:number,data:ViajeInputFuncionarioFin,usuarioR
     return (res.affectedRows > 0)
 }
 //Agrega un nuevo viaje con los valores inversos de un viaje si este es un viaje de ida
-export async function addViajeRegreso(viajeInicial:Viaje,modificacion:string,kmsfin:number): Promise<ViajeInputInicio>{
-    const [res] = await connection.query(
+export async function addViajeRegreso(viajeInicial:Viaje,modificacion:string,kmsfin:number,usuarioResponsable:string): Promise<ViajeInputInicio>{
+    const [res] = await queryAsUser(usuarioResponsable,
         `INSERT INTO viajes (
          vehiculo,
          id_usuario,

@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { getVehiculos, getVehiculoPatente, editarVehiculo, agregarVehiculo} from '../controllers/vehiculos.controller'
-import { autenticarJWT } from "../middleware/auth.middleware"
+import { autenticarJWT, verifyAdmin } from "../middleware/auth.middleware"
 
 
 const router = Router()
@@ -12,8 +12,8 @@ router.get('/:patente',getVehiculoPatente)
 
 
 /*Agregar vehiculo */
-router.post('/',autenticarJWT,agregarVehiculo)
+router.post('/',autenticarJWT,verifyAdmin,agregarVehiculo)
 /*Edita un vehiculo */
-router.put('/:patente',autenticarJWT,editarVehiculo)
+router.put('/:patente',autenticarJWT,verifyAdmin,editarVehiculo)
 
 export default router

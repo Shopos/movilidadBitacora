@@ -213,7 +213,7 @@ export async function parcheFin(req: Request, res: Response) {
 
         if (viaje[0].modo === "ida") {
             try {
-                const id = await viajesModel.addViajeRegreso(viaje[0], ultima_modificacion, kms_fin)
+                const id = await viajesModel.addViajeRegreso(viaje[0], ultima_modificacion, kms_fin,usuario)
                 res.status(201).json({ id, mensaje: " Viaje agregado inicialmente " })
             } catch (e) {
                 console.error(e)

@@ -606,32 +606,33 @@ function menuAdmin() {
     //Manejo de la lista de vehiculos y usuarios disponibles segun licencia. Si un vehiculo es seleccionado, la lista de funcionarios cambia para mostrar
     //aquellos que pueden usar dicho vehiculo
     useEffect(() => {
-        const vehiculoSelect = vehiculoSelected
-        const vehiculoEdit = formEdit?.patente ? vehiculos?.find(v=>v.patente === formEdit.patente):null
-
-        const vehiculoActivo  = vehiculoSelect || vehiculoEdit
-
-        if(!vehiculoActivo){
+        const vehiculoActivo = vehiculoSelected || (formEdit.patente ? vehiculos?.find(v=>v.patente===formEdit.patente):null)
+        if(vehiculoActivo){
             setUsuariosFiltrados(listaUsuarios||[])
-            return
         }
-        const filtra = (listaUsuarios||[]).filter(u=> u.lista_licencia?.includes(vehiculoActivo.licencia_min))
+        const filtra = (listaUsuarios || []).filter(u=>u.lista_licencia!.includes(vehiculoActivo!.licencia_min))
         setUsuariosFiltrados(filtra)
+
+        if(formInicio.id_usuario && !filtra.some(u=>u.id_usuario === formInicio.id_usuario)){
+            setFormInicio(prev=>({...prev,id_usuario:0,nombre_funcionario:""}))
+        }
     }, [vehiculoSelected,formEdit.patente])
 
     //Maneja la lista de vehiculos dependiendo si existe un usuario seleccionado en el formulario mostrando aquellos vehiculos que el usuario seleccionado puede usar
     useEffect(() => {
-        const idUsuarioActivo = formInicio.id_usuario === 0 ? formEdit.id_usuario : formInicio.id_usuario;
-        if (!idUsuarioActivo || idUsuarioActivo === 0) {
-            console.log(idUsuarioActivo)
-            setVehiculosFiltrados([])
+        const idUsuarioActivo = formInicio.id_usuario === 0 ? formEdit.id_usuario : formInicio.id_usuario
+        if(!idUsuarioActivo){
+            setVehiculoSelected(undefined)
+            return
         }
-        const usuarios = listaUsuarios?.find((u) => u.id_usuario === idUsuarioActivo)
-        const licenciasUsuario = usuarios?.lista_licencia || []
-        const newList = (vehiculos || []).filter((v) =>
-            licenciasUsuario?.includes(v.licencia_min)
-        )
+        const usr = listaUsuarios?.find((u)=>u.id_usuario === idUsuarioActivo)
+        const licenciasUsuario = usr?.lista_licencia || []
+        const newList = (vehiculos||[]).filter((v)=>licenciasUsuario.includes(v.licencia_min))
         setVehiculosFiltrados(newList)
+        if(formInicio.patente && !newList.some(v=>v.patente===formInicio.patente)){
+            setFormInicio(prev=>({...prev,patente:"",vehiculo:"",kms_inicial:0}))
+            setVehiculoSelected(undefined)
+        }
     }, [formInicio.id_usuario, formEdit.id_usuario])
 
     /*
@@ -892,7 +893,7 @@ function menuAdmin() {
                                 <div className="items-Modal">
                                     <div className="itemInput-Modal">
                                         <label>Patente</label>
-                                        <select name="Patentes" defaultValue={""} onChange={(e) => {
+                                        <select name="Patentes" value={formEdit.patente} onChange={(e) => {
                                             const veh = vehiculos?.find(v => v.patente === e.target.value)
                                             setFormEdit({ ...formEdit, patente: e.target.value, vehiculo: veh?.modelo ?? formEdit.vehiculo, kms_inicial: veh?.kms_actual ?? formEdit.kms_inicial })
                                         }}>
@@ -913,15 +914,15 @@ function menuAdmin() {
                                     </div>
                                     <div className="itemInput-Modal">
                                         <label>Funcionario</label>
-                                        <select name="funcionarios" defaultValue={""} onChange={manejarDataFuncionarioEdit}>
+                                        <select name="funcionarios" value={formEdit.nombre_funcionario} onChange={manejarDataFuncionarioEdit}>
                                             <option value={""}>{formEdit?.nombre_funcionario}</option>
                                             {formEdit?.patente ? 
                                             (
                                                 usuariosFiltrados?.map((usr: User) => (
-                                                <option value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
+                                                <option key={usr.id_usuario} value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
                                             ))) : (
                                                 listaUsuarios && listaUsuarios.map((usr: User) => (
-                                                <option value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
+                                                <option key={usr.id_usuario} value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
                                             )))}
                                         </select>
                                     </div>
@@ -1012,7 +1013,7 @@ function menuAdmin() {
 
                             <div className="itemInput-Modal">
                                 <label>Patente</label>
-                                <select name="Patentes" defaultValue={""} onChange={manejarDataVehiculo}>
+                                <select name="Patentes" value={formInicio.patente} onChange={manejarDataVehiculo}>
                                     <option value={""} disabled>Selecciona una patente disponible</option>
                                     {/**Solo se muestran las patentes de vehiculos disponibles */}
                                     {formInicio.id_usuario !== 0 ?
@@ -1033,16 +1034,16 @@ function menuAdmin() {
                             </div>
                             <div className="itemInput-Modal">
                                 <label>Funcionario</label>
-                                <select name="funcionarios" defaultValue={""} onChange={manejarDataFuncionario}>
+                                <select name="funcionarios" value={formInicio.id_usuario ? `${formInicio.nombre_funcionario}`:""} onChange={manejarDataFuncionario}>
                                     <option value={""} disabled>Designa un funcionario</option>
                                     {vehiculoSelected?.patente ?
                                         (
                                             usuariosFiltrados && usuariosFiltrados.map((usr: User) => (
-                                                <option value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
+                                                <option key={usr.id_usuario} value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
                                             ))
                                         )
                                         : (listaUsuarios && listaUsuarios.map((usr: User) => (
-                                            <option value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
+                                            <option key={usr.id_usuario} value={`${usr.nombre} / ${usr.correo}`}>{usr.nombre}</option>
                                         )))
                                     }
 

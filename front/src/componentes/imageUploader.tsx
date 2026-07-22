@@ -1,7 +1,7 @@
 import { useRef,useState, type ChangeEvent } from "react"
 
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+const API = import.meta.env.VITE_API_URL || 'http://192.168.2.65:4000'
 interface Props{
     onArchivoReady: (archivo:File,previewURL:string)=>void
     onCancelar?: ()=>void

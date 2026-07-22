@@ -5,7 +5,7 @@ import { Table, Select, Option } from "@mui/joy"
 import { TablePagination } from "@mui/material"
 import { useAuth } from "../../context/AuthContext"
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+const API = import.meta.env.VITE_API_URL || 'http://192.168.2.65:4000'
 
 type Audit = {
     tabla_afectada: string,

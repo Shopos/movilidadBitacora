@@ -15,7 +15,7 @@ import { TablePagination } from "@mui/material";
 import { useAlerta } from "../../context/AlertaContext.tsx";
 import DateRangeOutlinedIcon from "@mui/icons-material/DateRangeOutlined";
 import logoSC from "../../assets/logo.png"
-const API = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+const API = import.meta.env.VITE_API_URL || 'http://192.168.2.65:4000'
 
 //Funcion para el filtrado de viajes por fecha, se considera por dia, semana y mes
 function dentroPeriodo(fechaString: string | null, periodo: string): boolean {

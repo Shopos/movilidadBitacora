@@ -1,6 +1,6 @@
 import type { Mantencion, Vehiculo, User, Viaje, ViajeInputFin, ViajeInputInicio, SolicitudInicio } from "../types/tipoSistema";
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+const API = import.meta.env.VITE_API_URL || '192.168.2.65:4000'
 /* Clase auxiliar para manejar la solicitud de informacion hacia el backend del proyecto */
 
 

@@ -3,7 +3,7 @@ import DataViewViaje from "../../componentes/dataViewViaje.tsx";
 import "../../estilos/menuAdmin.css"
 import GeocodeBuscador from "../../componentes/geocodeBuscador.tsx";
 import logoSC from "../../assets/logo.png"
-const API = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+const API = import.meta.env.VITE_API_URL || 'http://192.168.2.65:4000'
 
 import { useState, useEffect, useMemo } from "react";
 import Table from '@mui/joy/Table';

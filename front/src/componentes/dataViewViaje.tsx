@@ -10,7 +10,7 @@ import "../estilos/dataViewViaje.css"
 import type { Viaje } from "../types/tipoSistema"
 import MapaPreview from "../componentes/mapa"
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+const API = import.meta.env.VITE_API_URL || 'http://192.168.2.65:4000'
 
 export interface prop {
     viajeSelected: Viaje

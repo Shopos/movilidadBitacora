@@ -1,6 +1,8 @@
 import { createContext,useContext,useEffect,useState} from "react";
 import type {ReactNode} from "react"
 
+
+
 export type usuarioLog = {
     id:number,
     correo:string,
@@ -17,7 +19,7 @@ export type AuthContextType = {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
-
+const API = import.meta.env.VITE_API_URL || 'http://192.168.2.65:4000'
 export function AuthProvider({children}: {children: ReactNode}){
     const [usuario,setUsuario] = useState<usuarioLog|null>(null)
     const [token, setToken] = useState<string|null>(null)
@@ -32,7 +34,7 @@ export function AuthProvider({children}: {children: ReactNode}){
      */
     const login = async (correo:string, pass:string) =>{
         try{
-            const res = await fetch('http://localhost:4000/usuarios/login' ,{
+            const res = await fetch(`${API}/usuarios/login` ,{
                 method:"POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({correo,pass})
@@ -74,7 +76,7 @@ export function AuthProvider({children}: {children: ReactNode}){
                 return
             }
             try{
-                const res = await fetch('http://localhost:4000/usuarios/perfil',{
+                const res = await fetch(`${API}/usuarios/perfil`,{
                     headers:{ Authorization: `Bearer ${tokenSaved}`}
                 })
                 if(res.status === 401 || res.status === 403){

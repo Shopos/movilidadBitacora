@@ -335,7 +335,7 @@ function cierreViaje() {
                         {viajeID && (
                             <ImageUploader
                                 label="Captura de comprobante combustible"
-                                //capture="environment"
+                                capture="environment"
                                 onArchivoReady={(file,url) =>{
                                     if(previewComprobante){
                                         URL.revokeObjectURL(previewComprobante)
@@ -374,6 +374,7 @@ function cierreViaje() {
                     <DialogContent>
                         {viajeID && (
                             <ImageUploader
+                                capture="environment"
                                 label="Captura de tablero vehículo"
                                 //capture="environment"
                                 onArchivoReady={(file,url)=>{

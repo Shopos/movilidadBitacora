@@ -5,6 +5,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import { Modal, ModalDialog, DialogTitle,Divider,DialogContent,DialogActions, Button} from "@mui/joy"
 import type { navBarProps } from '../types/tipoSistema';
 import { useAuth } from '../context/AuthContext';
+import logo from "../assets/icon.jpg"
 
 
 function navBar({type,texto}:navBarProps){
@@ -34,7 +35,7 @@ function navBar({type,texto}:navBarProps){
         <div className='gridAdmin'>
             <div className='barraAux'>
                 <div className='imgIconBar'>
-                    <img src='./src/assets/icon.jpg'></img>
+                    <img src={logo}></img>
                 </div>
                 <button className='buttonBarra' onClick={()=>irBitacoras()}>Bitácoras</button>
                 <button className='buttonBarra' onClick={()=>irRecursos()}>Recursos</button>

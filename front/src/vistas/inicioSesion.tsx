@@ -3,7 +3,7 @@ import '../estilos/incioSesion.css'
 import { useState } from "react"
 import { useAuth } from "../context/AuthContext"
 import { useAlerta } from "../context/AlertaContext"
-
+import logo from "../assets/icon.jpg"
 
 function inicioSesion(){
     
@@ -61,7 +61,7 @@ function inicioSesion(){
     return(
         <>
         <header className="headerInicio">
-            <img  src='./src/assets/icon.jpg'></img>
+            <img  src={logo}></img>
             <h2>Ilustre Municipalidad de Santa Cruz</h2>
         </header>
         <div className="contenidoInicio">

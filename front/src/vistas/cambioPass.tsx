@@ -3,6 +3,7 @@ import "../estilos/cambioPass.css"
 import { useNavigate } from "react-router-dom"
 import { useAlerta } from "../context/AlertaContext"
 import { solicitarRecuperarContraseña } from "../utils/auxiliar"
+import logo from "../assets/icon.jpg"
 function cambioPass(){
 
     const [formData,setFormData] = useState("")
@@ -40,7 +41,7 @@ function cambioPass(){
     return(
         <>
         <header className="headerInicio">
-            <img  src='./src/assets/icon.jpg'></img>
+            <img  src={logo}></img>
             <h2>Ilustre Municipalidad de Santa Cruz</h2>
         </header>
         <div className="contenidoInicio">

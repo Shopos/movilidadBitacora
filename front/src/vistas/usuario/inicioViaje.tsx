@@ -324,6 +324,7 @@ function inicioViaje() {
                         {formInicio && (
                             <ImageUploader 
                                 //capture="environment"
+                                capture="environment"
                                 label="Agrega la imagen del tablero, ubicando el medidor de kilometraje"
                                 onArchivoReady={(archivoInicio,url)=>{
                                     if(previewInicio){
@@ -332,6 +333,7 @@ function inicioViaje() {
                                     setArchivo(archivoInicio)
                                     setPreviewInicio(url)
                                     openModalCamara(false)
+                                    
                                 }}
                                 onCancelar={()=>openModalCamara(false)}
                             />

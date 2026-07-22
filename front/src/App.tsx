@@ -12,6 +12,7 @@ import Solicitudes from "./vistas/administracion/solicitudesAdmin.tsx"
 import MenuDepartamento from "./vistas/departamento/menuDepartamento.tsx"
 import SolicitudesDepartamento from "./vistas/departamento/solicitudesDepartamento.tsx"
 import Auditoria from "./vistas/administracion/menuAudit.tsx"
+import NotFound from "./componentes/notFound.tsx"
 import { AuthProvider } from "./context/AuthContext.tsx"
 import ProtectedRoute from "./componentes/protectedRoute.tsx"
 import { AlertProvider } from "./context/AlertaContext.tsx"
@@ -40,6 +41,9 @@ function App(){
             {/**Rutas departamento */}
             <Route path="/menuDepto" element={<ProtectedRoute rolesPermitidos="Departamento"><MenuDepartamento /></ProtectedRoute>}></Route>
             <Route path="/solicitudesDepto" element={<ProtectedRoute rolesPermitidos="Departamento"><SolicitudesDepartamento /></ProtectedRoute>}></Route>
+
+            <Route path="/404" element={<NotFound />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

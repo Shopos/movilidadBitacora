@@ -96,39 +96,33 @@ function cierreViaje() {
 
     }
 
-/**Manejo de subida de informacion al finalizar un viaje
- * Al manejar imagenes se da prioridad a la subida de imagen del tablero -> archivo
- *  -si no existe dicha imagen, la subida de informacion no es posible de continuar
- *  -si se sube una imagen, se resuelve una promesa, si la cantidad de promesas es mayor a 0 (se cumple una minimo)
- *      se actualiza completamente la informacion final a subir
- */
-    const handleSendDataFin = async () => {
-        const subida: Promise<unknown>[]=[]
-        if(archivo && viajeID){
-            subida.push(
-                resolverSubidaImagen(viajeID.id_viaje,'foto-fin',archivo).then(()=>{
-                    if(previewFin){
-                        URL.revokeObjectURL(previewFin)
-                    }
-                })
-            )
-        }
-        if(archivoComprobante && viajeID){
-            subida.push(
-                resolverSubidaImagen(viajeID.id_viaje,'foto-comprobante',archivoComprobante).then(()=>{
-                    if(previewComprobante){
-                        URL.revokeObjectURL(previewComprobante)
-                    }
-                })
-            )
-        }
-        if(archivo && subida.length > 0){
-            await Promise.all(subida)
-            await updateDatoFin()
-        }else{
-            showAlerta("Debes incluir a lo menos la foto del tablero","warning")
+/** Manejo de subida de información al finalizar un viaje */
+const handleSendDataFin = async () => {
+    if (!archivo || !viajeID) {
+        showAlerta("Debes incluir a lo menos la foto del tablero", "warning")
+        return
+    }
+    const resFin = await resolverSubidaImagen(viajeID.id_viaje, 'foto-fin', archivo)
+
+    if (!resFin?.ok) {
+        showAlerta(resFin?.message || "Error al subir la foto del tablero", "error")
+        return
+    }
+    if (previewFin) {
+        URL.revokeObjectURL(previewFin);
+    }
+
+    if (archivoComprobante) {
+        const resComprobante = await resolverSubidaImagen(viajeID.id_viaje, 'foto-comprobante', archivoComprobante)
+
+        if (!resComprobante?.ok) {
+            showAlerta(`La foto del tablero se guardó, pero hubo un error con el comprobante: ${resComprobante?.message}`, "warning")
+        } else if (previewComprobante) {
+            URL.revokeObjectURL(previewComprobante);
         }
     }
+    await updateDatoFin();
+}
     const sleep = (ms: number):Promise<void>=>new Promise((resolve)=> setTimeout(resolve,ms))
     /* Metodo para almacenar los datos en BD, esto solo se ejecuta si el valor de estado_viaje pasa a Falso
     esto ocurriendo en el caso de dar terminado el viaje

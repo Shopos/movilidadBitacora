@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import NavBar from "../../componentes/navBar.tsx"
 import Mantenciones from "../../componentes/mantencionesVehiculo.tsx"
 import "../../estilos/recursosAdmin.css"
@@ -21,7 +21,7 @@ const vehiculoVacio: Vehiculo = {
     kms_actual: 0,
     estado: "DADO DE BAJA",
     tipo_vehiculo: "Automóvil",
-    licencia_min:"B"
+    licencia_min: "B"
 }
 const mantencionVacia: Mantencion = {
     id_mantencion: 0,
@@ -41,7 +41,7 @@ const usuarioVacio: User = {
     tipo_licencia: "",
     estado_viaje_usuario: "Disponible",
     lista_licencia: [],
-    licencias_concat:""
+    licencias_concat: ""
 }
 function recursosAdmin() {
     const { showAlerta } = useAlerta()
@@ -55,6 +55,7 @@ function recursosAdmin() {
     const [recursoEdit, setRecursoEdit] = useState<Vehiculo | User>()
     const [modalEdit, openModalEdit] = useState<boolean>(false)
     const licencias = ["A5", "A4", "A3", "A2", "A1", "B", "C", "D", "E", "F"]
+    const [estados, setEstados] = useState<true | false | "Todos">("Todos")
     const [refresh, setRefresh] = useState(false)
 
     const [cargando, setCargando] = useState(false)
@@ -163,14 +164,31 @@ function recursosAdmin() {
         if (!formAddV || cargando) return
         setCargando(true)
         const res = await agregarVehiculo(formAddV)
-        if (res) {
+        if (res?.ok) {
             showAlerta("Vehículo agregado correctamente", "success")
+            setFormAddV(vehiculoVacio)
+            setRefresh(!refresh)
         } else {
-            showAlerta("Hubo un problema al agregar, intenta más tarde", "warning")
+            switch (res?.status) {
+                case 400:
+                    showAlerta("Datos inválidos. Revisa la información ingresada.", "warning");
+                    setCargando(false)
+                    break;
+                case 403:
+                    showAlerta("No tienes permisos para realizar esta acción.", "error");
+                    setCargando(false)
+                    break;
+                case 401:
+                    showAlerta("Sesión expirada. Vuelve a iniciar sesión.", "error");
+                    setCargando(false)
+                    break;
+                default:
+                    showAlerta("Hubo un problema al agregar, intenta más tarde.", "error");
+                    setCargando(false)
+                    break;
+            }
         }
-        setFormAddV(vehiculoVacio)
-        setCargando(false)
-        setRefresh(!refresh)
+
     }
     /* Metodo para agregar un nuevo usuario a BD */
     const handleAgregarUsuario = async () => {
@@ -178,25 +196,55 @@ function recursosAdmin() {
         setCargando(true)
 
         const res = await agregarUsuario(formAddU)
-        if (res) {
-            showAlerta("Usuario agregado correctamente", "success")
-        } else {
-            showAlerta("Hubo un problema al agregar, intenta más tarde", "warning")
-        }
 
-        setFormAddU(usuarioVacio)
-        setCargando(false)
-        setRefresh(!refresh)
+        if (res?.ok) {
+            showAlerta("Usuario agregado correctamente", 'success')
+            setFormAddU(usuarioVacio)
+            setRefresh(!refresh)
+        } else {
+            switch (res?.status) {
+                case 400:
+                    showAlerta("Datos inválidos. Revisa la información ingresada.", "warning");
+                    break;
+                case 403:
+                    showAlerta("No tienes permisos para realizar esta acción.", "error");
+                    break;
+                case 401:
+                    showAlerta("Sesión expirada. Vuelve a iniciar sesión.", "error");
+                    break;
+                default:
+                    showAlerta("Hubo un problema al agregar, intenta más tarde.", "error");
+                    break;
+            }
+        }
     }
 
     /* Metodo para agregar una nueva mantencion a un vehiculo */
     const handleAgregarMantencion = async () => {
         if (!formMantencion || cargando) return
         setCargando(true)
-        await addMantencionVehiculo(formMantencion)
-        setFormMantencion(mantencionVacia)
-        setCargando(false)
-        setRefresh(!refresh)
+        const res = await addMantencionVehiculo(formMantencion)
+        if (res?.ok) {
+            showAlerta(`Mantención agregada al vehículo ${formMantencion.patente}`, "success")
+            setFormMantencion(mantencionVacia)
+            setCargando(false)
+            setRefresh(!refresh)
+        } else {
+            switch (res?.status) {
+                case 400:
+                    showAlerta("Datos inválidos. Revisa la información ingresada.", "warning");
+                    break;
+                case 403:
+                    showAlerta("No tienes permisos para realizar esta acción.", "error");
+                    break;
+                case 401:
+                    showAlerta("Sesión expirada. Vuelve a iniciar sesión.", "error");
+                    break;
+                default:
+                    showAlerta("Hubo un problema al agregar, intenta más tarde.", "error");
+                    break;
+            }
+        }
     }
 
     /* Metodo para exportar los recursos que se encuentren activo
@@ -208,7 +256,7 @@ function recursosAdmin() {
         doc.setFontSize(12)
         if (vistaActual === true) {
             //Exportar pdf tabla vehiculos
-            const columns = ['Patente','Tipo', 'Modelo', 'Kilometraje', 'Estado']
+            const columns = ['Patente', 'Tipo', 'Modelo', 'Kilometraje', 'Estado']
             if (vehiculos) {
                 const rows = vehiculos.map((veh) => [
                     veh.patente,
@@ -254,6 +302,21 @@ function recursosAdmin() {
         }
     }
 
+    const usuarioFiltro = useMemo(() => {
+        if (!usuarios) return [];
+
+        return usuarios.filter((usr: User) => {
+            if (estados === "Todos") return true;
+            const esActivo = Boolean(usr.estado);
+            return esActivo === estados;
+        });
+    }, [usuarios, estados]);
+
+    const handleCambiarFiltro = (nuevoEstado: "Todos" | true | false) => {
+        setEstados(nuevoEstado);
+        setPage(0);
+    };
+
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -295,6 +358,34 @@ function recursosAdmin() {
 
             <div>
                 <div className='buttonsFlexEnd'>
+                    {vistaActual ? (<></>) : (<>
+                        <Box sx={{ display: 'flex', gap: 1, marginBottom: 2, alignItems: 'center' }}>
+                            <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Filtrar estado:</span>
+
+                            <Chip
+                                label="Todos"
+                                clickable
+                                color={estados === "Todos" ? "primary" : "default"}
+                                variant={estados === "Todos" ? "filled" : "outlined"}
+                                onClick={() => handleCambiarFiltro("Todos")}
+                            />
+
+                            <Chip
+                                label="Activos"
+                                clickable
+                                color={estados === true ? "success" : "default"}
+                                variant={estados === true ? "filled" : "outlined"}
+                                onClick={() => handleCambiarFiltro(true)}
+                            />
+
+                            <Chip
+                                label="Bloqueados"
+                                clickable
+                                color={estados === false ? "error" : "default"}
+                                variant={estados === false ? "filled" : "outlined"}
+                                onClick={() => handleCambiarFiltro(false)}
+                            />
+                        </Box></>)}
                     <button onClick={() => exportarPdf()}>Exportar tabla actual</button>
                     <button onClick={() => abriModalAdd()}>Agregar nuevo {vistaActual === true ? "vehículo" : "usuario"}</button>
                     {vistaActual ? (<button onClick={() => abrirModalMantencion()} > Agregar mantención</button>) : (<></>)}
@@ -302,12 +393,12 @@ function recursosAdmin() {
                 </div>
                 <div className='buttonsTablaH'>
                     <button className="bordeIzquierdoBoton" disabled={!vistaActual} onClick={() => setVistaActual(false)}>Usuarios</button>
-                    <button className="bordeDerechaBoton" disabled={vistaActual} onClick={() => setVistaActual(true)}>Vehiculos</button>
+                    <button className="bordeDerechaBoton" disabled={vistaActual} onClick={() => setVistaActual(true)}>Vehículos</button>
                 </div>
                 {vistaActual === false && usuarios ?
                     (
-                        /* Tabla usuarios */
                         <div>
+
                             <Table hoverRow borderAxis="y" sx={
                                 {
                                     '& tr:nth-of-type(odd)': { backgroundColor: '#FBF5DD' },
@@ -326,7 +417,7 @@ function recursosAdmin() {
                                 </thead>
 
                                 <tbody>
-                                    {usuarios && usuarios.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((usuario: User) => (
+                                    {usuarios && usuarioFiltro.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((usuario: User) => (
                                         <tr>
                                             <td style={{ overflow: "clip" }}>{usuario.correo}</td>
                                             <td>{usuario.nombre}</td>
@@ -351,7 +442,7 @@ function recursosAdmin() {
                             <TablePagination
                                 rowsPerPageOptions={[5, 10]}
                                 component="div"
-                                count={usuarios!.length}
+                                count={usuarioFiltro.length}
                                 rowsPerPage={rowsPerPage}
                                 page={page}
                                 onPageChange={handleChangePage}

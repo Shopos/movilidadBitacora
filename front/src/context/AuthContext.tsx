@@ -19,7 +19,7 @@ export type AuthContextType = {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
-const API = import.meta.env.VITE_API_URL || 'http://192.168.2.65:4000'
+const API = import.meta.env.VITE_API_URL
 export function AuthProvider({children}: {children: ReactNode}){
     const [usuario,setUsuario] = useState<usuarioLog|null>(null)
     const [token, setToken] = useState<string|null>(null)

@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import NavBar from "../../componentes/navBar"
 import getVehiculos, { getSolicitudes, resolverSolicitudesCambio, getSolicitudesViajes, getFuncionarios, patchSolicitudRechazo, addViajeInicial, pathSolicitudAprobada } from "../../utils/auxiliar"
 import { useAlerta } from "../../context/AlertaContext"
 import Table from "@mui/joy/Table"
-import { Modal, ModalDialog, DialogTitle, Divider, DialogContent, DialogActions, Button } from "@mui/joy"
+import { Modal, ModalDialog, DialogTitle, Divider, DialogContent, DialogActions, Button, Box } from "@mui/joy"
+import { Chip } from "@mui/material"
 import { type User, type Vehiculo, type Solicitud, type SolicitudViaje, type Viaje } from "../../types/tipoSistema.ts"
 import "../../estilos/solicitudesAdmin.css"
 
@@ -38,6 +39,7 @@ interface prop {
  */
 function solicitudesAdmin() {
     const { showAlerta } = useAlerta()
+    const [estado, setEstado] = useState<"Todos" | "resuelta" | "rechazada" | "pendiente">("Todos")
     const [solicitudesPendientes, setSolicitudesPendientes] = useState([])
     const [modalSol, setModalSol] = useState(false)
     const [modalViaje, setModalViaje] = useState(false)
@@ -91,7 +93,7 @@ function solicitudesAdmin() {
         imagen_comprobante_ben: "",
         imagen_tablero_ida: "",
         imagen_tablero_vuelta: "",
-        hora_recomendada:""
+        hora_recomendada: ""
     })
     const viajeVacio: Viaje = {
         id_viaje: 0,
@@ -121,7 +123,7 @@ function solicitudesAdmin() {
         imagen_comprobante_ben: "",
         imagen_tablero_ida: "",
         imagen_tablero_vuelta: "",
-        hora_recomendada:""
+        hora_recomendada: ""
     }
     const points: GPS[] = [dataGPS, dataGPSDestino]
     const [funcionarios, setFuncionarios] = useState<[User]>()
@@ -129,8 +131,8 @@ function solicitudesAdmin() {
     const [vehiculo, setVehiculo] = useState<Vehiculo>()
     const [modalDestino, openModalDestino] = useState(false)
     const { usuario } = useAuth()
-    
-    const [vehiculoSelected,setVehiculoSelected] = useState<Vehiculo>()
+
+    const [vehiculoSelected, setVehiculoSelected] = useState<Vehiculo>()
     const [usuariosFiltrados, setUsuariosFiltrados] = useState<User[]>()
     const [vehiculosFiltrados, setVehiculosFiltrados] = useState<Vehiculo[]>()
     //Metodo para obtener las solicitudes pendientes, usuarios y vehiculos por si se requiere agregar un viaje
@@ -214,7 +216,7 @@ function solicitudesAdmin() {
             showAlerta("Error al cambiar contraseña", "error")
         }
     }
-    
+
     const handleCloseModal = () => {
         setModalSol(false)
         setPass("")
@@ -247,14 +249,24 @@ function solicitudesAdmin() {
         const formato = `${year}-${month}-${day} ${hour}:${min}`
         return formato
     }
+    const solicitudFiltro = useMemo(() => {
+        if (!solicitudesViaje) return []
+        return solicitudesViaje.filter((sv: SolicitudViaje) => {
+            const status = estado === "Todos" || sv.estado === estado
+            return status
+        })
+    }, [solicitudesViaje, estado])
 
+    const handleFiltro = (nuevoEstado: "Todos" | "resuelta" | "rechazada" | "pendiente") => {
+        setEstado(nuevoEstado)
+    }
     //Use effect para el tratamiento de un viaje, si dentro del formulario de inicio y una solicitud seleccionada agrega un viaje y aprueba la solicitud
     useEffect(() => {
         const sendData = async () => {
             if (formInicio.estado_viaje === "En espera" && solicitudViajeSelected) {
-                try{
-                    const res = await pathSolicitudAprobada(solicitudViajeSelected?.id_solicitud,"Viaje Agendado")
-                    if(res){
+                try {
+                    const res = await pathSolicitudAprobada(solicitudViajeSelected?.id_solicitud, "Viaje Agendado")
+                    if (res) {
                         await addViajeInicial(formInicio)
                     }
                     setModalConfirmar(false)
@@ -262,14 +274,14 @@ function solicitudesAdmin() {
                     setMotivo("")
                     setFormInicio(viajeVacio)
                     setCargando(false)
-                    showAlerta("Solicitud aprobada, viaje agendado","success")
-                }catch(e){
-                    showAlerta("Error al intentar aprobar solicitud, intenta más tarde","error")
+                    showAlerta(`Solicitud aprobada, viaje agendado para ${solicitudViajeSelected.solicitante}`, "success")
+                } catch (e) {
+                    showAlerta("Error al intentar aprobar solicitud, intenta más tarde", "error")
                 }
             }
         }
         sendData()
-    },[formInicio])
+    }, [formInicio])
 
     const handleAprobarSolicitud = async () => {
         setFormInicio((prev) => ({
@@ -284,11 +296,29 @@ function solicitudesAdmin() {
     //rechaza la solicitud de viaje de un departamento
     const handleRechazarSolicitud = async () => {
         if (solicitudViajeSelected) {
-            await patchSolicitudRechazo(solicitudViajeSelected.id_solicitud, motivo)
-            setModalViaje(false)
-            setModalConfirmar(false)
-            setMotivo("")
-            setCargando(false)
+            const res = await patchSolicitudRechazo(solicitudViajeSelected.id_solicitud, motivo)
+            if (res?.ok) {
+                showAlerta(`Solicitud rechazada para ${solicitudViajeSelected.solicitante}`, "info")
+                setModalViaje(false)
+                setModalConfirmar(false)
+                setMotivo("")
+                setCargando(false)
+            } else {
+                switch (res?.status) {
+                    case 400:
+                        showAlerta("Datos inválidos. Revisa la información ingresada.", "warning");
+                        break;
+                    case 403:
+                        showAlerta("No tienes permisos para realizar esta acción.", "error");
+                        break;
+                    case 401:
+                        showAlerta("Sesión expirada. Vuelve a iniciar sesión.", "error");
+                        break;
+                    default:
+                        showAlerta("Hubo un problema al rechazar, intenta más tarde.", "error");
+                        break;
+                }
+            }
         }
     }
     //funcion para el manejo del destino gps usado en el mapa
@@ -325,7 +355,7 @@ function solicitudesAdmin() {
     const manejarDataFuncionario = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const usuarioSelected = Number(event.target.value)
         const usuarioFind = funcionarios!.find(
-            (usr) => usr.id_usuario === usuarioSelected 
+            (usr) => usr.id_usuario === usuarioSelected
         )
         if (usuarioFind && usuarioFind.id_usuario !== 0) {
             setFormInicio((prevData) => ({
@@ -390,31 +420,31 @@ function solicitudesAdmin() {
     //aquellos que pueden usar dicho vehiculo
     useEffect(() => {
         const vehiculoActivo = vehiculoSelected || null
-        if(!vehiculoActivo){
-            setUsuariosFiltrados(funcionarios||[])
+        if (!vehiculoActivo) {
+            setUsuariosFiltrados(funcionarios || [])
             return
         }
-        const filtra = (funcionarios || []).filter(u=>u.lista_licencia?.includes(vehiculoActivo?.licencia_min))
+        const filtra = (funcionarios || []).filter(u => u.lista_licencia?.includes(vehiculoActivo?.licencia_min))
         setUsuariosFiltrados(filtra)
 
-        if(formInicio.id_usuario && !filtra.some(u=>u.id_usuario === formInicio.id_usuario)){
-            setFormInicio(prev=>({...prev,id_usuario:0,nombre_funcionario:""}))
+        if (formInicio.id_usuario && !filtra.some(u => u.id_usuario === formInicio.id_usuario)) {
+            setFormInicio(prev => ({ ...prev, id_usuario: 0, nombre_funcionario: "" }))
         }
     }, [vehiculoSelected])
 
     //Maneja la lista de vehiculos dependiendo si existe un usuario seleccionado en el formulario mostrando aquellos vehiculos que el usuario seleccionado puede usar
     useEffect(() => {
         const idUsuarioActivo = formInicio.id_usuario
-        if(!idUsuarioActivo){
+        if (!idUsuarioActivo) {
             setVehiculoSelected(undefined)
             return
         }
-        const usr = funcionarios?.find((u)=>u.id_usuario === idUsuarioActivo)
+        const usr = funcionarios?.find((u) => u.id_usuario === idUsuarioActivo)
         const licenciasUsuario = usr?.lista_licencia || []
-        const newList = (vehiculos||[]).filter((v)=>licenciasUsuario.includes(v.licencia_min))
+        const newList = (vehiculos || []).filter((v) => licenciasUsuario.includes(v.licencia_min))
         setVehiculosFiltrados(newList)
-        if(formInicio.patente && !newList.some(v=>v.patente===formInicio.patente)){
-            setFormInicio(prev=>({...prev,patente:"",vehiculo:"",kms_inicial:0}))
+        if (formInicio.patente && !newList.some(v => v.patente === formInicio.patente)) {
+            setFormInicio(prev => ({ ...prev, patente: "", vehiculo: "", kms_inicial: 0 }))
             setVehiculoSelected(undefined)
         }
     }, [formInicio.id_usuario])
@@ -423,12 +453,48 @@ function solicitudesAdmin() {
         <>
             <NavBar type={1} texto={"Solicitudes"}></NavBar>
             <div>
+                {!vistaActual && (
+                    <>
+                        <Box sx={{ display: 'flex', gap: 1, marginBottom: 2, marginTop: "1vh", alignItems: 'center' }}>
+                            <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Filtrar estado:</span>
+
+                            <Chip
+                                label="Todas"
+                                clickable
+                                color={estado === "Todos" ? "primary" : "default"}
+                                variant={estado === "Todos" ? "filled" : "outlined"}
+                                onClick={() => handleFiltro("Todos")}
+                            />
+
+                            <Chip
+                                label="Resueltas"
+                                clickable
+                                color={estado === "resuelta" ? "success" : "default"}
+                                variant={estado === "resuelta" ? "filled" : "outlined"}
+                                onClick={() => handleFiltro("resuelta")}
+                            />
+                            <Chip
+                                label="Pendientes"
+                                clickable
+                                color={estado === "pendiente" ? "info" : "default"}
+                                variant={estado === "pendiente" ? "filled" : "outlined"}
+                                onClick={() => handleFiltro("pendiente")}
+                            />
+                            <Chip
+                                label="Rechazadas"
+                                clickable
+                                color={estado === "rechazada" ? "error" : "default"}
+                                variant={estado === "rechazada" ? "filled" : "outlined"}
+                                onClick={() => handleFiltro("rechazada")}
+                            />
+                        </Box></>
+                )}
                 <div className='buttonsTablaH'>
-                    
+
                     <button className="bordeIzquierdoBoton" disabled={vistaActual} onClick={() => setVistaActual(true)}>Solicitudes viajes</button>
                     <button className="bordeDerechaBoton" disabled={!vistaActual} onClick={() => setVistaActual(false)}>Solicitudes usuarios</button>
                 </div>
-                {vistaActual && solicitudesViaje && (
+                {!vistaActual && solicitudesViaje && (
                     <>
                         <Table hoverRow borderAxis='y' sx={{
                             '& tr:nth-of-type(odd)': { backgroundColor: '#FBF5DD' },
@@ -447,7 +513,7 @@ function solicitudesAdmin() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {solicitudesViaje && solicitudesViaje.map((sol: SolicitudViaje, index) => (
+                                {solicitudesViaje && solicitudFiltro.map((sol: SolicitudViaje, index) => (
                                     <tr>
                                         <td>{index + 1}</td>
                                         <td>{sol.solicitante}</td>
@@ -477,7 +543,7 @@ function solicitudesAdmin() {
                         </Table>
                     </>
                 )}
-                {solicitudesPendientes && !vistaActual && (
+                {solicitudesPendientes && vistaActual && (
                     <>
                         <Table hoverRow borderAxis='y' sx={{
                             '& tr:nth-of-type(odd)': { backgroundColor: '#FBF5DD' },
@@ -524,7 +590,7 @@ function solicitudesAdmin() {
                         </Table>
                     </>
                 )}
-                
+
 
             </div>
             {/**Modal para el tratamiento del cambio de contraseñas --> se debe confirmar que ambas contraseñas sean iguales */}
@@ -612,43 +678,43 @@ function solicitudesAdmin() {
                                 <div className="items-Modal">
 
                                     <div className="itemInput-Modal">
-                                <label>Patente</label>
-                                <select name="Patentes" value={formInicio.patente} onChange={manejarDataVehiculo}>
-                                    <option value={""} disabled>Selecciona una patente disponible</option>
-                                    {/**Solo se muestran las patentes de vehiculos disponibles */}
-                                    {formInicio.id_usuario !== 0 ?
-                                        (vehiculosFiltrados && vehiculosFiltrados.filter(veh => veh.estado === 'DISPONIBLE').map((veh) => (
-                                            <option key={veh.patente} value={veh.patente}>
-                                                {veh.patente}
-                                            </option>
-                                        )))
-                                        :
-                                        (vehiculos && vehiculos.filter(veh => veh.estado === "DISPONIBLE").map((veh) => (
-                                            <option key={veh.patente} value={veh.patente}>
-                                                {veh.patente}
-                                            </option>
-                                        )))
-                                    }
+                                        <label>Patente</label>
+                                        <select name="Patentes" value={formInicio.patente} onChange={manejarDataVehiculo}>
+                                            <option value={""} disabled>Selecciona una patente disponible</option>
+                                            {/**Solo se muestran las patentes de vehiculos disponibles */}
+                                            {formInicio.id_usuario !== 0 ?
+                                                (vehiculosFiltrados && vehiculosFiltrados.filter(veh => veh.estado === 'DISPONIBLE').map((veh) => (
+                                                    <option key={veh.patente} value={veh.patente}>
+                                                        {veh.patente}
+                                                    </option>
+                                                )))
+                                                :
+                                                (vehiculos && vehiculos.filter(veh => veh.estado === "DISPONIBLE").map((veh) => (
+                                                    <option key={veh.patente} value={veh.patente}>
+                                                        {veh.patente}
+                                                    </option>
+                                                )))
+                                            }
 
-                                </select>
-                            </div>
+                                        </select>
+                                    </div>
                                     <div className="itemInput-Modal">
-                                <label>Funcionario</label>
-                                <select name="funcionarios" value={formInicio.id_usuario || ""} onChange={manejarDataFuncionario}>
-                                    <option value={""} disabled>Designa un funcionario</option>
-                                    {vehiculoSelected?.patente ?
-                                        (
-                                            usuariosFiltrados && usuariosFiltrados.map((usr: User) => (
-                                                <option key={usr.id_usuario} value={usr.id_usuario}>{usr.nombre}</option>
-                                            ))
-                                        )
-                                        : (funcionarios && funcionarios.map((usr: User) => (
-                                            <option key={usr.id_usuario} value={usr.id_usuario}>{usr.nombre}</option>
-                                        )))
-                                    }
+                                        <label>Funcionario</label>
+                                        <select name="funcionarios" value={formInicio.id_usuario || ""} onChange={manejarDataFuncionario}>
+                                            <option value={""} disabled>Designa un funcionario</option>
+                                            {vehiculoSelected?.patente ?
+                                                (
+                                                    usuariosFiltrados && usuariosFiltrados.map((usr: User) => (
+                                                        <option key={usr.id_usuario} value={usr.id_usuario}>{usr.nombre}</option>
+                                                    ))
+                                                )
+                                                : (funcionarios && funcionarios.map((usr: User) => (
+                                                    <option key={usr.id_usuario} value={usr.id_usuario}>{usr.nombre}</option>
+                                                )))
+                                            }
 
-                                </select>
-                            </div>
+                                        </select>
+                                    </div>
                                     <div className="itemInput-Modal">
                                         <label>Modelo Vehículo</label>
                                         <input disabled value={formInicio.vehiculo} placeholder=""></input>
@@ -659,8 +725,8 @@ function solicitudesAdmin() {
                                     </div>
                                     <div className="itemInput-Modal">
                                         <label>Fecha y hora recomendada</label>
-                                        <input type="datetime-local" name="hora_recomendada" value={formInicio.hora_recomendada ? formInicio.hora_recomendada:""}
-                                        onChange={(e)=>setFormInicio({...formInicio,hora_recomendada:e.currentTarget.value})}></input>
+                                        <input type="datetime-local" name="hora_recomendada" value={formInicio.hora_recomendada ? formInicio.hora_recomendada : ""}
+                                            onChange={(e) => setFormInicio({ ...formInicio, hora_recomendada: e.currentTarget.value })}></input>
                                     </div>
                                     <div className="itemInput2-Modal">
                                         <label>Motivo</label>

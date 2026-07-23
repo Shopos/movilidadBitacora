@@ -57,7 +57,7 @@ function navBar({type,texto}:navBarProps){
         : 
         (<div className="navBarGrid">
             <div className="imgIconBar">
-                <img src=".\src\assets\icon.jpg"></img>
+                <img src={logo}></img>
             </div>
             <div className="textDiv">
                 <h2>Bitácoras</h2>

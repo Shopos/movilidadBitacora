@@ -10,9 +10,11 @@ import { solicitarViaje } from "../../utils/auxiliar"
 import { useAuth } from "../../context/AuthContext"
 import type { SolicitudInicio } from "../../types/tipoSistema"
 import "../../estilos/menuDepartamento.css"
+import { useAlerta } from "../../context/AlertaContext"
 
 function menuDepartamento(){
     const {usuario} = useAuth()
+    const {showAlerta} = useAlerta()
     const navigate = useNavigate()
     const [modalSolicitud,openModalSolicitud] = useState(false)
     const [cargando,setCargando] = useState(false)
@@ -39,12 +41,30 @@ function menuDepartamento(){
         //Si solicitud se cancela o no es aprobada el estado del viaje queda en terminado y se deja en blanco. La observacion del viaje queda con los motivos del rechazo
         //La solicitud debe quedar con un estado cancelada y el porque ademas se rechazo    
     const handleSolicitar=async()=>{
-        console.log("solicitando",formSolicitud)
-        if(formSolicitud && formSolicitud.motivo!==""&&formSolicitud.solicitante!==""&&formSolicitud.id_solicitante!==0){
-            await solicitarViaje(formSolicitud)
-            openModalSolicitud(false)
-            setFormSolicitud({solicitante:"",motivo:"",vehiculo_solicitado:"",id_solicitante:0})
-            setCargando(false)
+        if(formSolicitud && formSolicitud.motivo!=="" || formSolicitud.solicitante!=="" || formSolicitud.id_solicitante!==0){
+            const res = await solicitarViaje(formSolicitud)
+            if(res?.ok){
+                showAlerta("Solicitud de viaje agregada, espere confirmación de administración ")
+                openModalSolicitud(false)
+                setFormSolicitud({solicitante:"",motivo:"",vehiculo_solicitado:"",id_solicitante:0})
+                setCargando(false)
+            }else{
+                switch (res?.status) {
+                case 400:
+                    showAlerta("Datos inválidos. Revisa la información ingresada.", "warning");
+                    break;
+                case 403:
+                    showAlerta("No tienes permisos para realizar esta acción.", "error");
+                    break;
+                case 401:
+                    showAlerta("Sesión expirada. Vuelve a iniciar sesión.", "error");
+                    break;
+                default:
+                    showAlerta("Hubo un problema al agregar, intenta más tarde.", "error");
+                    break;
+            }
+            }
+            
         }
     }
 

@@ -210,14 +210,18 @@ export async function addMantencionVehiculo(data: Mantencion) {
         body: JSON.stringify(payload)
       })
       if (!res.ok) {
-        const errorData = await res.json().catch(() => {
-        })
-        console.log("back", errorData)
-        throw new Error(`HTTP error! Status: ${res.status}`);
+        const errorData = await res.json().catch(()=>({}))
+        return {
+          ok:false,
+          status: res.status,
+          message: errorData.message || `Error ${res.status}` 
+        }
       }
+      const data = await res.json()
+      return {ok:true, data: data}
     } catch (e) {
-      console.error('Error:', e);
-      console.log({ msg: "Error al agregar vehiculo" })
+      console.error('Error: ', e)
+      console.log({ msg: "Error al agregar viaje, revisar datos enviados" })
     }
   }
 }
@@ -238,23 +242,23 @@ export async function agregarVehiculo(data: Vehiculo) {
          
       })
       if (!res.ok) {
-        const errorData = await res.json().catch(() => {
-        })
-        console.log("back", errorData)
-        throw new Error(`HTTP error! Status: ${res.status}`);
+        const errorData = await res.json().catch(()=>({}))
+        return {
+          ok:false,
+          status: res.status,
+          message: errorData.message || `Error ${res.status}` 
+        }
       }
-      const data = await res.json();
-      console.log('Success:', data);
-      return true
+      const data = await res.json()
+      return {ok:true, data: data}
     } catch (e) {
-      console.error('Error:', e);
-      console.log({ msg: "Error al agregar vehiculo" })
-      return false
+      console.error('Error: ', e)
+      console.log({ msg: "Error al agregar viaje, revisar datos enviados" })
     }
   }
 }
 
-export async function agregarUsuario(data: User) {
+export async function agregarUsuario(data: User){
   if (data) {
     const url = `${API}/usuarios`
     const payload = data
@@ -269,15 +273,18 @@ export async function agregarUsuario(data: User) {
         body: JSON.stringify(payload)
       })
       if (!res.ok) {
-        throw new Error(`HTTP error! Status: ${res.status}`);
+        const errorData = await res.json().catch(()=>({}))
+        return {
+          ok:false,
+          status: res.status,
+          message: errorData.message || `Error ${res.status}` 
+        }
       }
-      const data = await res.json();
-      console.log('Success:', data);
-      return true
+      const data = await res.json()
+      return {ok:true, data: data}
     } catch (e) {
-      console.error('Error:', e);
-      console.log({ msg: "Error al agregar usuario" })
-      return false
+      console.error('Error: ', e)
+      console.log({ msg: "Error al agregar viaje, revisar datos enviados" })
     }
   }
 }
@@ -297,10 +304,15 @@ export async function addViajeInicial(data: Viaje) {
         body: JSON.stringify(payload)
       })
       if (!res.ok) {
-        throw new Error(`HTTP error! Status: ${res.status}`)
+        const errorData = await res.json().catch(()=>({}))
+        return {
+          ok:false,
+          status: res.status,
+          message: errorData.message || `Error ${res.status}` 
+        }
       }
       const data = await res.json()
-      console.log('Succes: ', data)
+      return {ok:true, data: data}
     } catch (e) {
       console.error('Error: ', e)
       console.log({ msg: "Error al agregar viaje, revisar datos enviados" })
@@ -593,40 +605,71 @@ export async function solicitarViaje(data: SolicitudInicio) {
       },
       body: JSON.stringify(payload)
     })
-    const json = await res.json()
     if (!res.ok) {
-      throw new Error(json.error || " No se logro agregar solicitud ")
+        const errorData = await res.json().catch(()=>({}))
+        return {
+          ok:false,
+          status: res.status,
+          message: errorData.message || `Error ${res.status}` 
+        }
+      }
+      const data = await res.json()
+      return {ok:true, data: data}
+    } catch (e) {
+      console.error('Error: ', e)
+      console.log({ msg: "Error al agregar viaje, revisar datos enviados" })
     }
-    return json
-  } catch (e) {
-    console.log("Error al agregar solicitud")
-    return null
-  }
 }
 
 export async function resolverSubidaImagen(
   id: number,
   tipo: "foto-inicio" | "foto-fin" | "foto-comprobante",
-  archivo: File): Promise<{ msg: string, ruta?: string } | null> {
+  archivo: File
+): Promise<{ ok: boolean; status: number; data?: any; message: string } | null> {
+
+  // Defensa previa
+  const MAX_BYTES = 5 * 1024 * 1024;
+  if (archivo.size > MAX_BYTES) {
+    return {
+      ok: false,
+      status: 400,
+      message: "La imagen excede el peso máximo permitido (5MB)."
+    };
+  }
 
   const token = localStorage.getItem("token")
   const form = new FormData()
   form.append('foto', archivo)
   const url = `${API}/viajes/${id}/${tipo}`
+
   try {
     const res = await fetch(url, {
       method: "PATCH",
       headers: { 'Authorization': `Bearer ${token}` },
       body: form
     })
-    const json = await res.json()
+
+    // Leer el body UNA SOLA VEZ
+    const data = await res.json().catch(() => ({}));
+
     if (!res.ok) {
-      throw new Error(json.error || "No se logro subir imagen")
+      return {
+        ok: false,
+        status: res.status,
+        message: data.message || `Error ${res.status}`,
+        data: data
+      }
     }
-    return json
+
+    return { ok: true, data: data, status: res.status, message: "success" }
+
   } catch (e) {
-    console.error('error subiendo imagen', e)
-    return null
+    console.error('Error al subir imagen: ', e)
+    return {
+      ok: false,
+      status: 500,
+      message: "Error de conexión o fallo de red."
+    }
   }
 }
 

@@ -6,7 +6,6 @@ dotenv.config
 
 //Agrega una solicitud de viaje
 export async function agregarSolicitud(req:Request,res:Response){
-    console.log("agregando")
     try{
         const usuario = (req.usuario as any).correo
         const { id_solicitante,motivo,solicitante,vehiculo_solicitado } = req.body
@@ -33,7 +32,6 @@ export async function aprobarSolicitud(req:Request,res:Response){
           }
           res.status(200).json({id,mensaje: "Viaje aprobado correctamente"})
     }catch(e){
-        console.log("error solicitud")
         res.status(500).json({error: " Error al agregar aprobar solicitud "})
     }
 }

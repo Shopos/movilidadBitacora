@@ -1,4 +1,5 @@
 import { useRef,useState, type ChangeEvent } from "react"
+import { useAlerta } from "../context/AlertaContext"
 
 
 const API = import.meta.env.VITE_API_URL || 'http://192.168.2.65:4000'
@@ -9,27 +10,37 @@ interface Props{
     capture?:'environment'|'user'|'',
     rutaActual?:string
 }
+const MAX_SIZE_MB = 5
+const MAX_SIZE_BYTES=MAX_SIZE_MB * 1024 * 1024
 
 /**Componente para la subida de imagenes
  * -->Sirve para la seleccion de las mismas, esta devuelve el archivo elegido al componente padre para su tramitacion
  */
 function imageUploader({onArchivoReady,onCancelar,label,capture,rutaActual} :Props){
-
+    const {showAlerta} = useAlerta()
     const inputRef = useRef<HTMLInputElement>(null)
     const [preview,setPreview] = useState<string|null>(null)
     const urlMostrar = preview ?? (rutaActual ? `${API}/uploads/${rutaActual}`:null)
 
-    const handleSeleccion =(e:ChangeEvent<HTMLInputElement>)=>{
+    const handleSeleccion = (e: ChangeEvent<HTMLInputElement>) => {
         const archivo = e.target.files?.[0]
-        if(!archivo){
-            return
+        if (!archivo) return
+
+        if (archivo.size > MAX_SIZE_BYTES) {
+            showAlerta(`La imagen supera el límite de ${MAX_SIZE_MB}MB. Por favor, elige una más liviana.`,"warning")
+            if (inputRef.current) {
+                inputRef.current.value = "" 
+            }
+            return;
         }
-        if(preview){
+
+        if (preview) {
             URL.revokeObjectURL(preview)
         }
+        
         const nuevaUrl = URL.createObjectURL(archivo)
         setPreview(nuevaUrl)
-        onArchivoReady(archivo,nuevaUrl)
+        onArchivoReady(archivo, nuevaUrl)
     }
 
     const handleCancelar = () =>{

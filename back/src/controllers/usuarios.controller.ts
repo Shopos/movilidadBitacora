@@ -171,7 +171,6 @@ export async function solicitarReset(req: Request, res: Response) {
             res.json({msg:"Solicitud enviada a correo"})
         }
     } catch (e) {
-        console.log(e)
         res.status(500).json({error:" Error al solicitar cambio contraseña "})
     }
 }
@@ -212,7 +211,6 @@ export async function resolverResetPass(req: Request, res: Response) {
         await solicitudesModel.resolverSolicitud(idSolicitud,autor)
         res.json({msg:` Contraseña nueva asignada al usuario ${solicitud[0].nombre} `})
     }catch(e){
-        console.log(e)
         res.status(500).json({error: " Error al resolver cambio contraseña "})
     }
 }

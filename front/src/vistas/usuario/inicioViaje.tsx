@@ -25,9 +25,9 @@ interface prop {
 }
 
 function inicioViaje() {
-    const {showAlerta} = useAlerta()
-    const [archivo,setArchivo] = useState<File|null>(null)
-    const [previewInicio,setPreviewInicio] = useState<string|null>(null)
+    const { showAlerta } = useAlerta()
+    const [archivo, setArchivo] = useState<File | null>(null)
+    const [previewInicio, setPreviewInicio] = useState<string | null>(null)
 
     const [modalCamara, openModalCamara] = useState<boolean>(false)
     const [cargando, setCargando] = useState<boolean>(false)
@@ -41,8 +41,8 @@ function inicioViaje() {
     const points: GPS[] = [dataGPS, dataGPSDestino]
     const { usuario } = useAuth()
     const date = new Date()
-    const today  = `${String(date.getFullYear())}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`
-    const nowTime = `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`
+    const today = `${String(date.getFullYear())}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+    const nowTime = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 
     /*Funcion para dar colores especificos a los Marker de leaflet y poder diferenciar punto de inicio y destino */
     const createCustomIcon = (color: string) => {
@@ -86,9 +86,9 @@ function inicioViaje() {
                 if (usuario) {
                     const idViaje = localStorage.getItem("idViaje")
                     const response = await getViajeUsuarioEspera(usuario.id)
-                    const viaje = response.find((vje:Viaje) => vje.id_viaje === Number(idViaje) )
-                    
-                    if (viaje && response){
+                    const viaje = response.find((vje: Viaje) => vje.id_viaje === Number(idViaje))
+
+                    if (viaje && response) {
                         setFormInicio(viaje)
                         setCargando(true)
                     } else {
@@ -165,27 +165,46 @@ function inicioViaje() {
             }
         }
         patch()
-    },[formInicio?.estado_viaje])
+    }, [formInicio?.estado_viaje])
 
-    
+
 
 
     /*Almacena los datos ingresados dentro de formInicio en db y deja el estado del viaje en "true" (viaje activo -> true/viaje terminado ->false) --> vehiculo a "ACTIVO" */
     const continuarProceso = async () => {
         //Almacenar en localStorage id_viaje
         //Hacer patch al viaje y cambiar estado del vehiculo y usuario a en ruta, como tambien al viaje
-        if(formInicio && archivo){
-            await resolverSubidaImagen(formInicio.id_viaje,'foto-inicio',archivo)
-
-            if(previewInicio){
-                URL.revokeObjectURL(previewInicio)
+        if (formInicio && archivo) {
+            const res = await resolverSubidaImagen(formInicio.id_viaje, 'foto-inicio', archivo)
+            if (res?.ok) {
+                if (previewInicio) {
+                    URL.revokeObjectURL(previewInicio)
+                }
+                await updateData().then()
+            } else {
+                switch (res?.status) {
+                    case 400:
+                        showAlerta(res.message || "Datos inválidos. Revisa la información.", "warning");
+                        break;
+                    case 413: 
+                        showAlerta("La imagen es demasiado pesada para el servidor.", "error");
+                        break;
+                    case 403:
+                        showAlerta("No tienes permisos para realizar esta acción.", "error");
+                        break;
+                    case 401:
+                        showAlerta("Sesión expirada. Vuelve a iniciar sesión.", "error");
+                        break;
+                    default:
+                        showAlerta(res?.message || "Hubo un problema al agregar, intenta más tarde.", "error");
+                        break;
+                }
             }
-            await updateData().then()
-        }else{
-            showAlerta("Debes incluir la foto de tablero antes de continuar","warning")
+        } else {
+            showAlerta("Debes incluir la foto de tablero antes de continuar", "warning")
         }
 
-       
+
     }
 
 
@@ -246,7 +265,7 @@ function inicioViaje() {
                         </div>
 
 
-                        {isMobile && !previewInicio &&(
+                        {isMobile && !previewInicio && (
                             <div className="full-width">
                                 <button className="buttonFormularioInicio" onClick={() => openModalCamara(true)}>Agregar imagen tablero</button>
                             </div>)}
@@ -255,18 +274,18 @@ function inicioViaje() {
                                 <img
                                     src={previewInicio}
                                     alt="tablero-inicio"
-                                    style={{width:"50vh",objectFit:'cover'}}
+                                    style={{ width: "50vh", objectFit: 'cover' }}
                                 ></img>
-                                <div style={{display:"flex",flexDirection:"row",justifyContent:"center"}}>
-                                    <p style={{fontSize:'0.8rem',color:'#555'}}>Foto tablero lista</p>
-                                    <button style={{fontSize:"0.75rem",color:"#e53935",background:'none',border:'none',cursor:'pointer'}} onClick={()=>{
+                                <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                                    <p style={{ fontSize: '0.8rem', color: '#555' }}>Foto tablero lista</p>
+                                    <button style={{ fontSize: "0.75rem", color: "#e53935", background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => {
                                         URL.revokeObjectURL(previewInicio)
                                         setPreviewInicio(null)
                                         setArchivo(null)
                                     }}>Quitar</button>
                                 </div>
                             </div>
-                            
+
                         )}
 
 
@@ -310,7 +329,7 @@ function inicioViaje() {
                 ) : (<>
                     <div>Cargando...</div>
                     <div className="botonesPaso">
-                        <button className="botonPaso" onClick={()=>volverMenu}>Volver</button>                    
+                        <button className="botonPaso" onClick={() => volverMenu}>Volver</button>
                     </div></>)}
 
             {/*Modal para ingreso de documentacion tablero vehiculo ya sea imagen previa o con camara */}
@@ -322,20 +341,20 @@ function inicioViaje() {
                     <Divider />
                     <DialogContent>
                         {formInicio && (
-                            <ImageUploader 
+                            <ImageUploader
                                 //capture="environment"
                                 capture="environment"
                                 label="Agrega la imagen del tablero, ubicando el medidor de kilometraje"
-                                onArchivoReady={(archivoInicio,url)=>{
-                                    if(previewInicio){
+                                onArchivoReady={(archivoInicio, url) => {
+                                    if (previewInicio) {
                                         URL.revokeObjectURL(previewInicio)
                                     }
                                     setArchivo(archivoInicio)
                                     setPreviewInicio(url)
                                     openModalCamara(false)
-                                    
+
                                 }}
-                                onCancelar={()=>openModalCamara(false)}
+                                onCancelar={() => openModalCamara(false)}
                             />
                         )}
                     </DialogContent>

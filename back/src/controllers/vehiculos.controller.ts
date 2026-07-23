@@ -42,7 +42,6 @@ export async function getVehiculoPatente(req:Request,res:Response){
 */
 
 export async function agregarVehiculo(req:Request,res:Response){
-    console.log(req)
     try{
         const {patente, modelo, kms_actual, estado, tipo_vehiculo} = req.body
         const usuario = (req.usuario as any).correo

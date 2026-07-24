@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+
+/**Componente llamado cuando la ruta a consultar no existe o no tiene permisos para su visualización */
 function NotFound() {
   const [link,setLink] = useState("/")
   const { usuario } = useAuth()

@@ -26,7 +26,9 @@ function menuAudit() {
     const [filtroTabla, setFiltroTabla] = useState("")
     const [filtroAccion, setFiltroAccion] = useState("")
 
-
+    /**Efecto para manejar las consultas hacia la tabla de auditoria, al trabajar con parametros tambien
+     * se puede pedir (cantidad a mostrar, la tabla a consultar y acciones) --> como filtros
+     */
     useEffect(() => {
         const cargar = async () => {
             setCargando(true)
@@ -66,6 +68,7 @@ function menuAudit() {
         setRowsPerPage(parseInt(event.target.value, 10))
         setPage(0)
     }
+    //Adapta las acciones a lenguaje común
     const adaptarAccion=(accion:string)=>{
         switch(accion){
             case "LOGIN": return "Inicio Sesión" 
@@ -74,7 +77,7 @@ function menuAudit() {
             case "DELETE": return "Borrado"
         }
     }
-
+    /**Vista para la tabla de auditoria, contiene dos select para trabajar filtros para separar entre tablas y acciones */
     return (
         <>
             <NavBar type={1} texto="Auditoria" />

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as auditModel from "../models/auditoria.model"
 
+/**Metodo para obtener los datos desde la tabla auditoria */
 export async function getLogs(req: Request, res: Response) {
     try {
         const { tabla, accion, usuario, desde, hasta, page = "0", size = "10" } = req.query

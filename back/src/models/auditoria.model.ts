@@ -11,6 +11,10 @@ export interface FiltroLog {
     limit:number
     offset:number
 }
+/**Funcion para trabajar la tabla de auditoria, revisa si existen datos relacionados al filtro --> parametros en controller
+ * si esto ocurre se agrega la "query" a un arreglo, luego si este arreglo tiene un tamaño se agregan las condiciones
+ * finalmente a la tabla se le consulta con el arreglo where directamente con los filtros consultados
+ */
 export async function getLogs(filtro: FiltroLog) {
     const condicion: string[] = []
     const params: any[] = []

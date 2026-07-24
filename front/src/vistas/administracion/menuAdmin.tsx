@@ -36,7 +36,7 @@ type GPS = {
 interface prop {
     points: GPS[]
 }
-
+//Funcion para trabajar los filtros relacionados a las fechas, se trabaja solo por ultimo dia, semana y mes
 function dentroPeriodo(fechaConsulta: string | null, periodo: string): boolean {
     if (!fechaConsulta) {
         return false

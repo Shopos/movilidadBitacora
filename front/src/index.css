@@ -52,7 +52,8 @@
 }
 
 #root {
-  width: 1400px;
+  display: flex;
+  width: 100%;
   max-width: 100%;
   margin: 0 auto;
   text-align: center;
@@ -118,4 +119,23 @@ textarea{
 
 .fourth-color { 
 	background: #01352c; 
+}
+
+@media (max-width: 576px){
+  [class*="ModalDialog-root"]{
+    width: 92vw !important;
+    max-width: 92vw !important;
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 4vw;
+    box-sizing: border-box;
+  }
+}
+
+@media ( max-width: 468px){
+  [class*="ModalDialog-root"]{
+    width: 96vw !important;
+    max-width: 96vw !important;
+    padding: 5vw;
+  }
 }

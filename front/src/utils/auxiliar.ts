@@ -45,7 +45,6 @@ export async function getFuncionarios() {
     return null;
   }
 }
-
 export async function getSolicitudesViajes() {
   try {
     const url = `${API}/solicitudes/`
@@ -66,7 +65,6 @@ export async function getSolicitudesViajes() {
     return null
   }
 }
-
 export async function getUsuarios() {
   try {
     const token = localStorage.getItem("token")
@@ -258,7 +256,7 @@ export async function agregarVehiculo(data: Vehiculo) {
   }
 }
 
-export async function agregarUsuario(data: User){
+export async function agregarUsuario(data: User){ 
   if (data) {
     const url = `${API}/usuarios`
     const payload = data
@@ -287,9 +285,9 @@ export async function agregarUsuario(data: User){
       console.log({ msg: "Error al agregar viaje, revisar datos enviados" })
     }
   }
-}
+} 
 
-export async function addViajeInicial(data: Viaje) {
+export async function addViajeInicial(data: Viaje) {  
   if (data) {
     const url = `${API}/viajes`
     const payload = data
@@ -318,7 +316,7 @@ export async function addViajeInicial(data: Viaje) {
       console.log({ msg: "Error al agregar viaje, revisar datos enviados" })
     }
   }
-}
+} 
 
 export async function addDataViajeFin(patente: string, data: ViajeInputFin) {
   if (data && patente) {
@@ -402,7 +400,7 @@ export async function editarUsuario(correo: string, data: User) {
   }
 }
 
-export async function patchInicio(id: number, data: ViajeInputInicio) {
+export async function patchInicio(id: number, data: ViajeInputInicio) { 
   if (data) {
     const url = `${API}/viajes/inicio/${id}`
     const payload = data
@@ -627,13 +625,13 @@ export async function resolverSubidaImagen(
   archivo: File
 ): Promise<{ ok: boolean; status: number; data?: any; message: string } | null> {
 
-  // Defensa previa
-  const MAX_BYTES = 5 * 1024 * 1024;
+  //Actual 15MB --> modificar si es necesario
+  const MAX_BYTES = 15* 1024 * 1024;
   if (archivo.size > MAX_BYTES) {
     return {
       ok: false,
       status: 400,
-      message: "La imagen excede el peso máximo permitido (5MB)."
+      message: "La imagen excede el peso máximo permitido (4MB)."
     };
   }
 

@@ -58,6 +58,7 @@
     display: flex;
     flex-direction: row;
     justify-items: center;
+    flex-wrap: wrap;
     align-items: center;
     background-color: var(--buttonPrimary);
     border-radius: 35px;
@@ -65,7 +66,59 @@
     padding: 2%;
     justify-content: space-around;
 }
-@media (min-width: 576px) {
+@media (max-width: 576px) {
+    .navBarGrid{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 3%;
+        padding: 3% 4%;
+    }
+    .navBarGrid .textDiv{
+        grid-area: unset;
+        flex:1;
+        text-align: left;
+    }
+    .navBarGrid .textDiv h2{
+        font-size: 1.3rem;
+        margin:0;
+    }
+    .imgIconBar img{
+        width: 12vw;
+        max-width: 44px;
+        min-width: 32px;
+    }
+    .gridAdmin{
+        display: flex;
+        flex-direction: column;
+        padding: 3% 0;
+    }
+    .barraAux{
+        width: 90%;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-left: 0;
+        border-radius: 20px;
+        padding: 3% 2%;
+        gap: 2% 4%
+    }
+    .buttonBarra{
+        font-size: 90%;
+        padding: 1.5% 2%;
+        white-space: nowrap;
+    }
+    .encabezado{
+        width: 100%;
+        margin-left: 0;
+        margin-top: 3%;
+    }
+    .encabezado h1{
+        font-size: 1.3rem;
+    }
+    .encabezado h2{
+        font-size: 1rem;
+    }
 }
 .buttonBarra{
     background-color:transparent;

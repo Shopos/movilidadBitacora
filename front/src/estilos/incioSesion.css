@@ -14,14 +14,14 @@
 }
 .contenidoInicio{
     display: flex;
-    height: 90vh;
+    height: 60%;
     flex-direction: column;
     justify-items: center;
     align-items: center;
 }
 .textoTituloInicio{
-    margin-top: 10%;
-    margin-bottom: 10%;
+    margin-top: 5%;
+    margin-bottom: 5%;
     font-family: "Spline Sans", sans-serif;
 }
 .contenido-formulario{
@@ -31,7 +31,7 @@
     align-items: center;
     background-color: var(--fondoBarra);
     border-radius: 25px;
-    padding: 3%;
+    padding: 1% 1% 2% 1%;
     color: white;
 }
 .campo-formulario{

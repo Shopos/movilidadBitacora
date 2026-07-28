@@ -28,8 +28,8 @@ app.use('/uploads',express.static(UPLOADS_DIR,{maxAge:'7d'}))
 
 app.use((err:any, req:Request,res:Response,next:NextFunction)=>{
     if(err instanceof MulterError){
-        if(err.code === 'LIMIT_FILE_SIZE'){
-            return res.status(400).json({err: 'La imagen no puede superar los 5 mb'})
+        if(err.code === 'LIMIT_FILE_SIZE'){ 
+            return res.status(400).json({err: 'La imagen no puede superar los 4 mb'})
         }
         return res.status(400).json({err: 'Error al procesar la imagen'})
     }

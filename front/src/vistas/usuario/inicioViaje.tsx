@@ -314,7 +314,7 @@ function inicioViaje() {
                                         >
                                         </Marker>
                                         <FitBounds points={points}></FitBounds>
-                                        <Routing point1={dataGPS} point2={dataGPSDestino} />
+                                        <Routing point1={dataGPS} point2={dataGPSDestino} option={false}/>
                                     </MapContainer>
                                 </div>
                             </>

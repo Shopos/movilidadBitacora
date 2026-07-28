@@ -80,7 +80,7 @@ function dataViewViaje({ viajeSelected, modo }: prop) {
                                 <span>Observaciones: </span>{viajeSelected?.obs_viaje}
                             </div>
                             <div>
-                                <span>Estado del viaje: </span>{viajeSelected?.estado_viaje ? "En proceso" : "Terminado"}
+                                <span>Estado del viaje: </span>{viajeSelected?.estado_viaje}
                             </div>
                         </div>
                         <div className='modalDataItemCol'>

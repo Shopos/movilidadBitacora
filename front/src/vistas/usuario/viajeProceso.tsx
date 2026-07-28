@@ -134,8 +134,8 @@ function viajeProceso() {
 
                                 <FitBounds points={points}></FitBounds>
 
-                                <Routing point1={punto1!} point2={punto2!} setRouteInfo={setRouteInfo}/>
-
+                                <Routing point1={punto1!} point2={punto2!} setRouteInfo={setRouteInfo} option={false} />
+                                <Routing point1={{lat:0,lng:0,alt:0}} point2={punto2!} option={true} color="#FF5733"/>
                             </MapContainer>
                         </div>
                         <div className="anunciosProceso">

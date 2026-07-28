@@ -51,7 +51,6 @@ function navBar({type,texto}:navBarProps){
                 <h1>Departamento de movilización</h1>
                 <h2>{texto}</h2>
             </div>
-            
         </div>
         )        
         : 

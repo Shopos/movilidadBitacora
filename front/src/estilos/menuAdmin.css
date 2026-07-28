@@ -144,3 +144,11 @@
     align-items: center;
     justify-content: flex-end;
 }
+@media (max-width: 576px){
+    .barraFiltro{
+        width: 100%;
+    }
+    .inputBusqueda{
+        width: 50%;
+    }
+}

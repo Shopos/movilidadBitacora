@@ -42,7 +42,7 @@ export function eliminarImagenAnterior(rutaRelativa:string|null|undefined):void{
     })
 }
 //Exportar metodos para ser usados en los controllers relacionados, limitando ademas el tamaño maximo
-const LimitSize = {fileSize: 4*1024*1024}
+const LimitSize = {fileSize: 15*1024*1024} //15MB
 
 export const uploadImageTableroInicio = multer({ storage: buildStorage('viajes/inicio'), limits:LimitSize, fileFilter})
 export const uploadImageComprobante = multer({storage: buildStorage('viajes/comprobante'),limits:LimitSize, fileFilter})

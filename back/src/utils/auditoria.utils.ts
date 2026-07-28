@@ -6,11 +6,7 @@ import { connection } from "../config/database";
  * Recibe un usuarioResponsable --> correo del usuario que realiza la accion y
  * sql que en si es la query a realizarse
  */
-export async function queryAsUser<T=any>(
-    usuarioResponsable:string,
-    sql:string,
-    params:any[]=[]
-):Promise<T>{
+export async function queryAsUser<T=any>(usuarioResponsable:string, sql:string, params:any[]=[]):Promise<T>{
     const conn = await connection.getConnection()
     try{
         await conn.query("SET @usuario_actual = ?",[usuarioResponsable])

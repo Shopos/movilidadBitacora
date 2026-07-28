@@ -26,6 +26,7 @@ import 'leaflet/dist/leaflet.css';
 import L from "leaflet"
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
 import Routing from "../../componentes/routing.tsx" /*Componente para marcar la ruta entre inicio y destino en mapa*/
+import { isMobile } from "react-device-detect";
 
 
 type GPS = {
@@ -661,7 +662,8 @@ function menuAdmin() {
                             endDecorator={<button>Buscar</button>}
                             sx={{ width: "100%" }}></Input>
                     </div>
-                    <Chip
+                    {!isMobile && (<>
+                        <Chip
                         variant={estado === "En espera" ? "outlined" : "plain"}
                         color={estado === "En espera" ? "primary" : "neutral"}
                         size="md"
@@ -756,6 +758,8 @@ function menuAdmin() {
                             marginRight: "2px"
                         }}
                     >Último mes</Chip>
+                    </>)}
+                    
 
                 </div>
                 {cargando ? (<><div className="tablaViajes">
@@ -1088,7 +1092,7 @@ function menuAdmin() {
 
             {/*Modal para la seleccion de destino del viaje */}
             <Modal open={modalDestino} onClose={() => openModalDestino(false)}>
-                <ModalDialog variant="soft" size="lg">
+                <ModalDialog variant="soft">
                     <DialogTitle>
                         {modoEdicionMapa === "edicion" ? "Cambiar el destino del viaje" : "Mueve el pin al destino aproximado"}
                     </DialogTitle>
@@ -1137,7 +1141,7 @@ function menuAdmin() {
                                     </Marker>
 
                                     <FitBounds points={points}></FitBounds>
-                                    <Routing point1={dataGPS} point2={dataGPSDestino} />
+                                    <Routing point1={dataGPS} point2={dataGPSDestino} option={false}/>
                                 </MapContainer>
                             </div>
                         </>

@@ -18,7 +18,7 @@ export async function getUsuarios(req: Request, res: Response) {
         const usuariosLicencias = usuarios.map((u:any)=>({
             ...u,
             lista_licencia:u.licencias_concat ? u.licencias_concat.split(","):[]
-        }))
+        })) 
         res.json(usuariosLicencias)
     } catch (e) {
         console.error(e)
@@ -154,7 +154,8 @@ export async function perfil(req: Request, res: Response) {
 }
 /**Metodo apra ingresar una solicitud de un usuario cuyo correo sea valido */
 export async function solicitarReset(req: Request, res: Response) {
-    try{//Tomar correo
+    try{
+        //Tomar correo
         const mail = req.body.correo
         //verificar que existe
         const usuarios = await usuarioModel.getUsuarioCorreo(mail)

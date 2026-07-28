@@ -18,6 +18,7 @@ import ManageAccountsSharpIcon from '@mui/icons-material/ManageAccountsSharp';
 import VisibilitySharpIcon from '@mui/icons-material/VisibilitySharp';
 import VisibilityOffSharpIcon from '@mui/icons-material/VisibilityOffSharp';
 import { useAuth } from "../../context/AuthContext.tsx"
+import { isMobile } from "react-device-detect"
 
 
 type GPS = {
@@ -453,7 +454,7 @@ function solicitudesAdmin() {
         <>
             <NavBar type={1} texto={"Solicitudes"}></NavBar>
             <div>
-                {!vistaActual && (
+                {!vistaActual && !isMobile &&(
                     <>
                         <Box sx={{ display: 'flex', gap: 1, marginBottom: 2, marginTop: "1vh", alignItems: 'center' }}>
                             <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Filtrar estado:</span>
@@ -762,7 +763,7 @@ function solicitudesAdmin() {
 
             {/*Modal para la seleccion de destino del viaje */}
             <Modal open={modalDestino} onClose={() => openModalDestino(false)}>
-                <ModalDialog variant="soft" size="lg">
+                <ModalDialog variant="soft">
                     <DialogTitle>
                         "Mueve el pin al destino aproximado"
                     </DialogTitle>
@@ -807,7 +808,7 @@ function solicitudesAdmin() {
                                     </Marker>
 
                                     <FitBounds points={points}></FitBounds>
-                                    <Routing point1={dataGPS} point2={dataGPSDestino} />
+                                    <Routing point1={dataGPS} point2={dataGPSDestino} option={false}/>
                                 </MapContainer>
                             </div>
                         </>

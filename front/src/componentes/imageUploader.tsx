@@ -10,7 +10,7 @@ interface Props{
     capture?:'environment'|'user'|'',
     rutaActual?:string
 }
-const MAX_SIZE_MB = 5
+const MAX_SIZE_MB = 15 //Cambiar si es necesario un mayor tamaño de imagen /actual 15MB --> tambien realizar el cambio en back/config/multer.ts
 const MAX_SIZE_BYTES=MAX_SIZE_MB * 1024 * 1024
 
 /**Componente para la subida de imagenes

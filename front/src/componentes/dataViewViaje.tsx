@@ -23,11 +23,11 @@ export interface prop {
  * 
  */
 function dataViewViaje({ viajeSelected, modo }: prop) {
-
+    console.log(viajeSelected)
+    console.log(viajeSelected.ruta_real)
     const [modalMapa, openModalMapa] = useState<boolean>(false)
     const [modalTablero, setModalTablero] = useState<boolean>(false)
     const [modalComprobante, setModalComprobante] = useState<boolean>(false)
-    console.log(viajeSelected.imagen_tablero_ida)
     return (
 
         <>
@@ -109,7 +109,7 @@ function dataViewViaje({ viajeSelected, modo }: prop) {
                     <DialogContent sx={{ minWidth: "90%" }}>
 
                         {viajeSelected?.lat_inicio !== null && viajeSelected?.lng_inicio !== null && viajeSelected?.lat_fin !== null && viajeSelected?.lng_fin !== null && (
-                            <MapaPreview puntoI={{ lat: viajeSelected!.lat_inicio, lng: viajeSelected!.lng_inicio }} puntoD={{ lat: viajeSelected!.lat_fin, lng: viajeSelected!.lng_fin }} interaction={true} />
+                            <MapaPreview puntoI={{ lat: viajeSelected!.lat_inicio, lng: viajeSelected!.lng_inicio }} puntoD={{ lat: viajeSelected!.lat_fin, lng: viajeSelected!.lng_fin }} ruta={viajeSelected!.ruta_real} interaction={true} />
                         )}
 
                     </DialogContent>

@@ -51,6 +51,7 @@ CREATE TABLE `viajes` (
   `imagen_tablero_vuelta` varchar(150) DEFAULT NULL,
   `imagen_comprobante_ben` varchar(150) DEFAULT NULL,
   `hora_recomendada` datetime DEFAULT NULL,
+  `ruta_real` json DEFAULT NULL,
   PRIMARY KEY (`id_viaje`),
   KEY `fk_usuario_viaje` (`id_usuario`),
   KEY `fk_vehiculo_viaje` (`patente`),

@@ -1,20 +1,26 @@
 import 'leaflet/dist/leaflet.css';
 import L from "leaflet"
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet';
-import {useEffect,useState} from 'react';
+import { useEffect, useState } from 'react';
 import Routing from "./routing.tsx" /*Componente para marcar la ruta entre inicio y destino en mapa*/
 import "../estilos/mapa.css"
 type GPS = {
     lat: number,
     lng: number
 }
-interface prop{
+interface prop {
     points: GPS[]
 }
-export interface propsComponent{
+interface Punto {
+    lat: number;
+    lng: number;
+    timeStamp: number;
+}
+export interface propsComponent {
     puntoI: GPS,
-    puntoD:GPS,
+    puntoD: GPS,
     interaction: boolean
+    ruta?: Punto[]
 }
 
 /*Componente mapa muestra los puntos Inicio y Destino
@@ -23,9 +29,9 @@ Destino con Marker color Verde
 
 la funcion FitBounds centra la vista del mapa para ajustarse al medio de los dos puntos al igual del zoom necesario para mostrar dichos puntos
 */
-function mapaProp({puntoD, puntoI,interaction}:propsComponent) {
+function mapaProp({ puntoD, puntoI, interaction, ruta }: propsComponent) {
     /*Funcion para dar colores especificos a los Marker de leaflet y poder diferenciar punto de inicio y destino */
-    const points = [puntoI,puntoD]
+    const points = [puntoI, puntoD]
     const [routeInfo, setRouteInfo] = useState({ distance: 0, duration: 0 });
     const createCustomIcon = (color: string) => {
         return L.divIcon({
@@ -45,35 +51,35 @@ function mapaProp({puntoD, puntoI,interaction}:propsComponent) {
         })
     }
 
-    function FitBounds ({ points }: prop){
+    function FitBounds({ points }: prop) {
         const map = useMap()
-        
 
-        useEffect(()=>{
-            const bound = points.map(p=> [p.lat,p.lng]as[number,number])
-            if(points.length > 0 ){
-                map.fitBounds(bound,{
-                    padding:[50,50],
-                    maxZoom:15,
+
+        useEffect(() => {
+            const bound = points.map(p => [p.lat, p.lng] as [number, number])
+            if (points.length > 0) {
+                map.fitBounds(bound, {
+                    padding: [50, 50],
+                    maxZoom: 15,
                 })
             }
-            
-        },[map,points])
+
+        }, [map, points])
         return null
     }
 
     return (
         <div className="leaflet-container-mapa">
-            <div style={{display:"flex", flexDirection:"column"}}>
+            <div style={{ display: "flex", flexDirection: "column" }}>
                 <label>Duración: {routeInfo.duration} minutos aproximados</label>
                 <label>Distancia: {routeInfo.distance} kilometros aproximados</label>
             </div>
             <MapContainer center={[puntoD.lat, puntoD.lng]} zoom={18}
-            dragging={interaction}
-            zoomControl={interaction}
-            doubleClickZoom={interaction}
-            touchZoom={interaction}
-            className="leaflet-container-mapa"
+                dragging={interaction}
+                zoomControl={interaction}
+                doubleClickZoom={interaction}
+                touchZoom={interaction}
+                className="leaflet-container-mapa"
             >
                 <TileLayer
                     url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
@@ -94,7 +100,7 @@ function mapaProp({puntoD, puntoI,interaction}:propsComponent) {
                 >
                 </Marker>
                 <FitBounds points={points}></FitBounds>
-                <Routing point1={puntoI} point2={puntoD} setRouteInfo={setRouteInfo} option={false}/>
+                <Routing point1={puntoI} point2={puntoD} setRouteInfo={setRouteInfo} option={false} />
             </MapContainer>
         </div>
     )

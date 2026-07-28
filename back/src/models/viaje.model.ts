@@ -28,6 +28,7 @@ export interface Viaje extends RowDataPacket{
     ultima_modificacion:string,
     modificado_por:string
     modo:"ida"|"vuelta"
+    ruta_real?:PuntoRuta[]
 }
 export interface ViajeInputInicio{
     vehiculo:string,
@@ -48,6 +49,13 @@ export interface ViajeInputInicio{
     modo:string,
     hora_recomendada:string|null
 }
+
+export interface PuntoRuta{
+    lat:number,
+    lng:number,
+    timeStamp:number
+}
+
 export interface ViajeInputFuncionarioInicio{
     fecha_hora_inicio:string,
     ultima_modificacion:string,
@@ -61,8 +69,9 @@ export interface ViajeInputFuncionarioFin{
     carga_combustible:boolean,
     cantidad_combustible:number,
     ultima_modificacion:string,
-    modificado_por: string
-    kms_fin:number
+    modificado_por: string,
+    kms_fin:number,
+    rutareal:PuntoRuta[]
 }
 
 export interface ViajeInputFin{
@@ -76,6 +85,7 @@ export interface ViajeInputFin{
     modificado_por: string
     kms_fin:number
     estado_viaje:boolean
+    ruta_real:PuntoRuta[]
 }
 export interface viajeTerminado{
     obs_viaje:string,
@@ -259,7 +269,7 @@ export async function changeStatusViaje(id:number,status:string,usuarioResponsab
 //Agrega la informacion faltante a un viaje{id} para cerrar un viaje
 export async function parcheFin(id:number,data:ViajeInputFuncionarioFin,usuarioResponsable:string): Promise<boolean>{
     const res:any = await queryAsUser(usuarioResponsable, `UPDATE viajes 
-        SET fecha_hora_fin = ?, obs_viaje = ?, carga_combustible=?,cantidad_carga=? , ultima_modificacion = ?, modificado_por = ?,kms_fin=? ,estado_viaje = ? 
+        SET fecha_hora_fin = ?, obs_viaje = ?, carga_combustible=?,cantidad_carga=? , ultima_modificacion = ?, modificado_por = ?,kms_fin=? ,estado_viaje = ?, ruta_real=? 
         WHERE id_viaje = ?`,
         [data.fecha_hora_fin,
             data.obs_viaje,
@@ -269,6 +279,7 @@ export async function parcheFin(id:number,data:ViajeInputFuncionarioFin,usuarioR
             data.modificado_por,
             data.kms_fin,
             "Terminado",
+            JSON.stringify(data.rutareal ?? []),
             id
         ])
     //@ts-ignore

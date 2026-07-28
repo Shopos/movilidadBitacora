@@ -52,6 +52,12 @@ export type Viaje = {
     imagen_tablero_vuelta:string,
     imagen_comprobante_ben:string
     hora_recomendada:string|null
+    ruta_real?:PuntoRuta[]
+}
+export type PuntoRuta = {
+    lat:number,
+    lng:number,
+    timeStamp:number
 }
 
 export type ViajeInputFin = {
@@ -65,6 +71,7 @@ export type ViajeInputFin = {
     modificado_por: string
     kms_fin:number,
     estado_viaje:"En espera"|"En proceso"|"Terminado"
+    rutaReal?:PuntoRuta[]
 }
 
 export type ViajeInputInicio = {

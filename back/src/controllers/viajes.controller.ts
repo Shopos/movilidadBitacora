@@ -182,7 +182,8 @@ export async function parcheFin(req: Request, res: Response) {
             cantidad_combustible,
             ultima_modificacion,
             modificado_por,
-            kms_fin
+            kms_fin,
+            rutareal
         } = req.body
         const viaje = await getViajeByid(Number(id))
         const usuario = (req.usuario as any).correo
@@ -202,7 +203,8 @@ export async function parcheFin(req: Request, res: Response) {
             cantidad_combustible,
             ultima_modificacion,
             modificado_por,
-            kms_fin
+            kms_fin,
+            rutareal
         },usuario
         )
 

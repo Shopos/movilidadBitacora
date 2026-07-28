@@ -83,12 +83,23 @@ function cierreViaje() {
     /*Metodo para actualizar los datos antes del envio de estos a la BD */
     const updateDatoFin = async () => {
         if (formFin) {
+            let rutaReal: import("../../types/tipoSistema.ts").PuntoRuta[]=[]
+            if(viajeID){
+                try{
+                    const raw = localStorage.getItem(`ruta_real_${viajeID.id_viaje}`)
+                    rutaReal = raw ? JSON.parse(raw) : []
+                }catch{
+                    rutaReal = []
+                }
+            }
+            console.log(rutaReal)
             setFormFin((prevData) => ({
                 ...prevData,
                 modificado_por: usuario!.nombre,
                 ultima_modificacion: `${date} ${timeNow}`,
                 fecha_hora_fin: `${date} ${timeNow}`,
                 estado_viaje: "Terminado",
+                rutareal: rutaReal
                 //lat_fin_real: dataGPS.lat,
                 //lng_fin_real:dataGPS.lng,
             }))
@@ -135,6 +146,7 @@ const handleSendDataFin = async () => {
                 await patchFin(viajeID!.id_viaje, formFin)
                 showAlerta("Viaje cerrado correctamete, regresando al menú principal","success")
                 localStorage.removeItem("idViaje")
+                localStorage.removeItem(`ruta_real_${viajeID?.id_viaje}`)
                 await sleep(3000)
                 
                 navigate("/menuUsuario")

@@ -20,7 +20,7 @@ interface RoutingProps {
   color?: string;
   setRouteInfo?: (info: RouteData) => void;
   viajeId?: string|number;
-  points?: PuntoRuta[]
+  ruta?: PuntoRuta[]
 }
 interface PuntoRuta{
   lat:number;
@@ -44,7 +44,7 @@ function guardarRuta(viajeId:number|string, puntos:PuntoRuta[]){
     localStorage.setItem(claveViaje(viajeId), JSON.stringify(puntos))
   }
 
-function Routing({ point1, point2, setRouteInfo, option, color = "#24A0ED", viajeId, points}: RoutingProps) {
+function Routing({ point1, point2, setRouteInfo, option, color = "#24A0ED", viajeId, ruta}: RoutingProps) {
   const map = useMap();
   const [gpsStart, setGpsStart] = useState<L.LatLng | null>(null);
   // Usamos una referencia para el marcador del GPS para poder moverlo o quitarlo fácilmente
@@ -131,7 +131,7 @@ function Routing({ point1, point2, setRouteInfo, option, color = "#24A0ED", viaj
     }
 
     const endPoint = L.latLng(point2.lat, point2.lng);
-    const intermedio = points && points.length>0 ? points.map(p=> L.latLng(p.lat,p.lng)) : []
+    const intermedio = ruta && ruta.length>0 ? ruta.map(p=> L.latLng(p.lat,p.lng)) : []
 
     const todos = [startPoint, ...intermedio, endPoint]
 

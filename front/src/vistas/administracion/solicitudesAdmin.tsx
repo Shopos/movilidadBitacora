@@ -298,6 +298,7 @@ function solicitudesAdmin() {
     const handleRechazarSolicitud = async () => {
         if (solicitudViajeSelected) {
             const res = await patchSolicitudRechazo(solicitudViajeSelected.id_solicitud, motivo)
+            console.log(res)
             if (res?.ok) {
                 showAlerta(`Solicitud rechazada para ${solicitudViajeSelected.solicitante}`, "info")
                 setModalViaje(false)
@@ -453,8 +454,8 @@ function solicitudesAdmin() {
     return (
         <>
             <NavBar type={1} texto={"Solicitudes"}></NavBar>
-            <div>
-                {!vistaActual && !isMobile &&(
+            <div style={{marginLeft: "5%"}}>
+                {vistaActual && !isMobile &&(
                     <>
                         <Box sx={{ display: 'flex', gap: 1, marginBottom: 2, marginTop: "1vh", alignItems: 'center' }}>
                             <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Filtrar estado:</span>
@@ -490,19 +491,22 @@ function solicitudesAdmin() {
                             />
                         </Box></>
                 )}
+                <div className="cuerpoMenu">
                 <div className='buttonsTablaH'>
 
                     <button className="bordeIzquierdoBoton" disabled={vistaActual} onClick={() => setVistaActual(true)}>Solicitudes viajes</button>
                     <button className="bordeDerechaBoton" disabled={!vistaActual} onClick={() => setVistaActual(false)}>Solicitudes usuarios</button>
                 </div>
-                {!vistaActual && solicitudesViaje && (
+                {vistaActual && solicitudesViaje && (
                     <>
-                        <Table hoverRow borderAxis='y' sx={{
+                        <Table hoverRow borderAxis='y' 
+                        sx={{
                             '& tr:nth-of-type(odd)': { backgroundColor: '#FBF5DD' },
                             '& tr:nth-of-type(even)': { backgroundColor: '#E7E1B1' },
                             '& td': { textAlign: 'left', paddingLeft: 1.9 },
                             '& th': { backgroundColor: "#bad8b6" },
-                            marginTop: "1vh"
+                            marginTop: "1vh",
+                            width:"90%"
                         }}>
                             <thead>
                                 <tr>
@@ -544,14 +548,15 @@ function solicitudesAdmin() {
                         </Table>
                     </>
                 )}
-                {solicitudesPendientes && vistaActual && (
+                {solicitudesPendientes && !vistaActual && (
                     <>
                         <Table hoverRow borderAxis='y' sx={{
                             '& tr:nth-of-type(odd)': { backgroundColor: '#FBF5DD' },
                             '& tr:nth-of-type(even)': { backgroundColor: '#E7E1B1' },
                             '& td': { textAlign: 'left', paddingLeft: 1.9 },
                             '& th': { backgroundColor: "#bad8b6" },
-                            marginTop: "1vh"
+                            marginTop: "1vh",
+                            width:"90%"
                         }}>
                             <thead>
                                 <tr>
@@ -591,7 +596,7 @@ function solicitudesAdmin() {
                         </Table>
                     </>
                 )}
-
+            </div>
 
             </div>
             {/**Modal para el tratamiento del cambio de contraseñas --> se debe confirmar que ambas contraseñas sean iguales */}

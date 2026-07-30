@@ -86,7 +86,7 @@ export async function addViajeInicio(req: Request, res: Response) {
             modo,
             hora_recomendada
         } = req.body
-        if (patente === " " || nombre_funcionario === "" || !estado_viaje) {
+        if (patente === " " || nombre_funcionario === "" || !estado_viaje || destino==="") {
             return res.status(400).json({ error: " Los campos patente, nombre funcionario no pueden estar vacios " })
         }
         const usuario = (req.usuario as any).correo

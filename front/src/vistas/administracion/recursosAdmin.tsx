@@ -221,9 +221,9 @@ function recursosAdmin() {
 
     /* Metodo para agregar una nueva mantencion a un vehiculo */
     const handleAgregarMantencion = async () => {
-        if (!formMantencion || cargando) return
         setCargando(true)
         const res = await addMantencionVehiculo(formMantencion)
+        console.log(res)
         if (res?.ok) {
             showAlerta(`Mantención agregada al vehículo ${formMantencion.patente}`, "success")
             setFormMantencion(mantencionVacia)
@@ -241,7 +241,7 @@ function recursosAdmin() {
                     showAlerta("Sesión expirada. Vuelve a iniciar sesión.", "error");
                     break;
                 default:
-                    showAlerta("Hubo un problema al agregar, intenta más tarde.", "error");
+                    showAlerta("Hubo un problema al agregar mantención, intenta más tarde.", "error");
                     break;
             }
         }
@@ -391,20 +391,22 @@ function recursosAdmin() {
                     {vistaActual ? (<button onClick={() => abrirModalMantencion()} > Agregar mantención</button>) : (<></>)}
 
                 </div>
+                <div className='cuerpoMenu'>
                 <div className='buttonsTablaH'>
                     <button className="bordeIzquierdoBoton" disabled={!vistaActual} onClick={() => setVistaActual(false)}>Usuarios</button>
                     <button className="bordeDerechaBoton" disabled={vistaActual} onClick={() => setVistaActual(true)}>Vehículos</button>
                 </div>
                 {vistaActual === false && usuarios ?
                     (
-                        <div>
+                        <div style={{width:"90%"}}>
 
                             <Table hoverRow borderAxis="y" sx={
                                 {
                                     '& tr:nth-of-type(odd)': { backgroundColor: '#FBF5DD' },
                                     '& tr:nth-of-type(even)': { backgroundColor: '#E7E1B1' },
                                     '& td': { textAlign: 'left', paddingLeft: 1.9 },
-                                    '& th': { backgroundColor: "#bad8b6" }
+                                    '& th': { backgroundColor: "#bad8b6", 
+                                    }
                                 }}>
                                 <thead>
                                     <tr>
@@ -457,13 +459,14 @@ function recursosAdmin() {
                     ) :
                     (
                         /* Tabla vehiculos */
-                        <div>
+                        <div style={{width:"90%"}}>
                             <Table hoverRow borderAxis="y" sx={
                                 {
                                     '& tr:nth-of-type(odd)': { backgroundColor: '#FBF5DD' },
                                     '& tr:nth-of-type(even)': { backgroundColor: '#E7E1B1' },
                                     '& td': { textAlign: 'left', paddingLeft: 1.9 },
-                                    '& th': { backgroundColor: "#bad8b6" }
+                                    '& th': { backgroundColor: "#bad8b6" },
+                                    
                                 }}>
                                 <thead>
                                     <tr>
@@ -516,6 +519,7 @@ function recursosAdmin() {
                             }
                         </div>
                     )}
+                </div>
             </div>
 
             {/**Modal agrega recurso */}

@@ -460,8 +460,16 @@ export async function patchSolicitudRechazo(id:number,data:string){
         },
         body: JSON.stringify({motivo:data})
       })
-      const json = await res.json()
-      return json
+      if(!res.ok){
+        const errorData = await res.json().catch(()=>({}))
+        return{
+          ok:false,
+          status: res.status,
+          message: errorData.message || `Error ${res.status}`
+        }
+      }
+      const dataRes = await res.json()
+      return {ok:true, data:dataRes}
     }catch(e){
       console.log({ msg: "Error al parchar solicitud rechazo",e })
     }
@@ -482,7 +490,6 @@ export async function pathSolicitudAprobada(id:number,data:string){
         body: JSON.stringify({motivo:data})
       })
       const json = await res.json()
-      console.log(json)
       return json
     }catch(e){
       console.log({msg: "Error al parchar solicitud aprobada",e})

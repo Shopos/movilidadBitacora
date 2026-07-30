@@ -100,7 +100,7 @@ function mapaProp({ puntoD, puntoI, interaction, ruta }: propsComponent) {
                 >
                 </Marker>
                 <FitBounds points={points}></FitBounds>
-                <Routing point1={puntoI} point2={puntoD} setRouteInfo={setRouteInfo} option={false} />
+                <Routing point1={puntoI} point2={puntoD} setRouteInfo={setRouteInfo} option={false} ruta={ruta}/>
             </MapContainer>
         </div>
     )

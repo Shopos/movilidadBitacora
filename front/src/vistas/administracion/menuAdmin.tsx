@@ -29,6 +29,7 @@ import Routing from "../../componentes/routing.tsx" /*Componente para marcar la 
 import { isMobile } from "react-device-detect";
 
 
+
 type GPS = {
     lat: number,
     lng: number
@@ -150,7 +151,7 @@ function menuAdmin() {
         imagen_tablero_vuelta: "",
         hora_recomendada: ""
     }
-
+    const [cargandoAgendar, setCargandoAgendar] = useState(false)
     /* Metodo para obtener la lista de viajes, usuarios y vehiculos */
     useEffect(() => {
         const getListaViajes = async () => {
@@ -196,24 +197,46 @@ function menuAdmin() {
         return
     }
 
+
+
+    const [rangoFechaInicio, setRangoFechaInicio] = useState<string>("")
+    const [rangoFechaFin, setRangoFechaFin] = useState<string>("")
+    const [modalRango, setModalRango] = useState(false)
     /* Metodo para exportar a documento la tabla de viajes actual */
     const exportarViajesPDF = () => {
         const doc = new jsPDF('l', 'pt', 'a4')
-        const columns = ['ID', 'Vehiculo', 'Patente', 'Funcionario', 'kM inicio', 'kM fin', 'Hora inicio', 'Destino', 'Hora llegada', 'Estado del viaje']
+        const columns = ['ID', 'Vehiculo', 'Patente', 'Funcionario', 'Destino', 'KMS inicio', 'KMS fin', 'Hora inicio', 'Hora llegada', 'Estado del viaje']
 
-        if (viajes) {
-            const rows = viajes.map((viaje) => [
-                viaje.id_viaje,
-                viaje.vehiculo,
-                viaje.patente,
-                viaje.nombre_funcionario,
-                viaje.kms_inicial,
-                (viaje.kms_fin ? viaje.kms_fin : 0),
-                (viaje.fecha_hora_inicio ? (viaje.fecha_hora_inicio.slice(0, 10) + " " + viaje.fecha_hora_inicio.slice(11, 19)) : ("No iniciado")),
-                viaje.destino,
-                (viaje.fecha_hora_fin ? (viaje.fecha_hora_fin.slice(0, 10) + " " + viaje.fecha_hora_fin.slice(11, 19)) : "No terminado"),
-                (viaje.estado_viaje)
-            ])
+        if (viajeFiltrado) {
+            let fill: Viaje[] = viajeFiltrado
+
+            if (rangoFechaInicio.length > 0 && rangoFechaFin.length > 0) {
+                if (rangoFechaInicio.length > 0 && rangoFechaFin.length > 0) {
+                    const inicioTime = new Date(rangoFechaInicio).getTime()
+                    const finTime = new Date(rangoFechaFin).getTime()
+
+                    fill = fill.filter((vje) => {
+                        if (!vje.fecha_hora_inicio) {
+                            return true;
+                        }
+                        const fechaVjeTime = new Date(vje.fecha_hora_inicio).getTime()
+                        return fechaVjeTime >= inicioTime && fechaVjeTime <= finTime
+                    });
+                }
+            }
+            const rows = fill.map((viaje) =>
+                [
+                    viaje.id_viaje,
+                    viaje.vehiculo,
+                    viaje.patente,
+                    viaje.nombre_funcionario,
+                    viaje.destino,
+                    viaje.kms_inicial,
+                    (viaje.kms_fin ? viaje.kms_fin : 0),
+                    (viaje.fecha_hora_inicio ? (viaje.fecha_hora_inicio.slice(0, 10) + " " + viaje.fecha_hora_inicio.slice(11, 19)) : ("No iniciado")),
+                    (viaje.fecha_hora_fin ? (viaje.fecha_hora_fin.slice(0, 10) + " " + viaje.fecha_hora_fin.slice(11, 19)) : "No terminado"),
+                    (viaje.estado_viaje)
+                ])
             doc.setFontSize(12)
             doc.text("Reporte de viajes departamento de movilización", 20, 20)
 
@@ -228,6 +251,9 @@ function menuAdmin() {
             doc.save("Reporte.pdf")
             showAlerta("Archivo creado, guardando...", "success")
         }
+        setModalRango(false)
+        setRangoFechaFin("")
+        setRangoFechaInicio("")
         return
     }
 
@@ -400,12 +426,33 @@ function menuAdmin() {
     useEffect(() => {
         const sendData = async () => {
             if (formInicio.estado_viaje === "En espera") {
-                await addViajeInicial(formInicio)
-                setModalNewViaje(false)
-                setCargando(false)
-                showAlerta("Viaje agendado correctamente", "success")
-                setFormInicio(viajeVacio)
-                setVehiculoSelected(undefined)
+                setCargandoAgendar(!cargandoAgendar)
+                const res = await addViajeInicial(formInicio)
+                if (res?.ok) {
+                    setModalNewViaje(false)
+                    setCargando(false)
+                    showAlerta("Viaje agendado correctamente", "success")
+                    setCargandoAgendar(!cargandoAgendar)
+                    setFormInicio(viajeVacio)
+                    setVehiculoSelected(undefined)
+                } else {
+                    setCargandoAgendar(!cargandoAgendar)
+                    setFormInicio({ ...formInicio, estado_viaje: "Terminado" })
+                    switch (res?.status) {
+                        case 400:
+                            showAlerta("Datos inválidos. Revisa la información ingresada.", "warning");
+                            break;
+                        case 403:
+                            showAlerta("No tienes permisos para realizar esta acción.", "error");
+                            break;
+                        case 401:
+                            showAlerta("Sesión expirada. Vuelve a iniciar sesión.", "error");
+                            break;
+                        default:
+                            showAlerta("Hubo un problema al agendar, intenta más tarde.", "error");
+                            break;
+                    }
+                }
             }
         }
         sendData()
@@ -417,7 +464,7 @@ function menuAdmin() {
     }
     /**Contructor y metodos para la paginacion de la tabla de viajes*/
     const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number,) => {
         setPage(newPage);
@@ -607,32 +654,32 @@ function menuAdmin() {
     //Manejo de la lista de vehiculos y usuarios disponibles segun licencia. Si un vehiculo es seleccionado, la lista de funcionarios cambia para mostrar
     //aquellos que pueden usar dicho vehiculo
     useEffect(() => {
-        const vehiculoActivo = vehiculoSelected || (formEdit.patente ? vehiculos?.find(v=>v.patente===formEdit.patente):null)
-        if(!vehiculoActivo){
-            setUsuariosFiltrados(listaUsuarios||[])
+        const vehiculoActivo = vehiculoSelected || (formEdit.patente ? vehiculos?.find(v => v.patente === formEdit.patente) : null)
+        if (!vehiculoActivo) {
+            setUsuariosFiltrados(listaUsuarios || [])
             return
         }
-        const filtra = (listaUsuarios || []).filter(u=>u.lista_licencia?.includes(vehiculoActivo?.licencia_min))
+        const filtra = (listaUsuarios || []).filter(u => u.lista_licencia?.includes(vehiculoActivo?.licencia_min))
         setUsuariosFiltrados(filtra)
 
-        if(formInicio.id_usuario && !filtra.some(u=>u.id_usuario === formInicio.id_usuario)){
-            setFormInicio(prev=>({...prev,id_usuario:0,nombre_funcionario:""}))
+        if (formInicio.id_usuario && !filtra.some(u => u.id_usuario === formInicio.id_usuario)) {
+            setFormInicio(prev => ({ ...prev, id_usuario: 0, nombre_funcionario: "" }))
         }
-    }, [vehiculoSelected,formEdit.patente])
+    }, [vehiculoSelected, formEdit.patente])
 
     //Maneja la lista de vehiculos dependiendo si existe un usuario seleccionado en el formulario mostrando aquellos vehiculos que el usuario seleccionado puede usar
     useEffect(() => {
         const idUsuarioActivo = formInicio.id_usuario === 0 ? formEdit.id_usuario : formInicio.id_usuario
-        if(!idUsuarioActivo){
+        if (!idUsuarioActivo) {
             setVehiculoSelected(undefined)
             return
         }
-        const usr = listaUsuarios?.find((u)=>u.id_usuario === idUsuarioActivo)
+        const usr = listaUsuarios?.find((u) => u.id_usuario === idUsuarioActivo)
         const licenciasUsuario = usr?.lista_licencia || []
-        const newList = (vehiculos||[]).filter((v)=>licenciasUsuario.includes(v.licencia_min))
+        const newList = (vehiculos || []).filter((v) => licenciasUsuario.includes(v.licencia_min))
         setVehiculosFiltrados(newList)
-        if(formInicio.patente && !newList.some(v=>v.patente===formInicio.patente)){
-            setFormInicio(prev=>({...prev,patente:"",vehiculo:"",kms_inicial:0}))
+        if (formInicio.patente && !newList.some(v => v.patente === formInicio.patente)) {
+            setFormInicio(prev => ({ ...prev, patente: "", vehiculo: "", kms_inicial: 0 }))
             setVehiculoSelected(undefined)
         }
     }, [formInicio.id_usuario, formEdit.id_usuario])
@@ -647,11 +694,12 @@ function menuAdmin() {
     return (
         <>
             <NavBar type={1} texto="Bitácoras" />
+
+            <div className="barraButtonsTop">
+                <button className="buttonExport" onClick={() => setModalNewViaje(true)}>Agendar viaje</button>
+                <button className="buttonExport" onClick={() => setModalRango(true)}>Exportar tabla</button>
+            </div>
             <div className="cuerpoMenu">
-                <div className="barraButtonsTop">
-                    <button className="buttonExport" onClick={() => setModalNewViaje(true)}>Agendar viaje</button>
-                    <button className="buttonExport" onClick={() => exportarViajesPDF()}>Exportar tabla</button>
-                </div>
                 <div className="barraFiltro">
                     <div className="inputBusqueda">
                         <Input
@@ -664,102 +712,102 @@ function menuAdmin() {
                     </div>
                     {!isMobile && (<>
                         <Chip
-                        variant={estado === "En espera" ? "outlined" : "plain"}
-                        color={estado === "En espera" ? "primary" : "neutral"}
-                        size="md"
-                        onClick={() => {
-                            setEstado(estado === "En espera" ? "Todos" : "En espera")
-                            setPage(0)
-                        }
-                        }
-                        sx={{
-                            padding: "0.3%",
-                            paddingLeft: "5px",
-                            marginRight: "2px"
-                        }}>
-                        En espera
-                    </Chip>
-                    <Chip
-                        variant={estado === "En proceso" ? "outlined" : "plain"}
-                        color={estado === "En proceso" ? "primary" : "neutral"}
-                        size="md"
-                        onClick={() => {
-                            setEstado(estado === "En proceso" ? "Todos" : "En proceso")
-                            setPage(0)
-                        }
-                        }
-                        sx={{
-                            padding: "0.3%",
-                            paddingLeft: "5px",
-                            marginRight: "2px"
-                        }}>
-                        En curso
-                    </Chip>
-                    <Chip
-                        variant={estado === "Terminado" ? "outlined" : "plain"}
-                        color={estado === "Terminado" ? "primary" : "neutral"}
-                        size="md"
-                        onClick={() => {
-                            setEstado(estado === "Terminado" ? "Todos" : "Terminado")
-                            setPage(0)
-                        }
-                        }
-                        sx={{
-                            padding: "0.3%",
-                            paddingLeft: "5px",
-                            marginRight: "2px"
-                        }}>
-                        Terminado
-                    </Chip>
-                    <Chip
-                        variant={periodos === "Hoy" ? "outlined" : "plain"}
-                        color={periodos === "Hoy" ? "primary" : "neutral"}
-                        size="md"
-                        startDecorator={<TodayOutlinedIcon />}
-                        onClick={() => {
-                            setPeriodos(periodos === "Hoy" ? "Todos" : "Hoy")
-                            setPage(0)
-                        }
-                        }
-                        sx={{
-                            padding: "0.3%",
-                            paddingLeft: "5px",
-                            marginRight: "2px"
-                        }}
-                    >Último día</Chip>
-                    <Chip
-                        variant={periodos === "Semana" ? "outlined" : "plain"}
-                        color={periodos === "Semana" ? "primary" : "neutral"}
-                        size="md"
-                        startDecorator={<DateRangeOutlinedIcon />}
-                        onClick={() => {
-                            setPeriodos(periodos === "Semana" ? "Todos" : "Semana")
-                            setPage(0)
-                        }}
-                        sx={{
-                            padding: "0.3%",
-                            paddingLeft: "5px",
-                            marginRight: "2px"
-                        }}
-                    >Última semana</Chip>
-                    <Chip
-                        variant={periodos === "Mes" ? "outlined" : "plain"}
-                        color={periodos === "Mes" ? "primary" : "neutral"}
-                        size="md"
-                        startDecorator={<DateRangeOutlinedIcon />}
-                        onClick={() => {
-                            setPeriodos(periodos === "Mes" ? "Todos" : "Mes")
-                            setPage(0)
-                        }
-                        }
-                        sx={{
-                            padding: "0.3%",
-                            paddingLeft: "5px",
-                            marginRight: "2px"
-                        }}
-                    >Último mes</Chip>
+                            variant={estado === "En espera" ? "outlined" : "plain"}
+                            color={estado === "En espera" ? "primary" : "neutral"}
+                            size="md"
+                            onClick={() => {
+                                setEstado(estado === "En espera" ? "Todos" : "En espera")
+                                setPage(0)
+                            }
+                            }
+                            sx={{
+                                padding: "0.3%",
+                                paddingLeft: "5px",
+                                marginRight: "2px"
+                            }}>
+                            En espera
+                        </Chip>
+                        <Chip
+                            variant={estado === "En proceso" ? "outlined" : "plain"}
+                            color={estado === "En proceso" ? "primary" : "neutral"}
+                            size="md"
+                            onClick={() => {
+                                setEstado(estado === "En proceso" ? "Todos" : "En proceso")
+                                setPage(0)
+                            }
+                            }
+                            sx={{
+                                padding: "0.3%",
+                                paddingLeft: "5px",
+                                marginRight: "2px"
+                            }}>
+                            En curso
+                        </Chip>
+                        <Chip
+                            variant={estado === "Terminado" ? "outlined" : "plain"}
+                            color={estado === "Terminado" ? "primary" : "neutral"}
+                            size="md"
+                            onClick={() => {
+                                setEstado(estado === "Terminado" ? "Todos" : "Terminado")
+                                setPage(0)
+                            }
+                            }
+                            sx={{
+                                padding: "0.3%",
+                                paddingLeft: "5px",
+                                marginRight: "2px"
+                            }}>
+                            Terminado
+                        </Chip>
+                        <Chip
+                            variant={periodos === "Hoy" ? "outlined" : "plain"}
+                            color={periodos === "Hoy" ? "primary" : "neutral"}
+                            size="md"
+                            startDecorator={<TodayOutlinedIcon />}
+                            onClick={() => {
+                                setPeriodos(periodos === "Hoy" ? "Todos" : "Hoy")
+                                setPage(0)
+                            }
+                            }
+                            sx={{
+                                padding: "0.3%",
+                                paddingLeft: "5px",
+                                marginRight: "2px"
+                            }}
+                        >Último día</Chip>
+                        <Chip
+                            variant={periodos === "Semana" ? "outlined" : "plain"}
+                            color={periodos === "Semana" ? "primary" : "neutral"}
+                            size="md"
+                            startDecorator={<DateRangeOutlinedIcon />}
+                            onClick={() => {
+                                setPeriodos(periodos === "Semana" ? "Todos" : "Semana")
+                                setPage(0)
+                            }}
+                            sx={{
+                                padding: "0.3%",
+                                paddingLeft: "5px",
+                                marginRight: "2px"
+                            }}
+                        >Última semana</Chip>
+                        <Chip
+                            variant={periodos === "Mes" ? "outlined" : "plain"}
+                            color={periodos === "Mes" ? "primary" : "neutral"}
+                            size="md"
+                            startDecorator={<DateRangeOutlinedIcon />}
+                            onClick={() => {
+                                setPeriodos(periodos === "Mes" ? "Todos" : "Mes")
+                                setPage(0)
+                            }
+                            }
+                            sx={{
+                                padding: "0.3%",
+                                paddingLeft: "5px",
+                                marginRight: "2px"
+                            }}
+                        >Último mes</Chip>
                     </>)}
-                    
+
 
                 </div>
                 {cargando ? (<><div className="tablaViajes">
@@ -836,7 +884,7 @@ function menuAdmin() {
                         </tbody>
                     </Table>
                     <TablePagination
-                        rowsPerPageOptions={[5, 10, 25]}
+                        rowsPerPageOptions={[10, 25, 50]}
                         component="div"
                         count={viajeFiltrado!.length}
                         rowsPerPage={rowsPerPage}
@@ -919,16 +967,16 @@ function menuAdmin() {
                                     </div>
                                     <div className="itemInput-Modal">
                                         <label>Funcionario</label>
-                                        <select name="funcionarios" value={formEdit.id_usuario||""} onChange={manejarDataFuncionarioEdit}>
+                                        <select name="funcionarios" value={formEdit.id_usuario || ""} onChange={manejarDataFuncionarioEdit}>
                                             <option value={""}>{formEdit?.nombre_funcionario}</option>
-                                            {formEdit?.patente ? 
-                                            (
-                                                usuariosFiltrados?.map((usr: User) => (
-                                                <option key={usr.id_usuario} value={usr.id_usuario}>{usr.nombre}</option>
-                                            ))) : (
-                                                listaUsuarios && listaUsuarios.map((usr: User) => (
-                                                <option key={usr.id_usuario} value={usr.id_usuario}>{usr.nombre}</option>
-                                            )))}
+                                            {formEdit?.patente ?
+                                                (
+                                                    usuariosFiltrados?.map((usr: User) => (
+                                                        <option key={usr.id_usuario} value={usr.id_usuario}>{usr.nombre}</option>
+                                                    ))) : (
+                                                    listaUsuarios && listaUsuarios.map((usr: User) => (
+                                                        <option key={usr.id_usuario} value={usr.id_usuario}>{usr.nombre}</option>
+                                                    )))}
                                         </select>
                                     </div>
                                     <div className="itemInput-Modal">
@@ -1080,6 +1128,7 @@ function menuAdmin() {
                     </DialogContent>
                     <DialogActions>
                         <Button variant="solid" color="success" onClick={() => handleAgendaViaje()}>Agendar Viaje</Button>
+
                         <Button variant="outlined" color="danger" onClick={() => {
                             setFormInicio(viajeVacio)
                             setVehiculoSelected(undefined)
@@ -1141,7 +1190,7 @@ function menuAdmin() {
                                     </Marker>
 
                                     <FitBounds points={points}></FitBounds>
-                                    <Routing point1={dataGPS} point2={dataGPSDestino} option={false}/>
+                                    <Routing point1={dataGPS} point2={dataGPSDestino} option={false} />
                                 </MapContainer>
                             </div>
                         </>
@@ -1153,6 +1202,44 @@ function menuAdmin() {
                         <Button variant="plain" color="danger" onClick={() => openModalDestino(false)}>
                             Cancelar
                         </Button>
+                    </DialogActions>
+                </ModalDialog>
+            </Modal>
+
+            <Modal open={modalRango} onClose={() => setModalRango(false)}>
+                <ModalDialog variant="soft">
+                    <DialogTitle>Confirmar exportación de bitácoras</DialogTitle>
+                    <Divider />
+                    <DialogContent>
+                        <div>
+                            <p><strong>Se exportarán las bitácoras con los siguientes criterios:</strong></p>
+
+                            {busqueda === "" && periodos === "Todos" && estado === "Todos" ? (
+                                <p style={{ fontStyle: 'italic', color: 'gray' }}>Todas (sin filtros aplicados)</p>
+                            ) : (
+                                <ul>
+                                    {busqueda !== "" && (
+                                        <li>Búsqueda por texto: <strong>"{busqueda}"</strong></li>
+                                    )}
+                                    {periodos !== "Todos" && (
+                                        <li>Período: <strong>{periodos}</strong></li>
+                                    )}
+                                    {estado !== "Todos" && (
+                                        <li>Estado: <strong>{estado}</strong></li>
+                                    )}
+                                </ul>
+                            )}
+                        </div>
+                        <div>
+                            <p><strong>Selecciona el rango de fechas a considerar</strong></p>
+                            <p>Desde</p><input type="datetime-local" value={rangoFechaInicio ? rangoFechaInicio : ""} onChange={(e) => setRangoFechaInicio(e.currentTarget.value)} ></input>
+                            <p>Hasta</p><input type="datetime-local" value={rangoFechaFin ? rangoFechaFin : ""} onChange={(e) => setRangoFechaFin(e.currentTarget.value)}></input>
+                        </div>
+                    </DialogContent>
+
+                    <DialogActions>
+                        <Button onClick={() => setModalRango(false)}>Cancelar</Button>
+                        <Button onClick={() => { exportarViajesPDF() }}>Exportar a PDF</Button>
                     </DialogActions>
                 </ModalDialog>
             </Modal>

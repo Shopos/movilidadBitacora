@@ -65,19 +65,19 @@ function viajesUsuario() {
         if (viajesUsuario) {
             const doc = new jsPDF('l', 'pt', 'a4')
             doc.setFontSize(12)
-            const columns = ['ID', 'Vehiculo', 'Patente', 'kM inicio', 'kM fin', 'Hora inicio', 'Destino', 'Hora llegada', 'Estado del viaje']
+            const columns = ['ID', 'Vehiculo', 'Patente', 'kM inicio', 'kM fin', 'Hora inicio', 'Hora llegada','Destino','Estado del viaje']
             const rows = viajesUsuario.map((vje) => [
                 vje.id_viaje,
                 vje.vehiculo,
                 vje.patente,
                 vje.kms_inicial,
                 (vje.kms_fin ? vje.kms_fin : 0),
-                (vje.fecha_hora_inicio.slice(0, 10) + " " + vje.fecha_hora_inicio.slice(11, 19)),
+                (vje.fecha_hora_inicio ? vje.fecha_hora_inicio.slice(0, 10) + " " + vje.fecha_hora_inicio.slice(11, 19) : ""),
+                (vje.fecha_hora_fin ? vje.fecha_hora_fin.slice(0, 10) + " " + vje.fecha_hora_fin.slice(11, 19) : ""),
                 vje.destino,
-                (vje.fecha_hora_fin.slice(0, 10) + " " + vje.fecha_hora_fin.slice(11, 19)),
                 (vje.estado_viaje)
             ])
-            doc.text(`Reporte de viajes de ${usuario?.nombre} - Departamento de Movilización`, 20, 20)
+            doc.text(`Reporte de Bitácoras de ${usuario?.nombre} - Departamento de Movilización Municipalidad de Santa Cruz`, 20, 20)
 
             autoTable(doc, {
                 startY: 40,

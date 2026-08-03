@@ -209,20 +209,22 @@ function menuAdmin() {
 
         if (viajeFiltrado) {
             let fill: Viaje[] = viajeFiltrado
-
             if (rangoFechaInicio.length > 0 && rangoFechaFin.length > 0) {
-                if (rangoFechaInicio.length > 0 && rangoFechaFin.length > 0) {
-                    const inicioTime = new Date(rangoFechaInicio).getTime()
-                    const finTime = new Date(rangoFechaFin).getTime()
-
-                    fill = fill.filter((vje) => {
-                        if (!vje.fecha_hora_inicio) {
-                            return true;
-                        }
-                        const fechaVjeTime = new Date(vje.fecha_hora_inicio).getTime()
-                        return fechaVjeTime >= inicioTime && fechaVjeTime <= finTime
-                    });
+                
+                let inicioTime = new Date(rangoFechaInicio).getTime()
+                let finTime = new Date(rangoFechaFin).getTime()
+                if(finTime < inicioTime){
+                    const aux = inicioTime
+                    inicioTime = finTime
+                    finTime = aux
                 }
+                fill = fill.filter((vje) => {
+                    if (!vje.fecha_hora_inicio) {
+                        return true;
+                    }
+                    const fechaVjeTime = new Date(vje.fecha_hora_inicio).getTime()
+                    return fechaVjeTime >= inicioTime && fechaVjeTime <= finTime
+                });
             }
             const rows = fill.map((viaje) =>
                 [
@@ -238,7 +240,7 @@ function menuAdmin() {
                     (viaje.estado_viaje)
                 ])
             doc.setFontSize(12)
-            doc.text("Reporte de viajes departamento de movilización", 20, 20)
+            doc.text("Reporte de Bitácoras - Departamento de Movilización Municipalidad de Santa Cruz", 20, 20)
 
             autoTable(doc, {
                 startY: 40,
